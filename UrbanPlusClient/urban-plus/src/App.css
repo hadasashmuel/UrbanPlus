@@ -1,0 +1,102 @@
+/* מיכל ראשי שתופס את כל המסך */
+.app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  direction: rtl;
+}
+
+/* שכבת הניווט העליונה הצפה מעל המפה */
+.top-nav-overlay {
+  position: absolute;
+  top: 20px;
+  left: 20px; /* בצד שמאל למעלה (או תעביר ל-right: 20px אם אתה מעדיף בצד ימין) */
+  z-index: 1000;
+}
+
+/* עיצוב כפתור הפרופיל/התחברות */
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 50px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.profile-btn:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.profile-btn svg {
+  color: #005DFF;
+}
+
+/* רקע שחור שקוף (Modal Backdrop) שמופיע מאחורי טופס ההתחברות */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px); /* טשטוש עדין של המפה ברקע */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+/* מיכל התוכן של חלון ההתחברות */
+.modal-content {
+  position: relative;
+  animation: modalFadeIn 0.3s ease;
+}
+
+/* כפתור סגירה (X) של החלון הקופץ */
+.close-modal-btn {
+  position: absolute;
+  top: 15px;
+  left: 15px; /* בפינה הפנימית של הכרטיס */
+  background: #f3f4f6;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+.close-modal-btn:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+/* אנימציית הופעה חלקה */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
