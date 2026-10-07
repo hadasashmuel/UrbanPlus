@@ -40,7 +40,5 @@ namespace DAL
         public MainEvents? MainEvent { get; set; }
         public Categories? Category { get; set; }
 
-
-
     }
 }

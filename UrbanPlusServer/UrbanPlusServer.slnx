@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="BLL/BLL.csproj" />
   <Project Path="DAL/DAL.csproj" />
+  <Project Path="DTO/DTO.csproj" Id="d42d8e38-3cf9-4777-85b9-410de4449653" />
   <Project Path="UrbanPlusServer/UrbanPlusServer.csproj" />
 </Solution>
