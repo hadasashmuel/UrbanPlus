@@ -1,10 +1,15 @@
-﻿using System;
+﻿using DTO.BadgeDTO;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace BLL.Repositories.BadgeRepositories
 {
-    internal class IBadgeRepositories
+    public interface IBadgeRepositories
     {
+        List<ShowBadgeDTO> GetAllBadges();
+        ShowBadgeDTO? GetBadgeById(int id);
+        ShowBadgeDTO CreateBadge(CreateBadgeDTO dto);
+        bool DeleteBadge(int id);
     }
 }

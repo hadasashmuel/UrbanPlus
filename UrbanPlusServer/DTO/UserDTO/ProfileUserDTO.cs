@@ -1,6 +1,7 @@
 ﻿using DAL;
 using DTO.BadgeDTO;
 using DTO.SaveEventDTO;
+using DTO.UserBadgeDTO;
 using DTO.VoteDTO;
 
 namespace DTO.UserDTO
@@ -14,7 +15,7 @@ namespace DTO.UserDTO
         public AuthProvider AuthProvider { get; set; }
         public double ScoreReliability { get; set; }
         public DateTime CreatedAt { get; set; }
-        public virtual List<ShowBadgeDTO> Badges { get; set; }
+        public virtual List<ShowUserBadgeDTO> UserBadges { get; set; }
         public virtual List<ShowVoteDTO> Votes { get; set; }
         public virtual List<ShowSavedEventsDTO> SavedEvents { get; set; }
     }
