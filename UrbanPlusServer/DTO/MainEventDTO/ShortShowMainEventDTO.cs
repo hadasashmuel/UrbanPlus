@@ -7,7 +7,7 @@ using System.Text;
 
 namespace DTO.MainEventDTO
 {
-    internal class ShortShowMainEventDTO
+    public class ShortShowMainEventDTO
     {
         public int MainEventsId { get; set; }
         public int CategoryId { get; set; }

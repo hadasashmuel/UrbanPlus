@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BLL.Repositories.MainEventRepositories
 {
-    internal class MainEventRepositories
+    public class MainEventRepositories
     {
     }
 }

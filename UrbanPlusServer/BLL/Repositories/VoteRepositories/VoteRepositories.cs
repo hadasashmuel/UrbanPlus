@@ -5,7 +5,7 @@ using DTO.VoteDTO;
 
 namespace BLL.Repositories.VoteRepositories
 {
-    public class VoteRepositories
+    public class VoteRepositories:IVoteRepositories
     {
         private readonly UrbanPlusContext _context;
         private readonly IMapper _mapper;
@@ -18,7 +18,7 @@ namespace BLL.Repositories.VoteRepositories
 
         public List<ShowVoteDTO> GetAllVotes()
         {
-            return _context.Categories
+            return _context.Votes
                .ProjectTo<ShowVoteDTO>(_mapper.ConfigurationProvider)
                .ToList();
         }
@@ -46,7 +46,7 @@ namespace BLL.Repositories.VoteRepositories
         }
 
 
-        public bool DeleteVotes(int id)
+        public bool DeleteVote(int id)
         {
             var votes = _context.Votes.Find(id);
             if (votes is null)

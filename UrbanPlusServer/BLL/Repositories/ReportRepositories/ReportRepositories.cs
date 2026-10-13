@@ -1,17 +1,13 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using DAL;
-using DTO.MessageDTO;
 using DTO.ReportDTO;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using static DTO.ReportDTO.ShowReportDTO;
+
 
 namespace BLL.Repositories.ReportRepositories
 {
-    public class ReportRepositories
+    public class ReportRepositories:IReportRepositories
     {
         private readonly UrbanPlusContext _context;
         private readonly IMapper _mapper;

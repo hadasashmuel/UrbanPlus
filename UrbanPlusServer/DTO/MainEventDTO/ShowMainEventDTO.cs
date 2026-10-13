@@ -27,6 +27,6 @@ namespace DTO.MainEventDTO
         public int CountVotes { get; set; }
         public int CountSavedEvents { get; set; }
         public int CountReports { get; set; }
-        public virtual List<ShowMessageDTO> Messages { get; set; }
+        public List<ShowMessageDTO> Messages { get; set; }
     }
 }

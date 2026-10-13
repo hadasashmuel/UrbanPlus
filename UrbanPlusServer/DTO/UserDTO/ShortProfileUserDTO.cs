@@ -15,7 +15,7 @@ namespace DTO.UserDTO
         public string LastName { get; set; }
         public double ScoreReliability { get; set; }
         public DateTime CreatedAt { get; set; }
-        public virtual List<ShowBadgeDTO> Badges { get; set; }
-        public virtual List<ShowSavedEventsDTO> SavedEvents { get; set; }
+        public List<ShowBadgeDTO> Badges { get; set; }
+        public List<ShowSavedEventsDTO> SavedEvents { get; set; }
     }
 }

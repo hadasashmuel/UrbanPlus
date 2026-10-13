@@ -8,7 +8,7 @@ namespace BLL.Repositories.ReportRepositories
 {
     public interface IReportRepositories
     {
-        List<ShowReportDTO> GetAllReport();
+        List<ShowReportDTO> GetAllReports();
         ShowReportDTO? GetReportById(int id);
         ShowReportDTO CreateReport(CreateReportDTO dto);
         bool DeleteReport(int id);

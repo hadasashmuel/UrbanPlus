@@ -9,8 +9,7 @@ using System.Text;
 namespace DTO.UserDTO
 {
     public class UpdateUserDTO
-    {
-        public int UserId { get; set; }
+    {        
         public string FirstName { get; set; }
         public string LastName { get; set; }
     }

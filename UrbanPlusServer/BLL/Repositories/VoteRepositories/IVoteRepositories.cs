@@ -9,7 +9,7 @@ namespace BLL.Repositories.VoteRepositories
     {
         List<ShowVoteDTO> GetAllVotes();
         ShowVoteDTO? GetVoteById(int id);
-        ShowVoteDTO CreateVotes(CreateVoteDTO dto);
+        ShowVoteDTO CreateVote(CreateVoteDTO dto);
         bool DeleteVote(int id);
     }
 }

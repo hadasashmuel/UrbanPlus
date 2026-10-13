@@ -15,8 +15,8 @@ namespace DTO.UserDTO
         public AuthProvider AuthProvider { get; set; }
         public double ScoreReliability { get; set; }
         public DateTime CreatedAt { get; set; }
-        public virtual List<ShowUserBadgeDTO> UserBadges { get; set; }
-        public virtual List<ShowVoteDTO> Votes { get; set; }
-        public virtual List<ShowSavedEventsDTO> SavedEvents { get; set; }
+        public List<ShowUserBadgeDTO> UserBadges { get; set; }
+        public List<ShowVoteDTO> Votes { get; set; }
+        public List<ShowSavedEventsDTO> SavedEvents { get; set; }
     }
 }

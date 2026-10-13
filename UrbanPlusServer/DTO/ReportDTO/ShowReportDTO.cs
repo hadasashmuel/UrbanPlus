@@ -8,9 +8,7 @@ using System.Text;
 namespace DTO.ReportDTO
 {
     public class ShowReportDTO
-    {
-        public class Reports
-        {
+    { 
             public int ReportId { get; set; }
             public int UserId { get; set; }
             public int? MainEventId { get; set; }
@@ -25,5 +23,4 @@ namespace DTO.ReportDTO
             public string CategoryName { get; set; }
 
         }
-    }
 }
