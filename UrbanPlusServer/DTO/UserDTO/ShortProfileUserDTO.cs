@@ -1,11 +1,6 @@
-﻿using DAL;
-using DTO.BadgeDTO;
+﻿using DTO.BadgeDTO;
 using DTO.SaveEventDTO;
-using DTO.VoteDTO;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
+//using Microsoft.AspNetCore.Http;
 namespace DTO.UserDTO
 {
     public class ShortProfileUserDTO
@@ -15,6 +10,7 @@ namespace DTO.UserDTO
         public string LastName { get; set; }
         public double ScoreReliability { get; set; }
         public DateTime CreatedAt { get; set; }
+      //  public IFormFile? ProfilePicture { get; set; }
         public List<ShowBadgeDTO> Badges { get; set; }
         public List<ShowSavedEventsDTO> SavedEvents { get; set; }
     }

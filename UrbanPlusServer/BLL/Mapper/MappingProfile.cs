@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DAL;
+using DAL.Entities;
 using DTO.BadgeDTO;
 using DTO.CategoryDTO;
 using DTO.MainEventDTO;
@@ -18,7 +19,7 @@ namespace BLL
         public MappingProfile()
         {
             // Users
-            CreateMap<Users, ProfileUserDTO>();
+            CreateMap<Users, ProfileUserDTO>().ReverseMap();
             CreateMap<Users, ShortProfileUserDTO>();
             CreateMap<CreateUserDTO, Users>();
             CreateMap<UpdateUserDTO, Users>()

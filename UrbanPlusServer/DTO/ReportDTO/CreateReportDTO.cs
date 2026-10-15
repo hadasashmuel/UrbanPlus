@@ -1,4 +1,5 @@
 ﻿using DAL;
+using DTO.ReportImageDTO;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,6 +16,6 @@ namespace DTO.ReportDTO
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public string InputAddress { get; set; }
-        public List<string>? ImageList { get; set; } = new List<string>();
+        public List<ShowReportImageDTO>? ImageList { get; set; } = new List<ShowReportImageDTO>();
     }
 }

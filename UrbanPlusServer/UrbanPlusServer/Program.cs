@@ -1,14 +1,14 @@
 using BLL;
-using BLL.Repositories.BadgeRepositories;
-using BLL.Repositories.CategoryRepositories;
-using BLL.Repositories.MessageRepositories;
-using BLL.Repositories.NotificationRepositories;
-using BLL.Repositories.ReportRepositories;
-using BLL.Repositories.SaveEventRepositories;
-using BLL.Repositories.UserBadgeRepositories;
-using BLL.Repositories.UserRepositories;
-using BLL.Repositories.VoteRepositories;
-using DAL;
+using DAL.Repositories.BadgeRepositories;
+using DAL.Repositories.CategoryRepositories;
+using DAL.Repositories.MessageRepositories;
+using DAL.Repositories.NotificationRepositories;
+using DAL.Repositories.ReportRepositories;
+using DAL.Repositories.SaveEventRepositories;
+using DAL.Repositories.UserBadgeRepositories;
+using DAL.Repositories.UserRepositories;
+using DAL.Repositories.VoteRepositories;
+using DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,16 +26,16 @@ builder.Services.AddDbContext<UrbanPlusContext>(options =>
     ));
 
 // Repositories
-builder.Services.AddScoped<IBadgeRepositories, BadgeRepositories>();
-builder.Services.AddScoped<ICategoryRepositories, CategoryRepositories>();
-//builder.Services.AddScoped<IMainEventRepositories, MainEventRepositories>();
-builder.Services.AddScoped<IMessageRepositories, MessageRepositories>();
-builder.Services.AddScoped<INotificationRepositories, NotificationRepositories>();
-builder.Services.AddScoped<IReportRepositories, ReportRepositories>();
-builder.Services.AddScoped<ISaveEventRepositories,SaveEventRepositories>();
-builder.Services.AddScoped<IUserBadgeRepositories, UserBadgeRepositories>();
-builder.Services.AddScoped<IUserRepositories, UserRepositories>();
-builder.Services.AddScoped<IVoteRepositories, VoteRepositories>();
+builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+//builder.Services.AddScoped<IMainEventRepository, MainEventRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<ISaveEventRepository, SaveEventRepository>();
+builder.Services.AddScoped<IUserBadgeRepository, UserBadgeRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IVoteRepository, VoteRepository>();
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<MappingProfile>();

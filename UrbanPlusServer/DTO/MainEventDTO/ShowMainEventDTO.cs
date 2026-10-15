@@ -1,4 +1,4 @@
-﻿using DAL;
+﻿using DAL.Entities;
 using DTO.MessageDTO;
 using System;
 using System.Collections.Generic;
