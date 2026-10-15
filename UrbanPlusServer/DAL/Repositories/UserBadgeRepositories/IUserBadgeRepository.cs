@@ -1,14 +1,17 @@
 ﻿using DAL.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DAL.Repositories.UserBadgeRepositories
 {
     public interface IUserBadgeRepository
     {
-        List<UserBadges> GetAll();
+        List<UserBadges> GetByUserId(int userId);
+
         UserBadges? GetById(int id);
+
+        bool ExistsForUserAndBadge(int userId, int badgeId);
+
+        UserBadges Add(UserBadges userBadge);
+
         bool Delete(int id);
     }
 }

@@ -10,22 +10,24 @@ namespace BLL.Services.ServicesDB.SaveEventServices
         private readonly ISaveEventRepository _repository;
         private readonly IMapper _mapper;
 
-        public SaveEventService(ISaveEventRepository repository,IMapper mapper)
+        public SaveEventService(
+            ISaveEventRepository repository,
+            IMapper mapper)
         {
             _repository = repository;
             _mapper = mapper;
         }
 
-        public List<ShowSavedEventsDTO> GetAllSavedEvents()
+        public List<ShowSavedEventsDTO> GetSavedEventsByUserId( int userId)
         {
-            var savedEvents = _repository.GetAll();
+            var savedEvents = _repository.GetByUserId(userId);
 
             return _mapper.Map<List<ShowSavedEventsDTO>>(savedEvents);
         }
 
-        public ShowSavedEventsDTO? GetSavedEventById(int id)
+        public ShowSavedEventsDTO? GetSavedEventById(int id,int userId)
         {
-            var savedEvent = _repository.GetById(id);
+            var savedEvent = _repository.GetById(id, userId);
 
             if (savedEvent == null)
                 return null;
@@ -45,9 +47,9 @@ namespace BLL.Services.ServicesDB.SaveEventServices
             return _mapper.Map<ShowSavedEventsDTO>(created);
         }
 
-        public bool DeleteSavedEvent(int id)
+        public bool DeleteSavedEvent(int id, int userId)
         {
-            return _repository.Delete(id);
+            return _repository.Delete(id, userId);
         }
     }
 }

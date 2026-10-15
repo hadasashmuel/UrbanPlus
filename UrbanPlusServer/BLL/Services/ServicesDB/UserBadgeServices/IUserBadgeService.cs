@@ -1,14 +1,15 @@
 ﻿using DTO.UserBadgeDTO;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BLL.Services.ServicesDB.UserBadgeServices
 {
     public interface IUserBadgeService
     {
-        List<ShowUserBadgeDTO> GetAllUserBadges();
+        List<ShowUserBadgeDTO> GetBadgesByUserId(int userId);
+
         ShowUserBadgeDTO? GetUserBadgeById(int id);
+
+        ShowUserBadgeDTO AwardBadgeToUser(int userId, int badgeId);
+
         bool DeleteUserBadge(int id);
     }
 }

@@ -1,9 +1,11 @@
 ﻿using DTO.MessageDTO;
-
-public interface IMessageService
+namespace BLL.Services.ServicesDB.MessageServices
 {
-    List<ShowMessageDTO> GetAllMessages();
-    ShowMessageDTO? GetMessageById(int id);
-    ShowMessageDTO CreateMessage(CreateMessageDTO dto);
-    bool DeleteMessage(int id);
+    public interface IMessageService
+    {
+        List<ShowMessageDTO> GetAllMessages();
+        ShowMessageDTO? GetMessageById(int id);
+        ShowMessageDTO CreateMessage(CreateMessageDTO dto);
+        bool DeleteMessage(int id);
+    }
 }

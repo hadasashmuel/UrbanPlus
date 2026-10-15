@@ -1,5 +1,4 @@
-﻿
-using DAL.Entities;
+﻿using DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories.SaveEventRepositories
@@ -13,14 +12,21 @@ namespace DAL.Repositories.SaveEventRepositories
             _context = context;
         }
 
-        public List<SavedEvents> GetAll()
+        public List<SavedEvents> GetByUserId(int userId)
         {
-            return _context.SavedEvents.AsNoTracking().ToList();
+            return _context.SavedEvents
+                .AsNoTracking()
+                .Where(s => s.UserId == userId)
+                .ToList();
         }
 
-        public SavedEvents? GetById(int id)
+        public SavedEvents? GetById(int id, int userId)
         {
-            return _context.SavedEvents.AsNoTracking().FirstOrDefault(s => s.SavedEventId == id);
+            return _context.SavedEvents
+                .AsNoTracking()
+                .FirstOrDefault(s =>
+                    s.SavedEventId == id &&
+                    s.UserId == userId);
         }
 
         public SavedEvents Add(SavedEvents savedEvent)
@@ -31,9 +37,12 @@ namespace DAL.Repositories.SaveEventRepositories
             return savedEvent;
         }
 
-        public bool Delete(int id)
+        public bool Delete(int id, int userId)
         {
-            var savedEvent = _context.SavedEvents.Find(id);
+            var savedEvent = _context.SavedEvents
+                .FirstOrDefault(s =>
+                    s.SavedEventId == id &&
+                    s.UserId == userId);
 
             if (savedEvent == null)
                 return false;
