@@ -1,5 +1,4 @@
-﻿
-using BLL.Services.ServicesDB.UserServices;
+﻿using BLL.Services.ServicesDB.UserServices;
 using DTO.UserDTO;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +17,7 @@ namespace UrbanPlusServer.Controllers
 
         // POST: api/User
         [HttpPost]
-        public ActionResult<ProfileUserDTO> CreateUser([FromBody] CreateUserDTO dto)
+        public ActionResult<ProfileUserDTO> CreateUser([FromForm] CreateUserDTO dto)
         {
             try
             {
@@ -31,11 +30,15 @@ namespace UrbanPlusServer.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(new { message = ex.Message });
+                return Conflict(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred while creating the user.");
             }
         }
 
@@ -43,29 +46,45 @@ namespace UrbanPlusServer.Controllers
         [HttpGet("{userId}")]
         public ActionResult<ProfileUserDTO> GetUserById(int userId)
         {
-            var user = _userService.GetUserById(userId);
+            try
+            {
+                var user = _userService.GetUserById(userId);
 
-            if (user == null)
-                return NotFound();
+                if (user == null)
+                    return NotFound();
 
-            return Ok(user);
+                return Ok(user);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred while retrieving the user.");
+            }
         }
 
         // GET: api/User/5/short
         [HttpGet("{userId}/short")]
-        public ActionResult<ShortProfileUserDTO> GetShortUserById( int userId)
+        public ActionResult<ShortProfileUserDTO> GetShortUserById(int userId)
         {
-            var user = _userService.GetShortUserById(userId);
+            try
+            {
+                var user = _userService.GetShortUserById(userId);
 
-            if (user == null)
-                return NotFound();
+                if (user == null)
+                    return NotFound();
 
-            return Ok(user);
+                return Ok(user);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred while retrieving the user.");
+            }
         }
 
         // PUT: api/User/5
         [HttpPut("{userId}")]
-        public ActionResult<ProfileUserDTO> UpdateUser(int userId,[FromBody] UpdateUserDTO dto)
+        public ActionResult<ProfileUserDTO> UpdateUser(
+            int userId,
+            [FromBody] UpdateUserDTO dto)
         {
             try
             {
@@ -78,7 +97,15 @@ namespace UrbanPlusServer.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred while updating the user.");
             }
         }
 
@@ -86,12 +113,19 @@ namespace UrbanPlusServer.Controllers
         [HttpDelete("{userId}")]
         public IActionResult DeleteUser(int userId)
         {
-            var deleted = _userService.DeleteUser(userId);
+            try
+            {
+                var deleted = _userService.DeleteUser(userId);
 
-            if (!deleted)
-                return NotFound();
+                if (!deleted)
+                    return NotFound();
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred while deleting the user.");
+            }
         }
     }
 }

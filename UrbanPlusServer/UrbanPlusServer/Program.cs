@@ -1,4 +1,6 @@
+//BLL
 using BLL;
+using BLL.Services.ImageServices;
 using BLL.Services.ServicesDB.BadgeServices;
 using BLL.Services.ServicesDB.CategoryServices;
 using BLL.Services.ServicesDB.MainEventServices;
@@ -10,7 +12,8 @@ using BLL.Services.ServicesDB.SaveEventServices;
 using BLL.Services.ServicesDB.UserBadgeServices;
 using BLL.Services.ServicesDB.UserServices;
 using BLL.Services.ServicesDB.VoteServices;
-
+using BLL.Services.ServiceSupport;
+//DAL
 using DAL.Entities;
 using DAL.Repositories.BadgeRepositories;
 using DAL.Repositories.CategoryRepositories;
@@ -23,8 +26,9 @@ using DAL.Repositories.SaveEventRepositories;
 using DAL.Repositories.UserBadgeRepositories;
 using DAL.Repositories.UserRepositories;
 using DAL.Repositories.VoteRepositories;
-
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,10 +40,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Database
-builder.Services.AddDbContext<UrbanPlusContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("SqlServer")
-    ));
+
+var connStr = builder.Configuration.GetConnectionString("SqlServer");
+
+if (string.IsNullOrWhiteSpace(connStr))
+{
+    throw new InvalidOperationException(
+        "Connection string 'SqlServer' is missing or empty. " +
+        "Set it with User Secrets or an environment variable.");
+}
+
+builder.Services.AddDbContext<UrbanPlusContext>(o => o.UseSqlServer(connStr));
 
 // ====================
 // Repositories (DAL)
@@ -73,6 +84,11 @@ builder.Services.AddScoped<IUserBadgeService, UserBadgeService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
 
+string imagesFolder = builder.Configuration["ImagesFolder"]
+    ?? throw new InvalidOperationException("ImagesFolder is not configured.");
+
+builder.Services.AddSingleton<IImageService>(
+    _ => new ImageService(imagesFolder));
 // ====================
 // AutoMapper
 // ====================
@@ -82,7 +98,29 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<MappingProfile>();
 });
 
+
+var imageFolder = builder.Configuration["ImageSettings:Folder"];
+
+if (string.IsNullOrWhiteSpace(imageFolder))
+{
+    throw new InvalidOperationException(
+        "Image folder path is missing in appsettings.json.");
+}
+
+var fullImageFolder = Path.GetFullPath(
+    Path.Combine(builder.Environment.ContentRootPath, imageFolder));
+
+builder.Services.AddSingleton<IImageService>(
+    _ => new ImageService(fullImageFolder));
+
 var app = builder.Build();
+
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(imagesFolder),
+    RequestPath = "/images"
+});
 
 // Swagger UI
 if (app.Environment.IsDevelopment())

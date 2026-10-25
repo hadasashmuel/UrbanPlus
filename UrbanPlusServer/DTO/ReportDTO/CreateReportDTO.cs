@@ -16,6 +16,6 @@ namespace DTO.ReportDTO
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public string InputAddress { get; set; }
-        public List<ShowReportImageDTO>? ImageList { get; set; } = new List<ShowReportImageDTO>();
+        public List<CreateReportImageDTO>? ImageList { get; set; } = new List<CreateReportImageDTO>();
     }
 }

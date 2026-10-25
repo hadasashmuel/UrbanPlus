@@ -1,4 +1,5 @@
 ﻿using DAL.Entities;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,6 +13,7 @@ namespace DTO.UserDTO
         public string LastName { get; set; }
         public string Email { get; set; }
         public AuthProvider AuthProvider { get; set; }
+        public IFormFile? ProfilePicture { get; set; }
 
     }
 }

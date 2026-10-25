@@ -1,4 +1,4 @@
-﻿
+﻿using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace DTO.ReportImageDTO
@@ -10,6 +10,6 @@ namespace DTO.ReportImageDTO
 
         [Required]
         [MaxLength(2048)]
-        public string ImageUrl { get; set; } = string.Empty;
+        public IFormFile ImageUrl { get; set; } 
     }
 }
