@@ -48,7 +48,7 @@ namespace BLL.Services.ServicesDB.UserServices
             user.ScoreReliability = 50;
 
             // הצפנת הסיסמה באמצעות Hash
-            user.passwordHash = _hasher.HashPassword(user, dto.passwordHash);
+            user.passwordHash = _hasher.HashPassword(user, dto.password);
 
             // שמירת תמונת פרופיל, אם נשלחה
             if (dto.ProfilePicture != null)
@@ -68,7 +68,7 @@ namespace BLL.Services.ServicesDB.UserServices
                 throw new ArgumentNullException(nameof(dto));
 
             if (string.IsNullOrWhiteSpace(dto.Email) ||
-                string.IsNullOrWhiteSpace(dto.passwordHash))
+                string.IsNullOrWhiteSpace(dto.password))
                 return null;
 
             var email = dto.Email.Trim().ToLowerInvariant();
@@ -78,7 +78,7 @@ namespace BLL.Services.ServicesDB.UserServices
             if (user == null)
                 return null;
 
-            var result = _hasher.VerifyHashedPassword( user, user.passwordHash, dto.passwordHash );
+            var result = _hasher.VerifyHashedPassword( user, user.passwordHash, dto.password );
 
             if (result == PasswordVerificationResult.Failed)
                 return null;

@@ -69,23 +69,14 @@ namespace BLL
 
             // Reports
             CreateMap<Reports, ShowReportDTO>()
-                .ForMember(dest => dest.CategoryName,
-                    opt => opt.MapFrom(src =>
-                        src.Category != null
-                            ? src.Category.CategoryName
-                            : null))
-                .ForMember(dest => dest.ImageList,
-                    opt => opt.Ignore());
+     .ForMember(dest => dest.CategoryName,
+         opt => opt.MapFrom(src =>
+             src.Category != null
+                 ? src.Category.CategoryName
+                 : null))
+     .ForMember(dest => dest.ImageList,
+         opt => opt.MapFrom(src => src.Images));
 
-            CreateMap<ReportImages, ShowReportImageDTO>();
-
-            CreateMap<Reports, ShowReportDTO>()
-                .ForMember(
-                    dest => dest.ImageList,
-                    opt => opt.MapFrom(src => src.Images)
-                );
-
-            // Report Images
             CreateMap<ReportImages, ShowReportImageDTO>();
 
             CreateMap<CreateReportImageDTO, ReportImages>()
@@ -93,6 +84,7 @@ namespace BLL
                     opt => opt.Ignore())
                 .ForMember(dest => dest.ReportId,
                     opt => opt.Ignore());
+
 
             // Votes
             CreateMap<Votes, ShowVoteDTO>();

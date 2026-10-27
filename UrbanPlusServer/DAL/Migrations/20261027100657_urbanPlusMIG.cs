@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class urbanPlusMIG : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -49,7 +49,7 @@ namespace DAL.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    passwordHash = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    passwordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AuthProvider = table.Column<int>(type: "int", nullable: false),
                     ScoreReliability = table.Column<double>(type: "float", nullable: false),
                     ProfilePicture = table.Column<string>(type: "nvarchar(max)", nullable: false),

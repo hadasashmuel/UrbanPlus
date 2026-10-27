@@ -85,11 +85,11 @@ namespace UrbanPlusServer.Controllers
         // DELETE: api/Report/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "1")]
-        public IActionResult DeleteReport(int reportId)
+        public IActionResult DeleteReport(int id)
         {
             try
             {
-                var deleted = _reportService.DeleteReport(reportId);
+                var deleted = _reportService.DeleteReport(id);
 
                 if (!deleted)
                     return NotFound();
@@ -98,7 +98,9 @@ namespace UrbanPlusServer.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "An unexpected error occurred while deleting the report.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred while deleting the report.");
             }
         }
     }

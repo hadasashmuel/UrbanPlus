@@ -12,7 +12,7 @@ namespace DTO.UserDTO
         public string Email { get; set; }
         public AuthProvider AuthProvider { get; set; }
         [Required, MinLength(8)]
-        public string passwordHash { get; set; }
+        public string password { get; set; }
 
 
     }

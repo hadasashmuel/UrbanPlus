@@ -17,6 +17,7 @@ namespace DAL.Repositories.ReportRepositories
             return _context.Reports
                 .AsNoTracking()
                 .Include(r => r.Category)
+                .Include(r => r.Images)
                 .ToList();
         }
 
@@ -25,6 +26,7 @@ namespace DAL.Repositories.ReportRepositories
             return _context.Reports
                 .AsNoTracking()
                 .Include(r => r.Category)
+                .Include(r => r.Images)
                 .FirstOrDefault(r => r.ReportId == id);
         }
 
@@ -53,6 +55,11 @@ namespace DAL.Repositories.ReportRepositories
        _context.Reports.FirstOrDefault(r => r.ReportId == id && r.UserId == userId);
 
         public List<Reports> GetByUser(int userId) =>
-            _context.Reports.Where(r => r.UserId == userId).ToList();
+         _context.Reports
+          .AsNoTracking()
+          .Include(r => r.Category)
+          .Include(r => r.Images)
+          .Where(r => r.UserId == userId)
+          .ToList();
     }
 }

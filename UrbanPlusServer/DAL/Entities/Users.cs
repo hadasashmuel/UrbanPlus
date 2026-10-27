@@ -19,8 +19,8 @@ namespace DAL.Entities
         [MaxLength(300)]
         public string Email { get; set; }
 
-        [MaxLength(8)]
-        public string passwordHash { get; set; }
+        [MinLength(8)]
+        public string passwordHash { get; set; } = string.Empty;
         public AuthProvider AuthProvider { get; set; }
 
         [Range(1, 100)]
