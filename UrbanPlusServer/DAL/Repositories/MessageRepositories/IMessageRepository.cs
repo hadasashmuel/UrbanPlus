@@ -8,5 +8,7 @@ namespace DAL.Repositories.MessageRepositories
         Message? GetMessageById(int id);
         Message AddMessage(Message message);
         bool DeleteMessage(int id);
+        Message? GetOwned(int id, int userId);
+        List<Message> GetByUser(int userId);
     }
 }

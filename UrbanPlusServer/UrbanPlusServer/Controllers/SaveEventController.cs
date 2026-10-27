@@ -1,88 +1,79 @@
 ﻿using BLL.Services.ServicesDB.SaveEventServices;
 using DTO.SaveEventDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UrbanPlusServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SaveEventController : ControllerBase
     {
         private readonly ISaveEventService _saveEventService;
 
-        public SaveEventController(
-            ISaveEventService saveEventService)
+        public SaveEventController(ISaveEventService saveEventService)
         {
             _saveEventService = saveEventService;
         }
 
-        // GET: api/SaveEvent/user/5
-        [HttpGet("user/{userId:int}")]
-        public ActionResult<List<ShowSavedEventsDTO>>
-            GetSavedEventsByUserId(int userId)
+        [HttpGet]
+        public ActionResult<List<ShowSavedEventsDTO>> GetSavedEventsByUserId()
         {
-            if (userId <= 0)
-                return BadRequest();
+            int userId = User.GetUserId();
 
-            return Ok(
-                _saveEventService.GetSavedEventsByUserId(userId));
+            return Ok(_saveEventService.GetSavedEventsByUserId(userId));
         }
 
-        // GET: api/SaveEvent/12/user/5
-        [HttpGet("{id:int}/user/{userId:int}")]
-        public ActionResult<ShowSavedEventsDTO>
-            GetSavedEventById(int id, int userId)
+        [HttpGet("{id:int}")]
+        public ActionResult<ShowSavedEventsDTO> GetSavedEventById(int id)
         {
-            if (id <= 0 || userId <= 0)
+            if (id <= 0)
                 return BadRequest();
 
-            var savedEvent =
-                _saveEventService.GetSavedEventById(id, userId);
+            int userId = User.GetUserId();
+
+            var savedEvent = _saveEventService.GetSavedEventById(id, userId);
 
             if (savedEvent == null)
                 return NotFound();
 
             return Ok(savedEvent);
         }
-
-        // POST: api/SaveEvent?userId=5
-        [HttpPost]
-        public ActionResult<ShowSavedEventsDTO> CreateSavedEvent(
-            [FromBody] CreateSaveEventDTO dto,
-            [FromQuery] int userId)
+        [HttpGet("mine")]
+        public ActionResult<List<ShowSavedEventsDTO>> GetMine()
         {
-            if (userId <= 0)
-                return BadRequest();
+            return Ok(
+                _saveEventService.GetSavedEventsByUserId(User.GetUserId()));
+        }
+        [HttpPost]
+        public ActionResult<ShowSavedEventsDTO> CreateSavedEvent( [FromBody] CreateSaveEventDTO dto)
+        {
+            int userId = User.GetUserId();
 
             var createdSavedEvent =
                 _saveEventService.CreateSavedEvent(dto, userId);
 
             return CreatedAtAction(
                 nameof(GetSavedEventById),
-                new
-                {
-                    id = createdSavedEvent.SavedEventId,
-                    userId = createdSavedEvent.UserId
-                },
+                new { id = createdSavedEvent.SavedEventId },
                 createdSavedEvent);
         }
-
-        // DELETE: api/SaveEvent/12/user/5
-        [HttpDelete("{id:int}/user/{userId:int}")]
-        public IActionResult DeleteSavedEvent(
-            int id,
-            int userId)
+        [HttpDelete("{id:int}")]
+        public IActionResult DeleteSavedEvent(int id)
         {
-            if (id <= 0 || userId <= 0)
+            if (id <= 0)
                 return BadRequest();
 
-            var deleted =
-                _saveEventService.DeleteSavedEvent(id, userId);
+            int userId = User.GetUserId();
+
+            var deleted = _saveEventService.DeleteSavedEvent(id, userId);
 
             if (!deleted)
                 return NotFound();
 
             return NoContent();
         }
+
     }
 }

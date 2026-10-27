@@ -1,12 +1,14 @@
 ﻿
 using BLL.Services.ServicesDB.CategoryServices;
 using DTO.CategoryDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UrbanPlusServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
@@ -17,6 +19,7 @@ namespace UrbanPlusServer.Controllers
         }
 
         // GET: api/Category
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult<List<ShowCategoryDTO>> GetAllCategories()
         {
@@ -25,6 +28,7 @@ namespace UrbanPlusServer.Controllers
         }
 
         // GET: api/Category/5
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public ActionResult<ShowCategoryDTO> GetCategoryById(int id)
         {
@@ -37,6 +41,7 @@ namespace UrbanPlusServer.Controllers
         }
 
         // POST: api/Category
+        [Authorize(Roles = "1")]
         [HttpPost]
         public ActionResult<ShowCategoryDTO> CreateCategory([FromBody] CreateCategoryDTO dto)
         {
@@ -55,6 +60,7 @@ namespace UrbanPlusServer.Controllers
         }
 
         // DELETE: api/Category/5
+        [Authorize(Roles = "1")]
         [HttpDelete("{id}")]
         public IActionResult DeleteCategory(int id)
         {

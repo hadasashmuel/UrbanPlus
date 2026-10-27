@@ -1,6 +1,7 @@
 ﻿
 using BLL.Services.ServicesDB.VoteServices;
 using DTO.VoteDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UrbanPlusServer.Controllers
@@ -39,30 +40,18 @@ namespace UrbanPlusServer.Controllers
 
         // POST: api/Vote?userId=5
         [HttpPost]
-        public ActionResult<ShowVoteDTO> CreateVote([FromBody] CreateVoteDTO dto, [FromQuery] int userId)
+        public ActionResult<ShowVoteDTO> CreateVotes([FromBody] CreateVoteDTO dto)
         {
-            try
-            {
-                var createdVote = _voteService.CreateVotes(dto, userId);
+            var createdVote = _voteService.CreateVotes( dto, User.GetUserId());
 
-                return CreatedAtAction(
-                    nameof(GetVoteById),
-                    new { id = createdVote.VoteId },
-                    createdVote);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            return Ok(createdVote);
         }
 
         // DELETE: api/Vote/5
         [HttpDelete("{id}")]
         public IActionResult DeleteVote(int id)
         {
-            var deleted = _voteService.DeleteVote(id);
-
-            if (!deleted)
+            if (!_voteService.DeleteVote(id, User.GetUserId()))
                 return NotFound();
 
             return NoContent();

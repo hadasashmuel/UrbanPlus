@@ -7,6 +7,7 @@ namespace DTO.CategoryDTO
 {
     public class CreateCategoryDTO
     {
+        [Required]
         public string CategoryName { get; set; }
         public string CategoryDescription { get; set; }
     }

@@ -11,7 +11,7 @@ namespace BLL.Services.ServicesDB.MessageServices
         private readonly IMessageRepository _repository;
         private readonly IMapper _mapper;
 
-        public MessageService( IMessageRepository repository,IMapper mapper)
+        public MessageService(IMessageRepository repository, IMapper mapper)
         {
             _repository = repository;
             _mapper = mapper;
@@ -34,9 +34,12 @@ namespace BLL.Services.ServicesDB.MessageServices
             return _mapper.Map<ShowMessageDTO>(message);
         }
 
-        public ShowMessageDTO CreateMessage(CreateMessageDTO dto)
+        public ShowMessageDTO CreateMessage(CreateMessageDTO dto, int userId)
         {
             var message = _mapper.Map<Message>(dto);
+
+            // מזהה השולח נקבע לפי המשתמש המחובר
+            message.UserId = userId;
 
             message.CreatedAt = DateTime.UtcNow;
             message.IsDeleted = false;
@@ -46,9 +49,16 @@ namespace BLL.Services.ServicesDB.MessageServices
             return _mapper.Map<ShowMessageDTO>(createdMessage);
         }
 
-        public bool DeleteMessage(int id)
+
+        public bool DeleteMessage(int messageId, int userId)
         {
-            return _repository.DeleteMessage(id);
+            var message = _repository.GetOwned(messageId, userId);
+
+            if (message is null)
+                return false;
+
+            _repository.DeleteMessage(message.MessageId);
+            return true;
         }
     }
 }

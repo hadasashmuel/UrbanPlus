@@ -1,7 +1,6 @@
-﻿using BLL.Services.ServiceSupport;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
-namespace BLL.Services.ImageServices
+namespace BLL.Services.ServiceSupport.ImageServices
 {
     public class ImageService : IImageService
     {

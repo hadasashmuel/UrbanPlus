@@ -9,7 +9,9 @@ namespace DTO.VoteDTO
 {
     public class CreateVoteDTO
     {
+        [Required]
         public int MainEventId { get; set; }
+        [Required]
         public VoteType TypeVote { get; set; }
 
     }

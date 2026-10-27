@@ -1,6 +1,5 @@
-//BLL
+// BLL
 using BLL;
-using BLL.Services.ImageServices;
 using BLL.Services.ServicesDB.BadgeServices;
 using BLL.Services.ServicesDB.CategoryServices;
 using BLL.Services.ServicesDB.MainEventServices;
@@ -12,8 +11,11 @@ using BLL.Services.ServicesDB.SaveEventServices;
 using BLL.Services.ServicesDB.UserBadgeServices;
 using BLL.Services.ServicesDB.UserServices;
 using BLL.Services.ServicesDB.VoteServices;
-using BLL.Services.ServiceSupport;
-//DAL
+using BLL.Services.ServiceSupport.ImageServices;
+using BLL.Services.ServiceSupport.TokenServices;
+
+// DAL
+using DAL;
 using DAL.Entities;
 using DAL.Repositories.BadgeRepositories;
 using DAL.Repositories.CategoryRepositories;
@@ -26,20 +28,37 @@ using DAL.Repositories.SaveEventRepositories;
 using DAL.Repositories.UserBadgeRepositories;
 using DAL.Repositories.UserRepositories;
 using DAL.Repositories.VoteRepositories;
+
+// Microsoft
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
+
+// System
 using System.IO;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ====================
 // Controllers
+// ====================
+
 builder.Services.AddControllers();
 
+// ====================
 // Swagger
+// ====================
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ====================
 // Database
+// ====================
 
 var connStr = builder.Configuration.GetConnectionString("SqlServer");
 
@@ -50,7 +69,8 @@ if (string.IsNullOrWhiteSpace(connStr))
         "Set it with User Secrets or an environment variable.");
 }
 
-builder.Services.AddDbContext<UrbanPlusContext>(o => o.UseSqlServer(connStr));
+builder.Services.AddDbContext<UrbanPlusContext>(
+    options => options.UseSqlServer(connStr));
 
 // ====================
 // Repositories (DAL)
@@ -83,12 +103,28 @@ builder.Services.AddScoped<ISaveEventService, SaveEventService>();
 builder.Services.AddScoped<IUserBadgeService, UserBadgeService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
-string imagesFolder = builder.Configuration["ImagesFolder"]
-    ?? throw new InvalidOperationException("ImagesFolder is not configured.");
+// ====================
+// Image Service
+// ====================
+
+var imagesFolder = builder.Configuration["ImagesFolder"];
+
+if (string.IsNullOrWhiteSpace(imagesFolder))
+{
+    throw new InvalidOperationException(
+        "ImagesFolder is not configured.");
+}
+
+var fullImagesFolder = Path.GetFullPath(
+    Path.Combine(builder.Environment.ContentRootPath, imagesFolder));
+
+Directory.CreateDirectory(fullImagesFolder);
 
 builder.Services.AddSingleton<IImageService>(
-    _ => new ImageService(imagesFolder));
+    _ => new ImageService(fullImagesFolder));
+
 // ====================
 // AutoMapper
 // ====================
@@ -98,31 +134,76 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<MappingProfile>();
 });
 
+// ====================
+// Password Hasher
+// ====================
 
-var imageFolder = builder.Configuration["ImageSettings:Folder"];
+builder.Services.AddScoped<IPasswordHasher<Users>,
+    PasswordHasher<Users>>();
 
-if (string.IsNullOrWhiteSpace(imageFolder))
+// ====================
+// JWT Authentication
+// ====================
+
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
 {
     throw new InvalidOperationException(
-        "Image folder path is missing in appsettings.json.");
+        "Jwt:Key is missing. Set the environment variable Jwt__Key.");
 }
 
-var fullImageFolder = Path.GetFullPath(
-    Path.Combine(builder.Environment.ContentRootPath, imageFolder));
+if (string.IsNullOrWhiteSpace(jwtIssuer))
+{
+    throw new InvalidOperationException(
+        "Jwt:Issuer is missing. Set the environment variable Jwt__Issuer.");
+}
 
-builder.Services.AddSingleton<IImageService>(
-    _ => new ImageService(fullImageFolder));
+if (string.IsNullOrWhiteSpace(jwtAudience))
+{
+    throw new InvalidOperationException(
+        "Jwt:Audience is missing. Set the environment variable Jwt__Audience.");
+}
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
 
 var app = builder.Build();
-
-
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(imagesFolder),
+    FileProvider = new PhysicalFileProvider(fullImagesFolder),
     RequestPath = "/images"
 });
 
-// Swagger UI
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -131,6 +212,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

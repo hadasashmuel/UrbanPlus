@@ -1,11 +1,14 @@
 ﻿using BLL.Services.ServicesDB.UserBadgeServices;
+using DTO.BadgeDTO;
 using DTO.UserBadgeDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UrbanPlusServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserBadgeController : ControllerBase
     {
         private readonly IUserBadgeService _userBadgeService;
@@ -14,14 +17,16 @@ namespace UrbanPlusServer.Controllers
         {
             _userBadgeService = userBadgeService;
         }
-
-        // GET: api/UserBadge/user/5
-        [HttpGet("user/{userId:int}")]
-        public ActionResult<List<ShowUserBadgeDTO>> GetBadgesByUserId(
-            int userId)
+        [HttpGet("mine")]
+        public ActionResult<List<ShowBadgeDTO>> GetMine()
         {
-            if (userId <= 0)
-                return BadRequest();
+            return Ok(_userBadgeService.GetMine(User.GetUserId()));
+        }
+
+        [HttpGet]
+        public ActionResult<List<ShowUserBadgeDTO>> GetBadgesByUserId()
+        {
+            int userId = User.GetUserId();
 
             try
             {
@@ -46,6 +51,7 @@ namespace UrbanPlusServer.Controllers
         }
 
         // POST: api/UserBadge/award?userId=5&badgeId=2
+        [Authorize(Roles = "1")]
         [HttpPost("award")]
         public ActionResult<ShowUserBadgeDTO> AwardBadgeToUser([FromQuery] int userId,[FromQuery] int badgeId)
         {
@@ -69,6 +75,7 @@ namespace UrbanPlusServer.Controllers
         }
 
         // DELETE: api/UserBadge/10
+        [Authorize(Roles = "1")]
         [HttpDelete("{id:int}")]
         public IActionResult DeleteUserBadge(int id)
         {

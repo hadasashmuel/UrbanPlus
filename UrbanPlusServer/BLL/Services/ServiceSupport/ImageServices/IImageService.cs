@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BLL.Services.ServiceSupport
+namespace BLL.Services.ServiceSupport.ImageServices
 {
     public interface IImageService
     {

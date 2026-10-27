@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace DTO.BadgeDTO
 {
     public class CreateBadgeDTO
     {
+        [Required]
         public string BadgeName { get; set; }
+        [Required]
         public string Description { get; set; }
-        public string IconUrl { get; set; }
+        [Required]
+        public IFormFile? IconUrl { get; set; }
     }
 }

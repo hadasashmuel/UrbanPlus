@@ -1,11 +1,13 @@
 ﻿using BLL.Services.ServicesDB.BadgeServices;
 using DTO.BadgeDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UrbanPlusServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "1")]
     public class BadgeController : ControllerBase
     {
         private readonly IBadgeService _badgeService;

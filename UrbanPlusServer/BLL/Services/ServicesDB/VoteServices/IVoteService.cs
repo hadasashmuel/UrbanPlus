@@ -12,6 +12,6 @@ namespace BLL.Services.ServicesDB.VoteServices
         ShowVoteDTO? GetVoteById(int id);
 
         ShowVoteDTO CreateVotes(CreateVoteDTO dto, int userId);
-        bool DeleteVote(int id);
+        bool DeleteVote(int voteId, int userId);
     }
 }

@@ -5,7 +5,7 @@ namespace BLL.Services.ServicesDB.MessageServices
     {
         List<ShowMessageDTO> GetAllMessages();
         ShowMessageDTO? GetMessageById(int id);
-        ShowMessageDTO CreateMessage(CreateMessageDTO dto);
-        bool DeleteMessage(int id);
+        ShowMessageDTO CreateMessage(CreateMessageDTO dto, int userId);
+        bool DeleteMessage(int messageId, int userId);
     }
 }

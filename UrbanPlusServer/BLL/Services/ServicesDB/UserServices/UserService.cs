@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
-using BLL.Services.ImageServices;
-using BLL.Services.ServiceSupport;
+
+using BLL.Services.ServiceSupport.ImageServices;
+using BLL.Services.ServiceSupport.TokenServices;
 using DAL.Entities;
 using DAL.Repositories.UserRepositories;
 using DTO.UserDTO;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 namespace BLL.Services.ServicesDB.UserServices
 {
@@ -12,19 +14,20 @@ namespace BLL.Services.ServicesDB.UserServices
     {
         private readonly IUserRepository _userRepository;
         private readonly IImageService _imageService;
+        private readonly ITokenService _tokens;
+        private readonly IPasswordHasher<Users> _hasher;
         private readonly IMapper _mapper;
 
-        public UserService(
-            IUserRepository userRepository,
-            IImageService imageService,
-            IMapper mapper)
+        public UserService(IUserRepository userRepository,IImageService imageService,IMapper mapper, ITokenService tokens, IPasswordHasher<Users> hasher)
         {
             _userRepository = userRepository;
             _imageService = imageService;
+            _tokens = tokens;
             _mapper = mapper;
+            _hasher = hasher;
         }
 
-        public ProfileUserDTO CreateUser(CreateUserDTO dto)
+        public bool CreateUser(CreateUserDTO dto)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
@@ -32,16 +35,20 @@ namespace BLL.Services.ServicesDB.UserServices
             if (string.IsNullOrWhiteSpace(dto.Email))
                 throw new ArgumentException("Email is required.");
 
-            if (_userRepository.IsEmailExists(dto.Email))
-                throw new InvalidOperationException(
-                    "A user with this email already exists.");
+            var email = dto.Email.Trim().ToLowerInvariant();
+
+            if (_userRepository.IsEmailExists(email))
+                return false;
 
             var user = _mapper.Map<Users>(dto);
 
-            user.Email = dto.Email.Trim();
+            user.Email = email;
             user.CreatedAt = DateTime.UtcNow;
             user.RoleCode = 0;
             user.ScoreReliability = 50;
+
+            // הצפנת הסיסמה באמצעות Hash
+            user.passwordHash = _hasher.HashPassword(user, dto.passwordHash);
 
             // שמירת תמונת פרופיל, אם נשלחה
             if (dto.ProfilePicture != null)
@@ -51,8 +58,34 @@ namespace BLL.Services.ServicesDB.UserServices
 
             var createdUser = _userRepository.Add(user);
 
-            return _mapper.Map<ProfileUserDTO>(createdUser);
+            return createdUser != null;
         }
+
+
+        public AuthResponseUserDto? Login(LoginUserDTO dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            if (string.IsNullOrWhiteSpace(dto.Email) ||
+                string.IsNullOrWhiteSpace(dto.passwordHash))
+                return null;
+
+            var email = dto.Email.Trim().ToLowerInvariant();
+
+            var user = _userRepository.GetByEmailAndProvider(email, dto.AuthProvider);
+
+            if (user == null)
+                return null;
+
+            var result = _hasher.VerifyHashedPassword( user, user.passwordHash, dto.passwordHash );
+
+            if (result == PasswordVerificationResult.Failed)
+                return null;
+
+            return _tokens.CreateToken(user);
+        }
+
 
         public ProfileUserDTO? GetUserById(int userId)
         {
@@ -61,8 +94,7 @@ namespace BLL.Services.ServicesDB.UserServices
 
             var user = _userRepository.GetById(userId);
 
-            return user == null
-                ? null
+            return user == null? null
                 : _mapper.Map<ProfileUserDTO>(user);
         }
 

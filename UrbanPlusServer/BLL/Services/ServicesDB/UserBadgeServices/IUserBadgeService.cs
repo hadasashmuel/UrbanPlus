@@ -1,4 +1,5 @@
-﻿using DTO.UserBadgeDTO;
+﻿using DTO.BadgeDTO;
+using DTO.UserBadgeDTO;
 
 namespace BLL.Services.ServicesDB.UserBadgeServices
 {
@@ -9,6 +10,7 @@ namespace BLL.Services.ServicesDB.UserBadgeServices
         ShowUserBadgeDTO? GetUserBadgeById(int id);
 
         ShowUserBadgeDTO AwardBadgeToUser(int userId, int badgeId);
+        List<ShowBadgeDTO> GetMine(int userId);
 
         bool DeleteUserBadge(int id);
     }

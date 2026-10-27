@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
-using BLL.Services.ImageServices;
-using BLL.Services.ServiceSupport;
+using BLL.Services.ServiceSupport.ImageServices;
 using DAL.Entities;
 using DAL.Repositories.ReportRepositories;
 using DTO.ReportDTO;
@@ -70,9 +69,9 @@ namespace BLL.Services.ServicesDB.ReportServices
             return _mapper.Map<ShowReportDTO>(createdReport);
         }
 
-        public bool DeleteReport(int id)
+        public bool DeleteReport(int reportId)
         {
-            return _reportRepository.DeleteReport(id);
+            return _reportRepository.DeleteReport(reportId);
         }
     }
 }

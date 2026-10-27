@@ -9,7 +9,9 @@ namespace DTO.MessageDTO
 {
     public class CreateMessageDTO
     {
+        [Required]
         public int MainEventId { get; set; }
+        [Required]
         public string Content { get; set; }
     }
 }

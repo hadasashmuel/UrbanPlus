@@ -9,6 +9,7 @@ namespace DTO.SaveEventDTO
 {
     public class CreateSaveEventDTO
     {
+        [Required]
         public int MainEventId { get; set; }
     }
 }

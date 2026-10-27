@@ -48,5 +48,11 @@ namespace DAL.Repositories.ReportRepositories
 
             return true;
         }
+
+        public Reports? GetOwned(int id, int userId) =>
+       _context.Reports.FirstOrDefault(r => r.ReportId == id && r.UserId == userId);
+
+        public List<Reports> GetByUser(int userId) =>
+            _context.Reports.Where(r => r.UserId == userId).ToList();
     }
 }

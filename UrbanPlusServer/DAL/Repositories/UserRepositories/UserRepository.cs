@@ -60,5 +60,11 @@ namespace DAL.Repositories.UserRepositories
 
             return true;
         }
+
+        public Users? GetOwned(int id, int userId) =>
+            _context.Users.FirstOrDefault(u => u.UserId == id && u.UserId == userId);
+
+        public List<Users> GetByUser(int userId) =>
+            _context.Users.Where(u => u.UserId == userId).ToList();
     }
 }

@@ -34,7 +34,6 @@ namespace BLL.Services.ServicesDB.SaveEventServices
 
             return _mapper.Map<ShowSavedEventsDTO>(savedEvent);
         }
-
         public ShowSavedEventsDTO CreateSavedEvent(CreateSaveEventDTO dto,int userId)
         {
             var savedEvent = _mapper.Map<SavedEvents>(dto);
