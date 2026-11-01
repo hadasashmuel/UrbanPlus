@@ -1,0 +1,131 @@
+.register-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  direction: rtl;
+  background: rgba(28, 42, 34, 0.22);
+  backdrop-filter: blur(3px);
+}
+
+.register-card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 32px 38px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 22px 70px rgba(30, 48, 38, 0.2);
+  text-align: right;
+}
+
+.register-logo {
+  margin-bottom: 14px;
+  color: #378052;
+  font-family: Georgia, serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.register-card h1 {
+  margin: 0 0 8px;
+  color: #3d5360;
+  font-size: 28px;
+  text-align: center;
+}
+
+.register-subtitle {
+  margin: 0 0 22px;
+  color: #778994;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* שדות הטופס */
+.register-card input {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  border: 1px solid #d5ded8;
+  border-radius: 12px;
+  background: #fff;
+  color: #344b40;
+  font: inherit;
+  outline: none;
+}
+
+.register-card input:focus {
+  border-color: #75a982;
+  box-shadow: 0 0 0 3px rgba(117, 169, 130, 0.15);
+}
+
+.register-card label {
+  color: #6c9b75;
+}
+
+.register-error {
+  margin: 8px 0;
+  color: #c0392b;
+  font-size: 14px;
+}
+
+.register-card .register-submit {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #8fb894;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.register-card .register-submit:hover {
+  background: #6fa47b;
+}
+
+.register-footer {
+  margin: 20px 0 0;
+  color: #778994;
+  font-size: 14px;
+  text-align: center;
+}
+
+.register-footer a {
+  color: #4d9361;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .register-overlay {
+    padding: 12px;
+  }
+
+  .register-card {
+    max-height: calc(100vh - 24px);
+    padding: 26px 22px;
+    border-radius: 22px;
+  }
+
+  .register-card h1 {
+    font-size: 24px;
+  }
+}

@@ -1,0 +1,146 @@
+
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(28, 42, 34, 0.22);
+  backdrop-filter: blur(3px);
+  direction: rtl;
+}
+
+.auth-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  box-sizing: border-box;
+  padding: 42px 38px 32px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 22px 70px rgba(30, 48, 38, 0.2);
+  text-align: right;
+}
+
+.auth-logo {
+  margin-bottom: 24px;
+  color: #378052;
+  font-family: Georgia, serif;
+  font-size: 34px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.auth-card h2 {
+  margin: 0 0 8px;
+  color: #3d5360;
+  font-size: 29px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.auth-subtitle {
+  margin: 0 0 28px;
+  color: #778994;
+  font-size: 15px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.auth-card .auth-close {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #f0f3f0;
+  color: #53656d;
+  font-size: 27px;
+  cursor: pointer;
+}
+
+.auth-card .auth-close:hover {
+  background: #e3ebe3;
+}
+
+/* עיצוב שדות הטופס */
+.auth-card input {
+  width: 100%;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #d5ded8;
+  border-radius: 12px;
+  background: #fff;
+  color: #344b40;
+  font: inherit;
+  outline: none;
+}
+
+.auth-card input:focus {
+  border-color: #75a982;
+  box-shadow: 0 0 0 3px rgba(117, 169, 130, 0.15);
+}
+
+.auth-card label {
+  color: #6c9b75;
+}
+
+.auth-link,
+.auth-footer a {
+  color: #4d9361;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.forgot-link {
+  display: block;
+  margin: 14px 0 24px;
+  font-size: 14px;
+}
+
+.auth-card .auth-submit {
+  width: 100%;
+  min-height: 54px;
+  border: none;
+  border-radius: 12px;
+  background: #8fb894;
+  color: white;
+  font-size: 19px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.auth-card .auth-submit:hover {
+  background: #6fa47b;
+  transform: translateY(-1px);
+}
+
+.auth-footer {
+  margin: 24px 0 0;
+  color: #778994;
+  font-size: 14px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .auth-overlay {
+    padding: 16px;
+  }
+
+  .auth-card {
+    padding: 38px 22px 26px;
+    border-radius: 22px;
+  }
+
+  .auth-logo {
+    font-size: 29px;
+  }
+}
