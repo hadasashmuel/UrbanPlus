@@ -1,4 +1,5 @@
-﻿using BLL.Services.ServicesDB.UserBadgeServices;
+﻿
+using BLL.Services.ServicesDB.UserBadgeServices;
 using DTO.BadgeDTO;
 using DTO.UserBadgeDTO;
 using Microsoft.AspNetCore.Authorization;
@@ -17,25 +18,21 @@ namespace UrbanPlusServer.Controllers
         {
             _userBadgeService = userBadgeService;
         }
+
+        // GET: api/UserBadge/mine
         [HttpGet("mine")]
         public ActionResult<List<ShowBadgeDTO>> GetMine()
         {
             return Ok(_userBadgeService.GetMine(User.GetUserId()));
         }
 
+        // GET: api/UserBadge
         [HttpGet]
         public ActionResult<List<ShowUserBadgeDTO>> GetBadgesByUserId()
         {
             int userId = User.GetUserId();
 
-            try
-            {
-                return Ok(_userBadgeService.GetBadgesByUserId(userId));
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(new { message = "User not found." });
-            }
+            return Ok(_userBadgeService.GetBadgesByUserId(userId));
         }
 
         // GET: api/UserBadge/10
@@ -44,34 +41,17 @@ namespace UrbanPlusServer.Controllers
         {
             var userBadge = _userBadgeService.GetUserBadgeById(id);
 
-            if (userBadge == null)
-                return NotFound();
-
             return Ok(userBadge);
         }
 
         // POST: api/UserBadge/award?userId=5&badgeId=2
         [Authorize(Roles = "1")]
         [HttpPost("award")]
-        public ActionResult<ShowUserBadgeDTO> AwardBadgeToUser([FromQuery] int userId,[FromQuery] int badgeId)
+        public ActionResult<ShowUserBadgeDTO> AwardBadgeToUser( [FromQuery] int userId, [FromQuery] int badgeId)
         {
-            if (userId <= 0 || badgeId <= 0)
-                return BadRequest();
+            var result = _userBadgeService.AwardBadgeToUser(userId, badgeId);
 
-            try
-            {
-                var result = _userBadgeService.AwardBadgeToUser(userId, badgeId);
-
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            return Ok(result);
         }
 
         // DELETE: api/UserBadge/10
@@ -79,10 +59,7 @@ namespace UrbanPlusServer.Controllers
         [HttpDelete("{id:int}")]
         public IActionResult DeleteUserBadge(int id)
         {
-            var deleted = _userBadgeService.DeleteUserBadge(id);
-
-            if (!deleted)
-                return NotFound();
+            _userBadgeService.DeleteUserBadge(id);
 
             return NoContent();
         }

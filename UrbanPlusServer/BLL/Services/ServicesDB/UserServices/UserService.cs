@@ -1,5 +1,6 @@
-﻿using AutoMapper;
-
+﻿
+using AutoMapper;
+using BLL.Exceptions;
 using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServiceSupport.TokenServices;
 using DAL.Entities;
@@ -18,7 +19,12 @@ namespace BLL.Services.ServicesDB.UserServices
         private readonly IPasswordHasher<Users> _hasher;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository,IImageService imageService,IMapper mapper, ITokenService tokens, IPasswordHasher<Users> hasher)
+        public UserService(
+            IUserRepository userRepository,
+            IImageService imageService,
+            IMapper mapper,
+            ITokenService tokens,
+            IPasswordHasher<Users> hasher)
         {
             _userRepository = userRepository;
             _imageService = imageService;
@@ -38,7 +44,7 @@ namespace BLL.Services.ServicesDB.UserServices
             var email = dto.Email.Trim().ToLowerInvariant();
 
             if (_userRepository.IsEmailExists(email))
-                return false;
+                throw new ConflictException("A user with this email already exists.");
 
             var user = _mapper.Map<Users>(dto);
 
@@ -61,7 +67,6 @@ namespace BLL.Services.ServicesDB.UserServices
             return createdUser != null;
         }
 
-
         public AuthResponseUserDto? Login(LoginUserDTO dto)
         {
             if (dto == null)
@@ -73,12 +78,15 @@ namespace BLL.Services.ServicesDB.UserServices
 
             var email = dto.Email.Trim().ToLowerInvariant();
 
-            var user = _userRepository.GetByEmailAndProvider(email, dto.AuthProvider);
+            var user = _userRepository.GetByEmailAndProvider(
+                email, dto.AuthProvider);
 
+            // לא חושפים אם המשתמש קיים במערכת
             if (user == null)
                 return null;
 
-            var result = _hasher.VerifyHashedPassword( user, user.passwordHash, dto.password );
+            var result = _hasher.VerifyHashedPassword(
+                user, user.passwordHash, dto.password);
 
             if (result == PasswordVerificationResult.Failed)
                 return null;
@@ -86,55 +94,57 @@ namespace BLL.Services.ServicesDB.UserServices
             return _tokens.CreateToken(user);
         }
 
-
-        public ProfileUserDTO? GetUserById(int userId)
+        public ProfileUserDTO GetUserById(int userId)
         {
             if (userId <= 0)
-                return null;
-
-            var user = _userRepository.GetById(userId);
-
-            return user == null? null
-                : _mapper.Map<ProfileUserDTO>(user);
-        }
-
-        public ShortProfileUserDTO? GetShortUserById(int userId)
-        {
-            if (userId <= 0)
-                return null;
-
-            var user = _userRepository.GetById(userId);
-
-            return user == null
-                ? null
-                : _mapper.Map<ShortProfileUserDTO>(user);
-        }
-
-        public ProfileUserDTO? UpdateUser(int userId,UpdateUserDTO dto)
-        {
-            if (userId <= 0 || dto == null)
-                return null;
+                throw new ArgumentException(
+                    "User ID must be greater than zero.");
 
             var user = _userRepository.GetById(userId);
 
             if (user == null)
-                return null;
+                throw new NotFoundException( $"User with id {userId} was not found.");
+
+            return _mapper.Map<ProfileUserDTO>(user);
+        }
+
+        public ShortProfileUserDTO GetShortUserById(int userId)
+        {
+            if (userId <= 0)
+                throw new ArgumentException( "User ID must be greater than zero.");
+
+            var user = _userRepository.GetById(userId);
+
+            if (user == null)
+                throw new NotFoundException($"User with id {userId} was not found.");
+
+            return _mapper.Map<ShortProfileUserDTO>(user);
+        }
+
+        public ProfileUserDTO UpdateUser(int userId, UpdateUserDTO dto)
+        {
+            if (userId <= 0)
+                throw new ArgumentException( "User ID must be greater than zero.");
+
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            var user = _userRepository.GetById(userId);
+
+            if (user == null)
+                throw new NotFoundException( $"User with id {userId} was not found.");
 
             if (string.IsNullOrWhiteSpace(dto.FirstName))
-                throw new ArgumentException(
-                    "First name is required.");
+                throw new ArgumentException("First name is required.");
 
             if (dto.FirstName.Trim().Length > 200)
-                throw new ArgumentException(
-                    "First name cannot exceed 200 characters.");
+                throw new ArgumentException( "First name cannot exceed 200 characters.");
 
             if (string.IsNullOrWhiteSpace(dto.LastName))
-                throw new ArgumentException(
-                    "Last name is required.");
+                throw new ArgumentException("Last name is required.");
 
             if (dto.LastName.Trim().Length > 200)
-                throw new ArgumentException(
-                    "Last name cannot exceed 200 characters.");
+                throw new ArgumentException("Last name cannot exceed 200 characters.");
 
             user.FirstName = dto.FirstName.Trim();
             user.LastName = dto.LastName.Trim();
@@ -152,14 +162,12 @@ namespace BLL.Services.ServicesDB.UserServices
                     var updatedUser = _userRepository.Update(user);
 
                     // מחיקת התמונה הישנה רק אחרי עדכון מוצלח
-                    if (!string.IsNullOrWhiteSpace(oldImage))
-                        _imageService.Delete(oldImage);
+                    if (!string.IsNullOrWhiteSpace(oldImage))_imageService.Delete(oldImage);
 
                     return _mapper.Map<ProfileUserDTO>(updatedUser);
                 }
                 catch
                 {
-                    // ניקוי הקובץ החדש אם עדכון המשתמש נכשל
                     _imageService.Delete(newImage);
                     throw;
                 }
@@ -173,12 +181,12 @@ namespace BLL.Services.ServicesDB.UserServices
         public bool DeleteUser(int userId)
         {
             if (userId <= 0)
-                return false;
+                throw new ArgumentException( "User ID must be greater than zero.");
 
             var user = _userRepository.GetById(userId);
 
             if (user == null)
-                return false;
+                throw new NotFoundException( $"User with id {userId} was not found.");
 
             var deleted = _userRepository.Delete(userId);
 

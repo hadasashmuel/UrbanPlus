@@ -32,27 +32,26 @@ namespace UrbanPlusServer.Controllers
         {
             var vote = _voteService.GetVoteById(id);
 
-            if (vote == null)
-                return NotFound();
-
             return Ok(vote);
         }
 
-        // POST: api/Vote?userId=5
+        // POST: api/Vote
+        [Authorize]
         [HttpPost]
         public ActionResult<ShowVoteDTO> CreateVotes([FromBody] CreateVoteDTO dto)
         {
-            var createdVote = _voteService.CreateVotes( dto, User.GetUserId());
+            var createdVote = _voteService.CreateVotes(
+                dto, User.GetUserId());
 
             return Ok(createdVote);
         }
 
         // DELETE: api/Vote/5
+        [Authorize]
         [HttpDelete("{id}")]
         public IActionResult DeleteVote(int id)
         {
-            if (!_voteService.DeleteVote(id, User.GetUserId()))
-                return NotFound();
+            _voteService.DeleteVote(id, User.GetUserId());
 
             return NoContent();
         }

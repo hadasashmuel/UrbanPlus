@@ -1,8 +1,9 @@
 ﻿
 using AutoMapper;
+using BLL.Exceptions;
+using DAL.Entities;
 using DAL.Repositories.VoteRepositories;
 using DTO.VoteDTO;
-using DAL.Entities;
 namespace BLL.Services.ServicesDB.VoteServices
 {
     public class VoteService : IVoteService
@@ -23,12 +24,12 @@ namespace BLL.Services.ServicesDB.VoteServices
             return _mapper.Map<List<ShowVoteDTO>>(votes);
         }
 
-        public ShowVoteDTO? GetVoteById(int id)
+        public ShowVoteDTO GetVoteById(int id)
         {
             var vote = _voteRepository.GetById(id);
 
             if (vote == null)
-                return null;
+                throw new NotFoundException($"Vote with id {id} was not found");
 
             return _mapper.Map<ShowVoteDTO>(vote);
         }
@@ -36,9 +37,7 @@ namespace BLL.Services.ServicesDB.VoteServices
 
         public ShowVoteDTO CreateVotes(CreateVoteDTO dto, int userId)
         {
-            var alreadyVoted =
-       _voteRepository.ExistsForUserAndMainEvent(
-           userId, dto.MainEventId);
+            var alreadyVoted =_voteRepository.ExistsForUserAndMainEvent( userId, dto.MainEventId);
 
             if (alreadyVoted)
             {

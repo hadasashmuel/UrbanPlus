@@ -1,19 +1,20 @@
-﻿using DAL.Entities;
-using System;
-using System.Collections.Generic;
+﻿
+using DAL.Entities;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace DTO.UserDTO
 {
     public class LoginUserDTO
     {
-        [Required, EmailAddress]
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
         public string Email { get; set; }
+
+        [EnumDataType(typeof(AuthProvider), ErrorMessage = "Invalid authentication provider")]
         public AuthProvider AuthProvider { get; set; }
-        [Required, MinLength(8)]
+
+        [Required(ErrorMessage = "Password is required")]
+        [MinLength(8, ErrorMessage = "Password must contain at least 8 characters")]
         public string password { get; set; }
-
-
     }
 }

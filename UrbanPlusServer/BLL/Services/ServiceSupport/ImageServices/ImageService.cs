@@ -23,8 +23,7 @@ namespace BLL.Services.ServiceSupport.ImageServices
             var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
 
             if (!allowed.Contains(ext))
-                throw new ArgumentException(
-                    "מותר להעלות רק קובצי JPG, PNG או WEBP.");
+                throw new ArgumentException( "מותר להעלות רק קובצי JPG, PNG או WEBP.");
 
             // בדיקת גודל: עד 5MB
             if (file.Length > 5 * 1024 * 1024)

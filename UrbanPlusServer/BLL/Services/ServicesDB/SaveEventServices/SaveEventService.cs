@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL.Exceptions;
 using DAL.Entities;
 using DAL.Repositories.SaveEventRepositories;
 using DTO.SaveEventDTO;
@@ -25,12 +26,12 @@ namespace BLL.Services.ServicesDB.SaveEventServices
             return _mapper.Map<List<ShowSavedEventsDTO>>(savedEvents);
         }
 
-        public ShowSavedEventsDTO? GetSavedEventById(int id,int userId)
+        public ShowSavedEventsDTO GetSavedEventById(int id,int userId)
         {
             var savedEvent = _repository.GetById(id, userId);
 
             if (savedEvent == null)
-                return null;
+                throw new NotFoundException($"savedEvent with id {id} was not found"); ;
 
             return _mapper.Map<ShowSavedEventsDTO>(savedEvent);
         }

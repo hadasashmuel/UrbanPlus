@@ -8,7 +8,7 @@ namespace BLL.Services.ServicesDB.BadgeServices
     public interface IBadgeService
     {
         List<ShowBadgeDTO> GetAllBadges();
-        ShowBadgeDTO? GetBadgeById(int id);
+        ShowBadgeDTO GetBadgeById(int id);
         ShowBadgeDTO CreateBadge(CreateBadgeDTO dto);
         bool DeleteBadge(int id);
     }

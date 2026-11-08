@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using BLL.Exceptions;
 using DAL.Entities;
 using DAL.Repositories.MainEventRepositories;
 using DTO.MainEventDTO;
@@ -34,7 +35,7 @@ namespace BLL.Services.ServicesDB.MainEventServices
             var mainEvent = _repository.GetMainEventById(id);
 
             if (mainEvent == null)
-                return null;
+                throw new NotFoundException($"mainEvent with id {id} was not found"); ;
 
             return _mapper.Map<ShowMainEventDTO>(mainEvent);
         }

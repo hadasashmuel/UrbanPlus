@@ -1,6 +1,5 @@
 ﻿
 using BLL.Services.ServicesDB.MessageServices;
-using DAL.Entities;
 using DTO.MessageDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +24,7 @@ namespace UrbanPlusServer.Controllers
         public ActionResult<List<ShowMessageDTO>> GetAllMessages()
         {
             var messages = _messageService.GetAllMessages();
+
             return Ok(messages);
         }
 
@@ -34,22 +34,16 @@ namespace UrbanPlusServer.Controllers
         {
             var message = _messageService.GetMessageById(id);
 
-            if (message == null)
-                return NotFound();
-
             return Ok(message);
         }
 
         // POST: api/Message
         [HttpPost]
-        public ActionResult<ShowMessageDTO> CreateMessage( [FromBody] CreateMessageDTO dto)
+        public ActionResult<ShowMessageDTO> CreateMessage(  [FromBody] CreateMessageDTO dto)
         {
-            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            int userId = User.GetUserId();
 
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-                return Unauthorized();
-
-            var createdMessage =  _messageService.CreateMessage(dto, userId);
+            var createdMessage = _messageService.CreateMessage(dto, userId);
 
             return CreatedAtAction(
                 nameof(GetMessageById),
@@ -61,10 +55,7 @@ namespace UrbanPlusServer.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteMessage(int id)
         {
-            var deleted = _messageService.DeleteMessage( id, User.GetUserId());
-
-            if (!deleted)
-                return NotFound();
+            _messageService.DeleteMessage(id, User.GetUserId());
 
             return NoContent();
         }

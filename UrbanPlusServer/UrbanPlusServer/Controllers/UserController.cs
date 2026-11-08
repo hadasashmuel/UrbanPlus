@@ -1,4 +1,5 @@
-﻿using BLL.Services.ServicesDB.UserServices;
+﻿
+using BLL.Services.ServicesDB.UserServices;
 using DTO.UserDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,61 +23,29 @@ namespace UrbanPlusServer.Controllers
         [HttpPost("register")]
         public IActionResult CreateUser([FromForm] CreateUserDTO dto)
         {
-            try
-            {
-                var created = _userService.CreateUser(dto);
+            _userService.CreateUser(dto);
 
-                if (!created)
-                    return Conflict("A user with this email already exists.");
-
-                return Ok("User created successfully.");
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode( 500, "An unexpected error occurred while creating the user.");
-            }
+            return Ok("User created successfully.");
         }
 
         // POST: api/User/login
         [AllowAnonymous]
         [HttpPost("login")]
-        public ActionResult<AuthResponseUserDto> Login([FromBody] LoginUserDTO dto)
+        public ActionResult<AuthResponseUserDto> Login( [FromBody] LoginUserDTO dto)
         {
-            try
-            {
-                var result = _userService.Login(dto);
+            var result = _userService.Login(dto);
 
-                if (result is null)
-                    return Unauthorized("Wrong email or password.");
+            if (result == null)
+                return Unauthorized("Wrong email or password.");
 
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "An unexpected error occurred while logging in.");
-            }
+            return Ok(result);
         }
 
-        // GET: api/User/5
-        [HttpGet("{userId}")]
+        // GET: api/User/me
+        [HttpGet("me")]
         public ActionResult<ProfileUserDTO> GetMyProfile()
         {
             var user = _userService.GetUserById(User.GetUserId());
-
-            if (user == null)
-                return NotFound();
 
             return Ok(user);
         }
@@ -86,29 +55,16 @@ namespace UrbanPlusServer.Controllers
         [HttpGet("{userId}/short")]
         public ActionResult<ShortProfileUserDTO> GetShortUserById(int userId)
         {
-            try
-            {
-                var user = _userService.GetShortUserById(userId);
+            var user = _userService.GetShortUserById(userId);
 
-                if (user == null)
-                    return NotFound();
-
-                return Ok(user);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500,"An unexpected error occurred while retrieving the user.");
-            }
+            return Ok(user);
         }
 
-        // PUT: api/User/5
+        // PUT: api/User
         [HttpPut]
-        public ActionResult<ProfileUserDTO> UpdateUser( [FromForm] UpdateUserDTO dto)
+        public ActionResult<ProfileUserDTO> UpdateUser([FromForm] UpdateUserDTO dto)
         {
-            var updatedUser = _userService.UpdateUser(  User.GetUserId(), dto);
-
-            if (updatedUser == null)
-                return NotFound();
+            var updatedUser = _userService.UpdateUser(User.GetUserId(), dto);
 
             return Ok(updatedUser);
         }
@@ -116,12 +72,9 @@ namespace UrbanPlusServer.Controllers
         // DELETE: api/User/5
         [Authorize(Roles = "1")]
         [HttpDelete("{userId}")]
-        public IActionResult DeleteUser()
+        public IActionResult DeleteUser(int userId)
         {
-            var deleted = _userService.DeleteUser(User.GetUserId());
-
-            if (!deleted)
-                return NotFound();
+            _userService.DeleteUser(userId);
 
             return NoContent();
         }

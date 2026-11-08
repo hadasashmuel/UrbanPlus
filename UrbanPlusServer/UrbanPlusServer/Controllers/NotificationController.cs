@@ -1,71 +1,73 @@
 ﻿
 using BLL.Services.ServicesDB.NotificationServices;
 using DTO.NotificationDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UrbanPlusServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;
 
-        public NotificationController(
-            INotificationService notificationService)
+        public NotificationController(INotificationService notificationService)
         {
             _notificationService = notificationService;
         }
 
         // GET: api/Notification
+        [Authorize(Roles = "1")]
         [HttpGet]
-        public ActionResult<List<ShowNotificationDTO>>GetAllNotifications()
+        public ActionResult<List<ShowNotificationDTO>> GetAllNotifications()
         {
-            var notifications =_notificationService.GetAllNotifications();
+            var notifications = _notificationService.GetAllNotifications();
 
             return Ok(notifications);
         }
 
-        // GET: api/Notification/user/5
-        [HttpGet("user/{userId}")]
-        public ActionResult<List<ShowNotificationDTO>>GetNotificationsByUserId(int userId)
+        // GET: api/Notification/mine
+        [HttpGet("mine")]
+        public ActionResult<List<ShowNotificationDTO>> GetMyNotifications()
         {
-            var notifications =_notificationService.GetNotificationsByUserId(userId);
+            int userId = User.GetUserId();
+
+            var notifications =  _notificationService.GetNotificationsByUserId(userId);
 
             return Ok(notifications);
         }
 
-        // GET: api/Notification/user/5/unread
-        [HttpGet("user/{userId}/unread")]
-        public ActionResult<List<ShowNotificationDTO>>GetUnreadNotificationsByUserId(int userId)
+        // GET: api/Notification/mine/unread
+        [HttpGet("mine/unread")]
+        public ActionResult<List<ShowNotificationDTO>> GetMyUnreadNotifications()
         {
+            int userId = User.GetUserId();
+
             var notifications = _notificationService.GetUnreadNotificationsByUserId(userId);
 
             return Ok(notifications);
         }
 
-        // PUT: api/Notification/10/read/5
-        [HttpPut("{id}/read/{userId}")]
-        public IActionResult MarkNotificationAsRead(int id, int userId)
+        // PUT: api/Notification/10/read
+        [HttpPut("{id}/read")]
+        public IActionResult MarkNotificationAsRead(int id)
         {
-            var updated =
-                _notificationService.MarkNotificationAsRead(
-                    id, userId);
+            int userId = User.GetUserId();
 
-            if (!updated)
-                return NotFound();
+            _notificationService.MarkNotificationAsRead(id, userId);
 
             return NoContent();
         }
 
-        // DELETE: api/Notification/10/user/5
-        [HttpDelete("{id}/user/{userId}")]
-        public IActionResult DeleteNotification(int id, int userId)
+        // DELETE: api/Notification/10
+        [HttpDelete("{id}")]
+        public IActionResult DeleteNotification(int id)
         {
-            var deleted =_notificationService.DeleteNotification(id, userId);
+            int userId = User.GetUserId();
 
-            if (!deleted)
-                return NotFound();
+            _notificationService.DeleteNotification(id, userId);
 
             return NoContent();
         }

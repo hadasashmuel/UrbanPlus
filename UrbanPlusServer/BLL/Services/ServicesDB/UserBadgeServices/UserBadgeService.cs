@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL.Exceptions;
 using DAL.Entities;
 using DAL.Repositories.BadgeRepositories;
 using DAL.Repositories.UserBadgeRepositories;
@@ -33,12 +34,12 @@ namespace BLL.Services.ServicesDB.UserBadgeServices
             return _mapper.Map<List<ShowUserBadgeDTO>>(userBadges);
         }
 
-        public ShowUserBadgeDTO? GetUserBadgeById(int id)
+        public ShowUserBadgeDTO GetUserBadgeById(int id)
         {
             var userBadge = _userBadgeRepository.GetById(id);
 
             if (userBadge == null)
-                return null;
+                throw new NotFoundException($"userBadge with id {id} was not found"); ;
 
             return _mapper.Map<ShowUserBadgeDTO>(userBadge);
         }

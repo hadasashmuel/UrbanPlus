@@ -1,4 +1,5 @@
-﻿using BLL.Services.ServicesDB.ReportServices;
+﻿
+using BLL.Services.ServicesDB.ReportServices;
 using DTO.ReportDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,86 +23,42 @@ namespace UrbanPlusServer.Controllers
         [HttpGet]
         public ActionResult<List<ShowReportDTO>> GetAllReports()
         {
-            try
-            {
-                var reports = _reportService.GetAllReports();
+            var reports = _reportService.GetAllReports();
 
-                return Ok(reports);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "An unexpected error occurred while retrieving reports.");
-            }
+            return Ok(reports);
         }
 
         // GET: api/Report/5
         [HttpGet("{id}")]
         public ActionResult<ShowReportDTO> GetReportById(int id)
         {
-            try
-            {
-                var report = _reportService.GetReportById(id);
+            var report = _reportService.GetReportById(id);
 
-                if (report == null)
-                    return NotFound();
-
-                return Ok(report);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "An unexpected error occurred while retrieving the report.");
-            }
+            return Ok(report);
         }
 
-        // POST: api/Report?userId=5
+        // POST: api/Report
         [HttpPost]
-        public ActionResult<ShowReportDTO> CreateReport([FromForm] CreateReportDTO dto)
+        public ActionResult<ShowReportDTO> CreateReport( [FromForm] CreateReportDTO dto)
         {
-            try
-            {
-                int userId = User.GetUserId();
-                var createdReport = _reportService.CreateReport(dto, userId);
+            int userId = User.GetUserId();
 
-                return CreatedAtAction(
-                    nameof(GetReportById),
-                    new { id = createdReport.ReportId },
-                    createdReport);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "An unexpected error occurred while creating the report.");
-            }
+            var createdReport = _reportService.CreateReport(dto, userId);
+
+            return CreatedAtAction(
+                nameof(GetReportById),
+                new { id = createdReport.ReportId },
+                createdReport);
         }
-
 
         // DELETE: api/Report/5
-        [HttpDelete("{id}")]
         [Authorize(Roles = "1")]
+        [HttpDelete("{id}")]
         public IActionResult DeleteReport(int id)
         {
-            try
-            {
-                var deleted = _reportService.DeleteReport(id);
+            _reportService.DeleteReport(id);
 
-                if (!deleted)
-                    return NotFound();
-
-                return NoContent();
-            }
-            catch (Exception)
-            {
-                return StatusCode(
-                    500,
-                    "An unexpected error occurred while deleting the report.");
-            }
+            return NoContent();
         }
     }
 }

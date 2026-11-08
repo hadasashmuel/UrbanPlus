@@ -40,6 +40,7 @@ using Microsoft.IdentityModel.Tokens;
 // System
 using System.IO;
 using System.Text;
+using UrbanPlusServer.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,7 +48,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Controllers
 // ====================
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<GlobalExceptionFilter>();
+});
 
 // ====================
 // Swagger
