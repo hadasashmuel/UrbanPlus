@@ -16,10 +16,18 @@ namespace DAL.Repositories.UserRepositories
 
         public Users Add(Users user)
         {
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            try
+            {
+                _context.Users.Add(user);
+                _context.SaveChanges();
 
-            return user;
+                return user;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.InnerException?.Message);
+                throw;
+            }
         }
 
         public Users? GetById(int userId)

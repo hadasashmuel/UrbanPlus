@@ -25,7 +25,7 @@ namespace DAL.Entities
 
         [Range(1, 100)]
         public double ScoreReliability { get; set; }
-        public string ProfilePicture { get; set; }
+        public string? ProfilePicture { get; set; }
 
         // 0 = User, 1 = Admin
         public int RoleCode { get; set; }

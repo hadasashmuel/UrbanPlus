@@ -1,12 +1,29 @@
-import { useState, type FormEvent } from "react";
+
+import { useEffect, useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { updateUser } from "../store/users/usersThunks";
 import "./UpdateUser.css";
 
 function UpdateUser() {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const user = useAppSelector((state) => state.users.user);
+  const loading = useAppSelector((state) => state.users.loading);
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleUpdate = (event: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName);
+      setLastName(user.lastName);
+    }
+  }, [user]);
+
+  const handleUpdate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!firstName.trim() || !lastName.trim()) {
@@ -14,8 +31,22 @@ function UpdateUser() {
       return;
     }
 
-    // כאן נחבר בהמשך את עדכון הפרטים לשרת.
-    setMessage("הפרטים הוזנו בהצלחה!");
+    try {
+      await dispatch(
+        updateUser({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+        })
+      ).unwrap();
+
+      navigate("/profile");
+    } catch (error) {
+      setMessage(
+        typeof error === "string"
+          ? error
+          : "עדכון הפרטים נכשל, נסי שוב"
+      );
+    }
   };
 
   return (
@@ -24,6 +55,7 @@ function UpdateUser() {
         <div className="update-user-icon">👤</div>
 
         <h1>עדכון פרטי משתמש</h1>
+
         <p className="update-user-subtitle">
           כאן אפשר לעדכן את הפרטים האישיים שלך
         </p>
@@ -53,38 +85,30 @@ function UpdateUser() {
             />
           </div>
 
-          <button
-            type="button"
-            className="update-user-forgot"
-            onClick={() => {
-              window.location.href = "/forgot-password";
-            }}
-          >
-            שכחת סיסמה?
-          </button>
-
           {message && (
             <p
-              className={`update-user-message ${
-                message.includes("בהצלחה") ? "success" : "error"
-              }`}
-              role="status"
+              className="update-user-message error"
+              role="alert"
             >
               {message}
             </p>
           )}
 
-          <button type="submit" className="update-user-button">
-            עדכון פרטים
+          <button
+            type="submit"
+            className="update-user-button"
+            disabled={loading}
+          >
+            {loading ? "מעדכן..." : "עדכון פרטים"}
           </button>
         </form>
 
         <button
           type="button"
           className="update-user-back"
-          onClick={() => window.history.back()}
+          onClick={() => navigate("/profile")}
         >
-          חזרה
+          חזרה לפרופיל
         </button>
       </section>
     </main>
