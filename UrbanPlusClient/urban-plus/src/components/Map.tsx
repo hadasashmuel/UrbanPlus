@@ -130,7 +130,7 @@ function Map() {
   }, []);
 
   return (
-    <div style={{ width: "100%", height: "100vh" }}>
+    <div style={{width: "100%",height: "100vh",position: "relative",margin: 0,padding: 0,}}>
       {locationError && (
         <div
           style={{
