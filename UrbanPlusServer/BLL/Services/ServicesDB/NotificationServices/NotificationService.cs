@@ -9,9 +9,7 @@ namespace BLL.Services.ServicesDB.NotificationServices
         private readonly INotificationRepository _repository;
         private readonly IMapper _mapper;
 
-        public NotificationService(
-            INotificationRepository repository,
-            IMapper mapper)
+        public NotificationService( INotificationRepository repository, IMapper mapper)
         {
             _repository = repository;
             _mapper = mapper;

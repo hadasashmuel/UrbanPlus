@@ -7,7 +7,7 @@ namespace BLL.Services.ServicesDB.SaveEventServices
     {
         List<ShowSavedEventsDTO> GetSavedEventsByUserId(int userId);
 
-        ShowSavedEventsDTO? GetSavedEventById(int id, int userId);
+        ShowSavedEventsDTO GetSavedEventById(int id, int userId);
 
         ShowSavedEventsDTO CreateSavedEvent(CreateSaveEventDTO dto, int userId);
 

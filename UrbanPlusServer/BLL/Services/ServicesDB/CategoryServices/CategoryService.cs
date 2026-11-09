@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BLL.Exceptions;
 using DAL.Entities;
 using DAL.Repositories.CategoryRepositories;
 using DTO.CategoryDTO;
@@ -23,15 +24,15 @@ namespace BLL.Services.ServicesDB.CategoryServices
             return _mapper.Map<List<ShowCategoryDTO>>(categories);
         }
 
-        public ShowCategoryDTO? GetCategoryById(int id)
+        public ShowCategoryDTO GetCategoryById(int id)
         {
             if (id <= 0)
-                return null;
+                throw new NotFoundException("Invalid badge ID.");
 
             var category = _repository.GetCategoryById(id);
 
             if (category == null)
-                return null;
+                throw new NotFoundException($"category with id {id} was not found"); ;
 
             return _mapper.Map<ShowCategoryDTO>(category);
         }

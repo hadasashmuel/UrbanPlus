@@ -61,6 +61,6 @@ namespace DAL.Entities
                         "[DistanceFromEvent] >= 0");
                 });
         }
-
     }
+
 }

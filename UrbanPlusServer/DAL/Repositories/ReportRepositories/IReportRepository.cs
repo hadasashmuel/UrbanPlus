@@ -11,5 +11,7 @@ namespace DAL.Repositories.ReportRepositories
         Reports? GetReportById(int id);
         Reports AddReport(Reports report);
         bool DeleteReport(int id);
+        Reports? GetOwned(int id, int userId);
+        List<Reports> GetByUser(int userId);
     }
 }

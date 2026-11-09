@@ -50,5 +50,11 @@ namespace DAL.Repositories.VoteRepositories
                 v.UserId == userId &&
                 v.MainEventId == mainEventId);
         }
+
+        public Votes? GetOwned(int id, int userId) =>
+            _context.Votes.FirstOrDefault(v => v.VoteId == id && v.UserId == userId);
+
+        public List<Votes> GetByUser(int userId) =>
+            _context.Votes.Where(v => v.UserId == userId).ToList();
     }
 }

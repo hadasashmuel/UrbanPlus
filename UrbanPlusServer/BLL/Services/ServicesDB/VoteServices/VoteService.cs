@@ -1,8 +1,9 @@
 ﻿
 using AutoMapper;
+using BLL.Exceptions;
+using DAL.Entities;
 using DAL.Repositories.VoteRepositories;
 using DTO.VoteDTO;
-using DAL.Entities;
 namespace BLL.Services.ServicesDB.VoteServices
 {
     public class VoteService : IVoteService
@@ -23,20 +24,20 @@ namespace BLL.Services.ServicesDB.VoteServices
             return _mapper.Map<List<ShowVoteDTO>>(votes);
         }
 
-        public ShowVoteDTO? GetVoteById(int id)
+        public ShowVoteDTO GetVoteById(int id)
         {
             var vote = _voteRepository.GetById(id);
 
             if (vote == null)
-                return null;
+                throw new NotFoundException($"Vote with id {id} was not found");
 
             return _mapper.Map<ShowVoteDTO>(vote);
         }
 
-   
+
         public ShowVoteDTO CreateVotes(CreateVoteDTO dto, int userId)
         {
-            var alreadyVoted = _voteRepository.ExistsForUserAndMainEvent( userId,dto.MainEventId);
+            var alreadyVoted =_voteRepository.ExistsForUserAndMainEvent( userId, dto.MainEventId);
 
             if (alreadyVoted)
             {
@@ -44,15 +45,24 @@ namespace BLL.Services.ServicesDB.VoteServices
             }
 
             var vote = _mapper.Map<Votes>(dto);
+
             vote.UserId = userId;
-            vote.CreatedAt = DateTime.Now;
+            vote.CreatedAt = DateTime.UtcNow;
+
             var createdVote = _voteRepository.Add(vote);
 
             return _mapper.Map<ShowVoteDTO>(createdVote);
         }
-        public bool DeleteVote(int id)
+
+        public bool DeleteVote(int id, int userId)
         {
-            return _voteRepository.Delete(id);
+            var vote = _voteRepository.GetOwned(id, userId);
+
+            if (vote is null)
+                return false;
+
+            _voteRepository.Delete(vote.VoteId);
+            return true;
         }
     }
 }

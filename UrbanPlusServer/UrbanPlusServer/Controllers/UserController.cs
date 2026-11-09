@@ -1,12 +1,14 @@
 ﻿
 using BLL.Services.ServicesDB.UserServices;
 using DTO.UserDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UrbanPlusServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -16,80 +18,63 @@ namespace UrbanPlusServer.Controllers
             _userService = userService;
         }
 
-        // POST: api/User
-        [HttpPost]
-        public ActionResult<ProfileUserDTO> CreateUser([FromBody] CreateUserDTO dto)
+        // POST: api/User/register
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public IActionResult CreateUser([FromForm] CreateUserDTO dto)
         {
-            try
-            {
-                var createdUser = _userService.CreateUser(dto);
+            _userService.CreateUser(dto);
 
-                return CreatedAtAction(
-                    nameof(GetUserById),
-                    new { userId = createdUser.UserId },
-                    createdUser);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            return Ok("User created successfully.");
         }
 
-        // GET: api/User/5
-        [HttpGet("{userId}")]
-        public ActionResult<ProfileUserDTO> GetUserById(int userId)
+        // POST: api/User/login
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public ActionResult<AuthResponseUserDto> Login( [FromBody] LoginUserDTO dto)
         {
-            var user = _userService.GetUserById(userId);
+            var result = _userService.Login(dto);
 
-            if (user == null)
-                return NotFound();
+            if (result == null)
+                return Unauthorized("Wrong email or password.");
+
+            return Ok(result);
+        }
+
+        // GET: api/User/me
+        [HttpGet("me")]
+        public ActionResult<ProfileUserDTO> GetMyProfile()
+        {
+            var user = _userService.GetUserById(User.GetUserId());
 
             return Ok(user);
         }
 
         // GET: api/User/5/short
+        [AllowAnonymous]
         [HttpGet("{userId}/short")]
-        public ActionResult<ShortProfileUserDTO> GetShortUserById( int userId)
+        public ActionResult<ShortProfileUserDTO> GetShortUserById(int userId)
         {
             var user = _userService.GetShortUserById(userId);
-
-            if (user == null)
-                return NotFound();
 
             return Ok(user);
         }
 
-        // PUT: api/User/5
-        [HttpPut("{userId}")]
-        public ActionResult<ProfileUserDTO> UpdateUser(int userId,[FromBody] UpdateUserDTO dto)
+        // PUT: api/User
+        [HttpPut]
+        public ActionResult<ProfileUserDTO> UpdateUser([FromForm] UpdateUserDTO dto)
         {
-            try
-            {
-                var updatedUser = _userService.UpdateUser(userId, dto);
+            var updatedUser = _userService.UpdateUser(User.GetUserId(), dto);
 
-                if (updatedUser == null)
-                    return NotFound();
-
-                return Ok(updatedUser);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return Ok(updatedUser);
         }
 
         // DELETE: api/User/5
+        [Authorize(Roles = "1")]
         [HttpDelete("{userId}")]
         public IActionResult DeleteUser(int userId)
         {
-            var deleted = _userService.DeleteUser(userId);
-
-            if (!deleted)
-                return NotFound();
+            _userService.DeleteUser(userId);
 
             return NoContent();
         }

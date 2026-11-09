@@ -45,5 +45,11 @@ namespace DAL.Repositories.MessageRepositories
 
             return true;
         }
+
+        public Message? GetOwned(int id, int userId) =>
+    _context.Messages.FirstOrDefault(m => m.MessageId == id && m.UserId == userId);
+
+        public List<Message> GetByUser(int userId) =>
+            _context.Messages.Where(r => r.UserId == userId).ToList();
     }
 }

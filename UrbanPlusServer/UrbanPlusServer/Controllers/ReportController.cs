@@ -1,12 +1,14 @@
 ﻿
 using BLL.Services.ServicesDB.ReportServices;
 using DTO.ReportDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UrbanPlusServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;
@@ -17,6 +19,7 @@ namespace UrbanPlusServer.Controllers
         }
 
         // GET: api/Report
+        [Authorize(Roles = "1")]
         [HttpGet]
         public ActionResult<List<ShowReportDTO>> GetAllReports()
         {
@@ -31,17 +34,16 @@ namespace UrbanPlusServer.Controllers
         {
             var report = _reportService.GetReportById(id);
 
-            if (report == null)
-                return NotFound();
-
             return Ok(report);
         }
 
-        // POST: api/Report?userId=5
+        // POST: api/Report
         [HttpPost]
-        public ActionResult<ShowReportDTO> CreateReport( [FromBody] CreateReportDTO dto,[FromQuery] int userId)
+        public ActionResult<ShowReportDTO> CreateReport( [FromForm] CreateReportDTO dto)
         {
-            var createdReport =_reportService.CreateReport(dto, userId);
+            int userId = User.GetUserId();
+
+            var createdReport = _reportService.CreateReport(dto, userId);
 
             return CreatedAtAction(
                 nameof(GetReportById),
@@ -50,13 +52,11 @@ namespace UrbanPlusServer.Controllers
         }
 
         // DELETE: api/Report/5
+        [Authorize(Roles = "1")]
         [HttpDelete("{id}")]
         public IActionResult DeleteReport(int id)
         {
-            var deleted = _reportService.DeleteReport(id);
-
-            if (!deleted)
-                return NotFound();
+            _reportService.DeleteReport(id);
 
             return NoContent();
         }

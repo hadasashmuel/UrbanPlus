@@ -1,11 +1,14 @@
-﻿using BLL.Services.ServicesDB.BadgeServices;
+﻿
+using BLL.Services.ServicesDB.BadgeServices;
 using DTO.BadgeDTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace UrbanPlusServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "1")]
     public class BadgeController : ControllerBase
     {
         private readonly IBadgeService _badgeService;
@@ -30,9 +33,6 @@ namespace UrbanPlusServer.Controllers
         {
             var badge = _badgeService.GetBadgeById(id);
 
-            if (badge == null)
-                return NotFound();
-
             return Ok(badge);
         }
 
@@ -40,29 +40,19 @@ namespace UrbanPlusServer.Controllers
         [HttpPost]
         public ActionResult<ShowBadgeDTO> CreateBadge( [FromBody] CreateBadgeDTO dto)
         {
-            try
-            {
-                var createdBadge = _badgeService.CreateBadge(dto);
+            var createdBadge = _badgeService.CreateBadge(dto);
 
-                return CreatedAtAction(
-                    nameof(GetBadgeById),
-                    new { id = createdBadge.BadgeId },
-                    createdBadge);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return CreatedAtAction(
+                nameof(GetBadgeById),
+                new { id = createdBadge.BadgeId },
+                createdBadge);
         }
 
         // DELETE: api/Badge/5
         [HttpDelete("{id}")]
         public IActionResult DeleteBadge(int id)
         {
-            var deleted = _badgeService.DeleteBadge(id);
-
-            if (!deleted)
-                return NotFound();
+            _badgeService.DeleteBadge(id);
 
             return NoContent();
         }

@@ -1,14 +1,12 @@
-﻿using DAL;
-using System;
-using System.Collections.Generic;
+﻿
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace DTO.SaveEventDTO
 {
     public class CreateSaveEventDTO
     {
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "MainEventId must be greater than 0")]
         public int MainEventId { get; set; }
     }
 }

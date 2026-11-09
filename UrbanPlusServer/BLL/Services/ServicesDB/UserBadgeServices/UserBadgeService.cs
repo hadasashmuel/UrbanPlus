@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using BLL.Exceptions;
 using DAL.Entities;
 using DAL.Repositories.BadgeRepositories;
 using DAL.Repositories.UserBadgeRepositories;
 using DAL.Repositories.UserRepositories;
+using DTO.BadgeDTO;
 using DTO.UserBadgeDTO;
 
 namespace BLL.Services.ServicesDB.UserBadgeServices
@@ -14,11 +16,7 @@ namespace BLL.Services.ServicesDB.UserBadgeServices
         private readonly IBadgeRepository _badgeRepository;
         private readonly IMapper _mapper;
 
-        public UserBadgeService(
-            IUserBadgeRepository userBadgeRepository,
-            IUserRepository userRepository,
-            IBadgeRepository badgeRepository,
-            IMapper mapper)
+        public UserBadgeService(  IUserBadgeRepository userBadgeRepository, IUserRepository userRepository,IBadgeRepository badgeRepository,IMapper mapper)
         {
             _userBadgeRepository = userBadgeRepository;
             _userRepository = userRepository;
@@ -36,14 +34,18 @@ namespace BLL.Services.ServicesDB.UserBadgeServices
             return _mapper.Map<List<ShowUserBadgeDTO>>(userBadges);
         }
 
-        public ShowUserBadgeDTO? GetUserBadgeById(int id)
+        public ShowUserBadgeDTO GetUserBadgeById(int id)
         {
             var userBadge = _userBadgeRepository.GetById(id);
 
             if (userBadge == null)
-                return null;
+                throw new NotFoundException($"userBadge with id {id} was not found"); ;
 
             return _mapper.Map<ShowUserBadgeDTO>(userBadge);
+        }
+        public List<ShowBadgeDTO> GetMine(int userId)
+        {
+            return _mapper.Map<List<ShowBadgeDTO>>( _userBadgeRepository.GetByUserId(userId));
         }
 
         public ShowUserBadgeDTO AwardBadgeToUser(int userId, int badgeId)

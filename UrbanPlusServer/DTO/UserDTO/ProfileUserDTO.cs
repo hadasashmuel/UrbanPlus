@@ -2,7 +2,7 @@
 using DTO.SaveEventDTO;
 using DTO.UserBadgeDTO;
 using DTO.VoteDTO;
-//using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace DTO.UserDTO
 {
@@ -13,8 +13,7 @@ namespace DTO.UserDTO
         public string LastName { get; set; }
         public string Email { get; set; }
         public AuthProvider AuthProvider { get; set; }
-     //   public IFormFile? ProfilePicture { get; set; }
-
+        public string? ProfilePicture { get; set; }
         public double ScoreReliability { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<ShowUserBadgeDTO> UserBadges { get; set; }

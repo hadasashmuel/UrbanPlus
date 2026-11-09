@@ -1,22 +1,39 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
+using BLL.Exceptions;
+using BLL.Services.ServiceSupport.ImageServices;
+using BLL.Services.ServiceSupport.TokenServices;
 using DAL.Entities;
 using DAL.Repositories.UserRepositories;
 using DTO.UserDTO;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 namespace BLL.Services.ServicesDB.UserServices
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IImageService _imageService;
+        private readonly ITokenService _tokens;
+        private readonly IPasswordHasher<Users> _hasher;
         private readonly IMapper _mapper;
 
-        public UserService( IUserRepository userRepository,IMapper mapper)
+        public UserService(
+            IUserRepository userRepository,
+            IImageService imageService,
+            IMapper mapper,
+            ITokenService tokens,
+            IPasswordHasher<Users> hasher)
         {
             _userRepository = userRepository;
+            _imageService = imageService;
+            _tokens = tokens;
             _mapper = mapper;
+            _hasher = hasher;
         }
 
-        public ProfileUserDTO CreateUser(CreateUserDTO dto)
+        public bool CreateUser(CreateUserDTO dto)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
@@ -24,86 +41,159 @@ namespace BLL.Services.ServicesDB.UserServices
             if (string.IsNullOrWhiteSpace(dto.Email))
                 throw new ArgumentException("Email is required.");
 
-            if (_userRepository.IsEmailExists(dto.Email))
-                throw new InvalidOperationException( "A user with this email already exists.");
+            var email = dto.Email.Trim().ToLowerInvariant();
+
+            if (_userRepository.IsEmailExists(email))
+                throw new ConflictException("A user with this email already exists.");
 
             var user = _mapper.Map<Users>(dto);
 
-            user.Email = dto.Email.Trim();
+            user.Email = email;
             user.CreatedAt = DateTime.UtcNow;
             user.RoleCode = 0;
-
-            // יש לבחור ערך התחלתי בהתאם לכללי הפרויקט.
             user.ScoreReliability = 50;
+
+            // הצפנת הסיסמה באמצעות Hash
+            user.passwordHash = _hasher.HashPassword(user, dto.password);
+
+            // שמירת תמונת פרופיל, אם נשלחה
+            if (dto.ProfilePicture != null)
+            {
+                user.ProfilePicture = _imageService.Save(dto.ProfilePicture);
+            }
 
             var createdUser = _userRepository.Add(user);
 
-            return _mapper.Map<ProfileUserDTO>(createdUser);
+            return createdUser != null;
         }
 
-        public ProfileUserDTO? GetUserById(int userId)
+        public AuthResponseUserDto? Login(LoginUserDTO dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            if (string.IsNullOrWhiteSpace(dto.Email) ||
+                string.IsNullOrWhiteSpace(dto.password))
+                return null;
+
+            var email = dto.Email.Trim().ToLowerInvariant();
+
+            var user = _userRepository.GetByEmailAndProvider(
+                email, dto.AuthProvider);
+
+            // לא חושפים אם המשתמש קיים במערכת
+            if (user == null)
+                return null;
+
+            var result = _hasher.VerifyHashedPassword(
+                user, user.passwordHash, dto.password);
+
+            if (result == PasswordVerificationResult.Failed)
+                return null;
+
+            return _tokens.CreateToken(user);
+        }
+
+        public ProfileUserDTO GetUserById(int userId)
         {
             if (userId <= 0)
-                return null;
-
-            var user = _userRepository.GetById(userId);
-
-            return user == null
-                ? null
-                : _mapper.Map<ProfileUserDTO>(user);
-        }
-
-        public ShortProfileUserDTO? GetShortUserById(int userId)
-        {
-            if (userId <= 0)
-                return null;
-
-            var user = _userRepository.GetById(userId);
-
-            return user == null
-                ? null
-                : _mapper.Map<ShortProfileUserDTO>(user);
-        }
-
-
-        public ProfileUserDTO? UpdateUser(int userId, UpdateUserDTO dto)
-        {
-            if (userId <= 0 || dto == null)
-                return null;
+                throw new ArgumentException(
+                    "User ID must be greater than zero.");
 
             var user = _userRepository.GetById(userId);
 
             if (user == null)
-                return null;
+                throw new NotFoundException( $"User with id {userId} was not found.");
+
+            return _mapper.Map<ProfileUserDTO>(user);
+        }
+
+        public ShortProfileUserDTO GetShortUserById(int userId)
+        {
+            if (userId <= 0)
+                throw new ArgumentException( "User ID must be greater than zero.");
+
+            var user = _userRepository.GetById(userId);
+
+            if (user == null)
+                throw new NotFoundException($"User with id {userId} was not found.");
+
+            return _mapper.Map<ShortProfileUserDTO>(user);
+        }
+
+        public ProfileUserDTO UpdateUser(int userId, UpdateUserDTO dto)
+        {
+            if (userId <= 0)
+                throw new ArgumentException( "User ID must be greater than zero.");
+
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            var user = _userRepository.GetById(userId);
+
+            if (user == null)
+                throw new NotFoundException( $"User with id {userId} was not found.");
 
             if (string.IsNullOrWhiteSpace(dto.FirstName))
                 throw new ArgumentException("First name is required.");
 
             if (dto.FirstName.Trim().Length > 200)
-                throw new ArgumentException(
-                    "First name cannot exceed 200 characters.");
+                throw new ArgumentException( "First name cannot exceed 200 characters.");
 
             if (string.IsNullOrWhiteSpace(dto.LastName))
                 throw new ArgumentException("Last name is required.");
 
             if (dto.LastName.Trim().Length > 200)
-                throw new ArgumentException(
-                    "Last name cannot exceed 200 characters.");
+                throw new ArgumentException("Last name cannot exceed 200 characters.");
 
             user.FirstName = dto.FirstName.Trim();
             user.LastName = dto.LastName.Trim();
 
-            var updatedUser = _userRepository.Update(user);
+            // עדכון תמונת פרופיל, אם נשלחה תמונה חדשה
+            if (dto.ProfilePicture != null)
+            {
+                var oldImage = user.ProfilePicture;
+                var newImage = _imageService.Save(dto.ProfilePicture);
 
-            return _mapper.Map<ProfileUserDTO>(updatedUser);
+                user.ProfilePicture = newImage;
+
+                try
+                {
+                    var updatedUser = _userRepository.Update(user);
+
+                    // מחיקת התמונה הישנה רק אחרי עדכון מוצלח
+                    if (!string.IsNullOrWhiteSpace(oldImage))_imageService.Delete(oldImage);
+
+                    return _mapper.Map<ProfileUserDTO>(updatedUser);
+                }
+                catch
+                {
+                    _imageService.Delete(newImage);
+                    throw;
+                }
+            }
+
+            var result = _userRepository.Update(user);
+
+            return _mapper.Map<ProfileUserDTO>(result);
         }
 
         public bool DeleteUser(int userId)
         {
             if (userId <= 0)
-                return false;
+                throw new ArgumentException( "User ID must be greater than zero.");
 
-            return _userRepository.Delete(userId);
+            var user = _userRepository.GetById(userId);
+
+            if (user == null)
+                throw new NotFoundException( $"User with id {userId} was not found.");
+
+            var deleted = _userRepository.Delete(userId);
+
+            if (deleted && !string.IsNullOrWhiteSpace(user.ProfilePicture))
+                _imageService.Delete(user.ProfilePicture);
+
+            return deleted;
         }
     }
 }
