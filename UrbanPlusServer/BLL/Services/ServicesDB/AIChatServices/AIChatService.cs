@@ -1,5 +1,6 @@
 ﻿
 using BLL.Exceptions;
+using BLL.Services.ServicesDB.AIChatServices.Tools;
 using DAL.Entities;
 using DAL.Repositories.AIChatRepositories;
 using DTO.AIChatMessagesDTO;
@@ -13,13 +14,34 @@ namespace BLL.Services.ServicesDB.AIChatServices
     {
         private readonly IAIChatRepository _repository;
         private readonly IChatClient _chatClient;
+        private readonly AIChatTools _aiChatTools;
 
         public AIChatService(
             IAIChatRepository repository,
-            IChatClient chatClient)
+            IChatClient chatClient,
+            AIChatTools aiChatTools)
         {
             _repository = repository;
             _chatClient = chatClient;
+            _aiChatTools = aiChatTools;
+        }
+
+        private ChatOptions CreateChatOptions()
+        {
+            return new ChatOptions
+            {
+                Tools =
+                [
+                    AIFunctionFactory.Create(
+                        (Func<List<object>>)_aiChatTools.GetAllMainEvents),
+
+                    AIFunctionFactory.Create(
+                        (Func<int, object?>)_aiChatTools.GetMainEventById),
+
+                    AIFunctionFactory.Create(
+                        (Func<List<object>>)_aiChatTools.GetAllCategories)
+                ]
+            };
         }
 
         public async Task<AIChatMessageResponseDTO> SendMessage(
@@ -28,7 +50,9 @@ namespace BLL.Services.ServicesDB.AIChatServices
         {
             var (session, chatMessages) = PrepareConversation(userId, dto);
 
-            var response = await _chatClient.GetResponseAsync(chatMessages);
+            var response = await _chatClient.GetResponseAsync(
+                chatMessages,
+                CreateChatOptions());
 
             var aiContent = response.Text;
 
@@ -67,7 +91,8 @@ namespace BLL.Services.ServicesDB.AIChatServices
 
             await foreach (var update in _chatClient.GetStreamingResponseAsync(
                 chatMessages,
-                cancellationToken: cancellationToken))
+                CreateChatOptions(),
+                cancellationToken))
             {
                 if (!string.IsNullOrEmpty(update.Text))
                 {

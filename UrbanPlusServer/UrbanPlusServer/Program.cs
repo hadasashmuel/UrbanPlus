@@ -1,6 +1,8 @@
 
 // BLL
 using BLL;
+using BLL.Services.ServicesDB.AIChatServices;
+using BLL.Services.ServicesDB.AIChatServices.Tools;
 using BLL.Services.ServicesDB.BadgeServices;
 using BLL.Services.ServicesDB.CategoryServices;
 using BLL.Services.ServicesDB.MainEventServices;
@@ -14,11 +16,11 @@ using BLL.Services.ServicesDB.UserServices;
 using BLL.Services.ServicesDB.VoteServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServiceSupport.TokenServices;
-using BLL.Services.ServicesDB.AIChatServices;
+
 
 // DAL
-using DAL;
 using DAL.Entities;
+using DAL.Repositories.AIChatRepositories;
 using DAL.Repositories.BadgeRepositories;
 using DAL.Repositories.CategoryRepositories;
 using DAL.Repositories.MainEventRepositories;
@@ -30,7 +32,6 @@ using DAL.Repositories.SaveEventRepositories;
 using DAL.Repositories.UserBadgeRepositories;
 using DAL.Repositories.UserRepositories;
 using DAL.Repositories.VoteRepositories;
-using DAL.Repositories.AIChatRepositories;
 
 // Microsoft
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -40,12 +41,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using OpenAI;
-
 using System.ClientModel;
-
-// System
-using System.IO;
 using System.Text;
 using UrbanPlusServer.Filters;
 
@@ -61,11 +59,29 @@ builder.Services.AddControllers(options =>
 });
 
 // ====================
-// Swagger
+// Swagger + JWT
 // ====================
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "הכניסי כאן את ה-JWT Token"
+    });
+
+    options.AddSecurityRequirement(document =>
+        new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+        });
+});
 
 // ====================
 // Database
@@ -80,7 +96,6 @@ if (string.IsNullOrWhiteSpace(connStr))
         "Set it with User Secrets or an environment variable.");
 }
 
-// רישום מסד הנתונים - התיקון
 builder.Services.AddDbContext<UrbanPlusContext>(
     options => options.UseSqlServer(connStr));
 
@@ -91,10 +106,10 @@ builder.Services.AddDbContext<UrbanPlusContext>(
 var apiKey = builder.Configuration["Gemini:ApiKey"]
     ?? throw new InvalidOperationException("Gemini:ApiKey is missing");
 
-// הכתובת של Gemini שמדברת בפורמט של OpenAI
 var options = new OpenAIClientOptions
 {
-    Endpoint = new Uri("https://generativelanguage.googleapis.com/v1beta/openai/")
+    Endpoint = new Uri(
+        "https://generativelanguage.googleapis.com/v1beta/openai/")
 };
 
 IChatClient innerClient = new OpenAIClient(
@@ -140,6 +155,7 @@ builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAIChatService, AIChatService>();
 
+builder.Services.AddScoped<AIChatTools>();
 // ====================
 // Image Service
 // ====================
