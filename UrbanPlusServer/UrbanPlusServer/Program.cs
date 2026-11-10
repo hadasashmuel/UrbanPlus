@@ -1,3 +1,4 @@
+
 // BLL
 using BLL;
 using BLL.Services.ServicesDB.BadgeServices;
@@ -13,6 +14,7 @@ using BLL.Services.ServicesDB.UserServices;
 using BLL.Services.ServicesDB.VoteServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServiceSupport.TokenServices;
+using BLL.Services.ServicesDB.AIChatServices;
 
 // DAL
 using DAL;
@@ -28,14 +30,19 @@ using DAL.Repositories.SaveEventRepositories;
 using DAL.Repositories.UserBadgeRepositories;
 using DAL.Repositories.UserRepositories;
 using DAL.Repositories.VoteRepositories;
+using DAL.Repositories.AIChatRepositories;
 
 // Microsoft
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using OpenAI;
+
+using System.ClientModel;
 
 // System
 using System.IO;
@@ -73,8 +80,30 @@ if (string.IsNullOrWhiteSpace(connStr))
         "Set it with User Secrets or an environment variable.");
 }
 
+// רישום מסד הנתונים - התיקון
 builder.Services.AddDbContext<UrbanPlusContext>(
     options => options.UseSqlServer(connStr));
+
+// ====================
+// Gemini AI
+// ====================
+
+var apiKey = builder.Configuration["Gemini:ApiKey"]
+    ?? throw new InvalidOperationException("Gemini:ApiKey is missing");
+
+// הכתובת של Gemini שמדברת בפורמט של OpenAI
+var options = new OpenAIClientOptions
+{
+    Endpoint = new Uri("https://generativelanguage.googleapis.com/v1beta/openai/")
+};
+
+IChatClient innerClient = new OpenAIClient(
+    new ApiKeyCredential(apiKey), options)
+    .GetChatClient("gemini-3.8-flash")
+    .AsIChatClient();
+
+builder.Services.AddChatClient(innerClient)
+    .UseFunctionInvocation();
 
 // ====================
 // Repositories (DAL)
@@ -91,6 +120,7 @@ builder.Services.AddScoped<ISaveEventRepository, SaveEventRepository>();
 builder.Services.AddScoped<IUserBadgeRepository, UserBadgeRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVoteRepository, VoteRepository>();
+builder.Services.AddScoped<IAIChatRepository, AIChatRepository>();
 
 // ====================
 // Services (BLL)
@@ -108,6 +138,7 @@ builder.Services.AddScoped<IUserBadgeService, UserBadgeService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAIChatService, AIChatService>();
 
 // ====================
 // Image Service
@@ -199,14 +230,17 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
+// ====================
+// Build Application
+// ====================
 
 var app = builder.Build();
+
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(fullImagesFolder),
     RequestPath = "/images"
 });
-
 
 if (app.Environment.IsDevelopment())
 {

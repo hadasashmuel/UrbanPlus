@@ -8,7 +8,7 @@ namespace DTO.UserDTO
     {
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email address")]
-        public string Email { get; set; }
+        public string Email { get; set; } 
 
         [EnumDataType(typeof(AuthProvider), ErrorMessage = "Invalid authentication provider")]
         public AuthProvider AuthProvider { get; set; }
