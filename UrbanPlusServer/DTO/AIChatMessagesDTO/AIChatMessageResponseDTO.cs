@@ -1,8 +1,7 @@
-﻿using DAL.Entities;
+﻿
+using DAL.Entities;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace DTO.AIChatMessagesDTO
 {
@@ -10,6 +9,9 @@ namespace DTO.AIChatMessagesDTO
     {
         [Range(1, int.MaxValue)]
         public int AIChatMessageId { get; set; }
+
+        [Range(1, int.MaxValue)]
+        public int AIChatSessionId { get; set; }
 
         [Required]
         public SenderType SenderType { get; set; }

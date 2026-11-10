@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace DTO.AIChatMessagesDTO
 {
@@ -12,11 +10,10 @@ namespace DTO.AIChatMessagesDTO
         [RegularExpression(@"^(?!\s*$).+",ErrorMessage = "Message cannot contain only spaces")]
         public string Content { get; set; } = string.Empty;
 
-        [Range(1, int.MaxValue,ErrorMessage = "Chat session ID must be a positive number")]
+        [Range(1,int.MaxValue,ErrorMessage = "Chat session ID must be a positive number")]
         public int? AIChatSessionId { get; set; }
 
-        [Range(1, int.MaxValue,ErrorMessage = "Main event ID must be a positive number")]
+        [Range(1,int.MaxValue,ErrorMessage = "Main event ID must be a positive number")]
         public int? MainEventId { get; set; }
-
     }
 }

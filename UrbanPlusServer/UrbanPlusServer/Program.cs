@@ -114,7 +114,7 @@ var options = new OpenAIClientOptions
 
 IChatClient innerClient = new OpenAIClient(
     new ApiKeyCredential(apiKey), options)
-    .GetChatClient("gemini-3.8-flash")
+    .GetChatClient("gemini-3.1-flash-lite")
     .AsIChatClient();
 
 builder.Services.AddChatClient(innerClient)
@@ -175,6 +175,7 @@ Directory.CreateDirectory(fullImagesFolder);
 
 builder.Services.AddSingleton<IImageService>(
     _ => new ImageService(fullImagesFolder));
+
 
 // ====================
 // AutoMapper

@@ -5,6 +5,7 @@ using DAL.Entities;
 using DAL.Repositories.AIChatRepositories;
 using DTO.AIChatMessagesDTO;
 using Microsoft.Extensions.AI;
+using System.ClientModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -49,12 +50,31 @@ namespace BLL.Services.ServicesDB.AIChatServices
             SendAIMessageDTO dto)
         {
             var (session, chatMessages) = PrepareConversation(userId, dto);
+            string aiContent;
 
-            var response = await _chatClient.GetResponseAsync(
-                chatMessages,
-                CreateChatOptions());
+            try
+            {
+                var response = await _chatClient.GetResponseAsync(
+                    chatMessages,
+                    CreateChatOptions());
 
-            var aiContent = response.Text;
+                aiContent = response.Text;
+            }
+            catch (ClientResultException ex)
+            {
+                Console.WriteLine("GEMINI ERROR:");
+                Console.WriteLine($"Status: {ex.Status}");
+                Console.WriteLine(ex.Message);
+
+                return new AIChatMessageResponseDTO
+                {
+                    AIChatSessionId = session.AIChatSessionId,
+                    SenderType = SenderType.AI,
+                    Content = "שירות ה-AI עמוס כרגע. נסי שוב בעוד כמה דקות.",
+                    CreatedAt = DateTime.UtcNow
+                };
+            }//
+
 
             if (string.IsNullOrWhiteSpace(aiContent))
                 throw new InvalidOperationException(
@@ -73,6 +93,7 @@ namespace BLL.Services.ServicesDB.AIChatServices
             return new AIChatMessageResponseDTO
             {
                 AIChatMessageId = aiMessage.AIChatMessageId,
+                AIChatSessionId = session.AIChatSessionId,
                 SenderType = aiMessage.SenderType,
                 Content = aiMessage.Content,
                 CreatedAt = aiMessage.CreatedAt
@@ -133,7 +154,8 @@ namespace BLL.Services.ServicesDB.AIChatServices
                 throw new ArgumentNullException(nameof(dto));
 
             if (string.IsNullOrWhiteSpace(dto.Content))
-                throw new ArgumentException("Message content is required.");
+                throw new ArgumentException(
+                    "Message content is required.");
 
             AIChatSessions session;
 
@@ -141,10 +163,12 @@ namespace BLL.Services.ServicesDB.AIChatServices
             {
                 session = _repository.GetSessionById(
                     dto.AIChatSessionId.Value, userId)
-                    ?? throw new NotFoundException("Chat session not found.");
+                    ?? throw new NotFoundException(
+                        "Chat session not found.");
 
                 if (session.ClosedAt.HasValue)
-                    throw new ConflictException("Chat session is closed.");
+                    throw new ConflictException(
+                        "Chat session is closed.");
             }
             else
             {
