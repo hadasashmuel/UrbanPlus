@@ -19,6 +19,7 @@ using BLL.Services.ServicesDB.VoteServices;
 using BLL.Services.ServiceSupport.EventAggregationServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServiceSupport.TokenServices;
+using BLL.Services.ServiceSupport.EmailServices;
 
 
 // DAL
@@ -168,6 +169,7 @@ builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAIChatService, AIChatService>();
 builder.Services.AddScoped<IEventAggregationService, EventAggregationService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddScoped<AIChatTools>();
 // ====================
@@ -175,6 +177,7 @@ builder.Services.AddScoped<AIChatTools>();
 // ====================
 
 var imagesFolder = builder.Configuration["ImagesFolder"];
+var emailPassword = Environment.GetEnvironmentVariable("AppPassword");
 
 if (string.IsNullOrWhiteSpace(imagesFolder))
 {
@@ -205,6 +208,22 @@ builder.Services.AddAutoMapper(cfg =>
 
 builder.Services.AddScoped<IPasswordHasher<Users>,
     PasswordHasher<Users>>();
+
+var googleClientId = builder.Configuration["GoogleClientId"];
+var googleClientSecret = builder.Configuration["GoogleClientSecret"];
+
+if (string.IsNullOrWhiteSpace(googleClientId))
+{
+    throw new InvalidOperationException(
+        "GoogleClientId is missing. Set the environment variable GoogleClientId.");
+}
+
+if (string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    throw new InvalidOperationException(
+        "GoogleClientSecret is missing. Set the environment variable GoogleClientSecret.");
+}
+
 
 // ====================
 // JWT Authentication

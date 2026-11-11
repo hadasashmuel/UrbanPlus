@@ -173,3 +173,32 @@ export const updateUser = createAsyncThunk<
     }
   }
 );
+// התחברות באמצעות Google
+export const googleLoginUser = createAsyncThunk<
+  AuthResponseUser,
+  string,
+  { rejectValue: string }
+>(
+  "users/googleLogin",
+  async (idToken, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_URL}/google-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!response.ok) {
+        return rejectWithValue(
+          (await response.text()) || "Google login failed"
+        );
+      }
+
+      return await response.json();
+    } catch {
+      return rejectWithValue("Could not connect to server");
+    }
+  }
+);

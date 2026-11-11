@@ -41,6 +41,18 @@ namespace UrbanPlusServer.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
+        [HttpPost("google-login")]
+        public async Task<ActionResult<AuthResponseUserDto>> GoogleLogin([FromBody] GoogleLoginDTO dto)
+        {
+            var result = await _userService.GoogleLogin(dto);
+
+            if (result == null)
+                return Unauthorized("Google authentication failed.");
+
+            return Ok(result);
+        }
+
         // GET: api/User/me
         [HttpGet("me")]
         public ActionResult<ProfileUserDTO> GetMyProfile()

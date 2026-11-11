@@ -9,6 +9,8 @@ namespace BLL.Services.ServicesDB.UserServices
         ProfileUserDTO? GetUserById(int userId);
         ShortProfileUserDTO? GetShortUserById(int userId);
         ProfileUserDTO? UpdateUser(int userId, UpdateUserDTO dto);
+
+        Task<AuthResponseUserDto?> GoogleLogin(GoogleLoginDTO dto);
         bool DeleteUser(int userId);
     }
 }

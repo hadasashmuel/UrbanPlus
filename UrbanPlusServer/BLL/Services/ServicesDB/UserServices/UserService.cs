@@ -1,36 +1,39 @@
 ﻿
 using AutoMapper;
 using BLL.Exceptions;
+using BLL.Services.ServiceSupport.EmailServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServiceSupport.TokenServices;
 using DAL.Entities;
 using DAL.Repositories.UserRepositories;
 using DTO.UserDTO;
-using Microsoft.AspNetCore.Http;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.SqlServer.Server;
+using System.Security.Cryptography;
 
 namespace BLL.Services.ServicesDB.UserServices
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IEmailService _emailService;
         private readonly IImageService _imageService;
+        private readonly IConfiguration _configuration;
         private readonly ITokenService _tokens;
         private readonly IPasswordHasher<Users> _hasher;
         private readonly IMapper _mapper;
 
-        public UserService(
-            IUserRepository userRepository,
-            IImageService imageService,
-            IMapper mapper,
-            ITokenService tokens,
-            IPasswordHasher<Users> hasher)
+        public UserService(IUserRepository userRepository,IImageService imageService,IMapper mapper, ITokenService tokens,IPasswordHasher<Users> hasher, IEmailService emailService,IConfiguration configuration)
         {
             _userRepository = userRepository;
             _imageService = imageService;
             _tokens = tokens;
             _mapper = mapper;
             _hasher = hasher;
+            _emailService = emailService;
+            _configuration = configuration;
         }
 
         public bool CreateUser(CreateUserDTO dto)
@@ -44,7 +47,8 @@ namespace BLL.Services.ServicesDB.UserServices
             var email = dto.Email.Trim().ToLowerInvariant();
 
             if (_userRepository.IsEmailExists(email))
-                throw new ConflictException("A user with this email already exists.");
+                throw new ConflictException(
+                    "A user with this email already exists.");
 
             var user = _mapper.Map<Users>(dto);
 
@@ -53,20 +57,26 @@ namespace BLL.Services.ServicesDB.UserServices
             user.RoleCode = 0;
             user.ScoreReliability = 50;
 
-            // הצפנת הסיסמה באמצעות Hash
-            user.passwordHash = _hasher.HashPassword(user, dto.password);
+            user.passwordHash =
+                _hasher.HashPassword(user, dto.password);
 
-            // שמירת תמונת פרופיל, אם נשלחה
             if (dto.ProfilePicture != null)
             {
-                user.ProfilePicture = _imageService.Save(dto.ProfilePicture);
+                user.ProfilePicture =
+                    _imageService.Save(dto.ProfilePicture);
             }
 
             var createdUser = _userRepository.Add(user);
 
+            if (createdUser != null)
+            {
+                _emailService.SendWelcomeEmail(
+                    user.Email,
+                    user.FirstName);
+            }
+
             return createdUser != null;
         }
-
         public AuthResponseUserDto? Login(LoginUserDTO dto)
         {
             if (dto == null)
@@ -176,6 +186,84 @@ namespace BLL.Services.ServicesDB.UserServices
             var result = _userRepository.Update(user);
 
             return _mapper.Map<ProfileUserDTO>(result);
+        }
+
+        public async Task<AuthResponseUserDto?> GoogleLogin(GoogleLoginDTO dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            if (string.IsNullOrWhiteSpace(dto.IdToken))
+                return null;
+
+            var clientId = _configuration["GoogleClientId"];
+
+            if (string.IsNullOrWhiteSpace(clientId))
+                throw new InvalidOperationException("GoogleClientId is missing.");
+
+            GoogleJsonWebSignature.Payload payload;
+
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(
+                    dto.IdToken,
+                    new GoogleJsonWebSignature.ValidationSettings
+                    {
+                        Audience = new[] { clientId }
+                    });
+            }
+            catch (InvalidJwtException)
+            {
+                return null;
+            }
+
+            if (payload.EmailVerified != true ||
+                string.IsNullOrWhiteSpace(payload.Email))
+            {
+                return null;
+            }
+
+            var email = payload.Email.Trim().ToLowerInvariant();
+
+            // חיפוש משתמש קיים לפי כתובת האימייל,
+            // ללא תלות בספק ההתחברות
+            var existingUser = _userRepository.GetByEmail(email);
+
+            if (existingUser != null)
+            {
+                return _tokens.CreateToken(existingUser);
+            }
+
+            // יצירת משתמש חדש
+            var user = new Users
+            {
+                FirstName = payload.GivenName ?? payload.Name ?? "Google User",
+                LastName = payload.FamilyName ?? "",
+                Email = email,
+                AuthProvider = AuthProvider.Google,
+                CreatedAt = DateTime.UtcNow,
+                RoleCode = 0,
+                ScoreReliability = 50
+            };
+
+            // יצירת סיסמה אקראית
+            var randomPassword = Convert.ToBase64String(
+                RandomNumberGenerator.GetBytes(32));
+
+            user.passwordHash = _hasher.HashPassword(
+                user, randomPassword);
+
+            var createdUser = _userRepository.Add(user);
+
+            if (createdUser == null)
+                return null;
+
+            // שליחת מייל ברוכים הבאים בהרשמה ראשונה בלבד
+            _emailService.SendWelcomeEmail(
+                user.Email,
+                user.FirstName);
+
+            return _tokens.CreateToken(user);
         }
 
         public bool DeleteUser(int userId)

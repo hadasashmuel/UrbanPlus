@@ -4,7 +4,11 @@ import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import FormField from "../components/FormField";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { loginUser } from "../store/users/usersThunks";
+import {
+  loginUser,
+  googleLoginUser,
+} from "../store/users/usersThunks";
+import { GoogleLogin } from "@react-oauth/google";
 import "./Login.css";
 
 function Login() {
@@ -21,24 +25,41 @@ function Login() {
     document.title = "התחברות | URBAN+";
   }, []);
 
+  // התחברות רגילה
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     try {
-    const result = await dispatch(
-  loginUser({
-    email,
-    password,
-    authProvider: 2,
-  })
-).unwrap();
+      const result = await dispatch(
+        loginUser({
+          email,
+          password,
+          authProvider: 2,
+        })
+      ).unwrap();
 
-console.log("תשובת התחברות מהשרת:", result);
-console.log("הטוקן שהתקבל:", result.token);
+      console.log("תשובת התחברות מהשרת:", result);
+      console.log("הטוקן שהתקבל:", result.token);
 
       navigate("/map");
     } catch {
-      // הודעת השגיאה מוצגת מתוך Redux
+      // השגיאה מוצגת מתוך Redux
+    }
+  }
+
+  // התחברות באמצעות Google
+  async function handleGoogleSuccess(credential: string) {
+    try {
+      const result = await dispatch(
+        googleLoginUser(credential)
+      ).unwrap();
+
+      console.log("תשובת התחברות Google:", result);
+      console.log("הטוקן שהתקבל:", result.token);
+
+      navigate("/map");
+    } catch {
+      // השגיאה מוצגת מתוך Redux
     }
   }
 
@@ -88,6 +109,32 @@ console.log("הטוקן שהתקבל:", result.token);
         >
           {loading ? "מתחבר..." : "אישור ההתחברות"}
         </button>
+
+        {/* הפרדה בין סוגי ההתחברות */}
+        <div className="auth-divider">
+          <span>או התחברי באמצעות</span>
+        </div>
+
+        {/* התחברות Google */}
+        <div className="google-login">
+          <GoogleLogin
+            onSuccess={(response) => {
+              if (response.credential) {
+                handleGoogleSuccess(response.credential);
+              }
+            }}
+            onError={() => {
+              console.error("Google login failed");
+            }}
+            text="continue_with"
+            shape="rectangular"
+            theme="outline"
+            size="large"
+            logo_alignment="center"
+            width="300"
+            
+          />
+        </div>
 
         <p className="auth-footer">
           עדיין אין לך חשבון?{" "}

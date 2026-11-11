@@ -6,6 +6,7 @@ import {
   registerUser,
   fetchMyProfile,
   updateUser,
+  googleLoginUser,
 } from "./usersThunks";
 
 const usersSlice = createSlice({
@@ -29,7 +30,21 @@ const usersSlice = createSlice({
         state.loading = false;
         state.error = action.payload ?? "Login failed";
       })
-
+      // התחברות באמצעות Google
+      .addCase(googleLoginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(googleLoginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.token = action.payload.token;
+        state.expiresAt = action.payload.expiresAt;
+        state.error = null;
+      })
+      .addCase(googleLoginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Google login failed";
+      })  
       // הרשמה
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
