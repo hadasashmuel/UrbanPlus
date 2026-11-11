@@ -1,7 +1,9 @@
-
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import FormField from "./FormField";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { registerUser } from "../store/users/usersThunks";
 import "./Register.css";
 
 function Register() {
@@ -10,9 +12,16 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [error, setError] = useState("");
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const loading = useAppSelector((state) => state.users.loading);
+  const serverError = useAppSelector((state) => state.users.error);
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
 
@@ -37,14 +46,22 @@ function Register() {
       return;
     }
 
-    console.log({
-      firstName,
-      lastName,
-      email,
-      password,
-    });
+    try {
+      await dispatch(
+        registerUser({
+          firstName,
+          lastName,
+          email,
+          password,
+          authProvider: 2,
+          profilePicture,
+        })
+      ).unwrap();
 
-    // בהמשך נחבר את ההרשמה לשרת
+      navigate("/login", { state: { registered: true } });
+    } catch {
+      // שגיאת השרת מוצגת למשתמש
+    }
   }
 
   return (
@@ -61,12 +78,14 @@ function Register() {
 
         <FormField
           label="שם פרטי"
+          type="text"
           value={firstName}
           onChange={setFirstName}
         />
 
         <FormField
           label="שם משפחה"
+          type="text"
           value={lastName}
           onChange={setLastName}
         />
@@ -92,20 +111,39 @@ function Register() {
           onChange={setConfirmPassword}
         />
 
-        {error && (
+        <div className="register-picture-field">
+          <label htmlFor="profilePicture">תמונת פרופיל (לא חובה)</label>
+
+          <input
+            id="profilePicture"
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp"
+            onChange={(e) =>
+              setProfilePicture(e.target.files?.[0] ?? null)
+            }
+          />
+
+          {profilePicture && (
+            <p>נבחרה תמונה: {profilePicture.name}</p>
+          )}
+        </div>
+
+        {(error || serverError) && (
           <p className="register-error" role="alert">
-            {error}
+            {error || serverError}
           </p>
         )}
 
-        <button type="submit" className="register-submit">
-          אישור ההרשמה
+        <button
+          type="submit"
+          className="register-submit"
+          disabled={loading}
+        >
+          {loading ? "נרשמת..." : "אישור ההרשמה"}
         </button>
 
         <p className="register-footer">
-          כבר יש לך חשבון?
-          {" "}
-          <a href="/login">התחברות</a>
+          כבר יש לך חשבון? <Link to="/login">התחברות</Link>
         </p>
       </form>
     </div>

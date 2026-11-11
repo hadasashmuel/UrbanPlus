@@ -4,7 +4,7 @@ import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import UpdateUser from "./components/UpdateUser";
-
+import Profile from "./components/Profile";
 import "./App.css";
 
 function App() {
@@ -16,6 +16,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/update-user" element={<UpdateUser />} />
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
   );

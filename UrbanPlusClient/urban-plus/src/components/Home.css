@@ -125,3 +125,24 @@
   font-size: 27px;
   cursor: pointer;
 }
+.user-icon-button {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #247651;
+  border-radius: 50%;
+  background: white;
+  color: #247651;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  transition: 0.2s ease;
+}
+
+.user-icon-button:hover {
+  background: #247651;
+  color: white;
+  transform: scale(1.05);
+}

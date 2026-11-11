@@ -61,6 +61,16 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<GlobalExceptionFilter>();
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactClient", policy =>
+    {
+        policy
+            .SetIsOriginAllowed(_ => true)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 // ====================
 // Swagger + JWT
 // ====================
@@ -266,6 +276,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("ReactClient");
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -420,7 +420,6 @@ namespace DAL.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("ProfilePicture")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RoleCode")

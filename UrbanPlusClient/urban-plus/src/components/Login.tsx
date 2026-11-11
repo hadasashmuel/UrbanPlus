@@ -1,26 +1,45 @@
-import { useState,useEffect } from "react";
+
+import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import FormField from "../components/FormField";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { loginUser } from "../store/users/usersThunks";
 import "./Login.css";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const loading = useAppSelector((state) => state.users.loading);
+  const error = useAppSelector((state) => state.users.error);
 
   useEffect(() => {
-  document.title = "התחברות | URBAN+";
+    document.title = "התחברות | URBAN+";
   }, []);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    // כאן נחבר בהמשך את ההתחברות לשרת
-    console.log({ email, password });
+    try {
+    const result = await dispatch(
+  loginUser({
+    email,
+    password,
+    authProvider: 2,
+  })
+).unwrap();
 
-    // מעבר למפה — כרגע לצורך בדיקה בלבד
-    navigate("/map");
+console.log("תשובת התחברות מהשרת:", result);
+console.log("הטוקן שהתקבל:", result.token);
+
+      navigate("/map");
+    } catch {
+      // הודעת השגיאה מוצגת מתוך Redux
+    }
   }
 
   return (
@@ -56,8 +75,18 @@ function Login() {
           שכחת סיסמה?
         </a>
 
-        <button type="submit" className="auth-submit">
-          אישור ההתחברות
+        {error && (
+          <p className="register-error" role="alert">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          className="auth-submit"
+          disabled={loading}
+        >
+          {loading ? "מתחבר..." : "אישור ההתחברות"}
         </button>
 
         <p className="auth-footer">
