@@ -1,6 +1,7 @@
 ﻿using DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace DAL.Repositories.ReportRepositories
 {
     public class ReportRepository : IReportRepository

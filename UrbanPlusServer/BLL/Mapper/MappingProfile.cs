@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using DAL.Entities;
 using DTO.BadgeDTO;
 using DTO.CategoryDTO;
@@ -68,23 +69,34 @@ namespace BLL
                     opt => opt.MapFrom(src => src.Reports.Count));
 
             // Reports
-            CreateMap<Reports, ShowReportDTO>()
-     .ForMember(dest => dest.CategoryName,
-         opt => opt.MapFrom(src =>
-             src.Category != null
-                 ? src.Category.CategoryName
-                 : null))
-     .ForMember(dest => dest.ImageList,
-         opt => opt.MapFrom(src => src.Images));
-
-            CreateMap<ReportImages, ShowReportImageDTO>();
-
-            CreateMap<CreateReportImageDTO, ReportImages>()
-                .ForMember(dest => dest.ReportImageId,
-                    opt => opt.Ignore())
+            CreateMap<CreateReportDTO, Reports>()
                 .ForMember(dest => dest.ReportId,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.UserId,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.MainEventId,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.Images,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.User,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.MainEvent,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.Category,
                     opt => opt.Ignore());
 
+            CreateMap<Reports, ShowReportDTO>()
+                .ForMember(dest => dest.CategoryName,
+                    opt => opt.MapFrom(src =>
+                        src.Category != null
+                            ? src.Category.CategoryName
+                            : null))
+                .ForMember(dest => dest.ImageList,
+                    opt => opt.MapFrom(src => src.Images));
+
+            CreateMap<ReportImages, ShowReportImageDTO>();
 
             // Votes
             CreateMap<Votes, ShowVoteDTO>();

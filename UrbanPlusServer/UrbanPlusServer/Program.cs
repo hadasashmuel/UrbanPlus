@@ -5,6 +5,7 @@ using BLL.Services.ServicesDB.AIChatServices;
 using BLL.Services.ServicesDB.AIChatServices.Tools;
 using BLL.Services.ServicesDB.BadgeServices;
 using BLL.Services.ServicesDB.CategoryServices;
+using BLL.Services.ServicesDB.EventAggregationServices;
 using BLL.Services.ServicesDB.MainEventServices;
 using BLL.Services.ServicesDB.MessageServices;
 using BLL.Services.ServicesDB.NotificationServices;
@@ -14,6 +15,8 @@ using BLL.Services.ServicesDB.SaveEventServices;
 using BLL.Services.ServicesDB.UserBadgeServices;
 using BLL.Services.ServicesDB.UserServices;
 using BLL.Services.ServicesDB.VoteServices;
+
+using BLL.Services.ServiceSupport.EventAggregationServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServiceSupport.TokenServices;
 
@@ -154,6 +157,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAIChatService, AIChatService>();
+builder.Services.AddScoped<IEventAggregationService, EventAggregationService>();
 
 builder.Services.AddScoped<AIChatTools>();
 // ====================
@@ -164,8 +168,7 @@ var imagesFolder = builder.Configuration["ImagesFolder"];
 
 if (string.IsNullOrWhiteSpace(imagesFolder))
 {
-    throw new InvalidOperationException(
-        "ImagesFolder is not configured.");
+    throw new InvalidOperationException( "ImagesFolder is not configured.");
 }
 
 var fullImagesFolder = Path.GetFullPath(
@@ -203,20 +206,17 @@ var jwtAudience = builder.Configuration["Jwt:Audience"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
-    throw new InvalidOperationException(
-        "Jwt:Key is missing. Set the environment variable Jwt__Key.");
+    throw new InvalidOperationException( "Jwt:Key is missing. Set the environment variable Jwt__Key.");
 }
 
 if (string.IsNullOrWhiteSpace(jwtIssuer))
 {
-    throw new InvalidOperationException(
-        "Jwt:Issuer is missing. Set the environment variable Jwt__Issuer.");
+    throw new InvalidOperationException( "Jwt:Issuer is missing. Set the environment variable Jwt__Issuer.");
 }
 
 if (string.IsNullOrWhiteSpace(jwtAudience))
 {
-    throw new InvalidOperationException(
-        "Jwt:Audience is missing. Set the environment variable Jwt__Audience.");
+    throw new InvalidOperationException("Jwt:Audience is missing. Set the environment variable Jwt__Audience.");
 }
 
 builder.Services

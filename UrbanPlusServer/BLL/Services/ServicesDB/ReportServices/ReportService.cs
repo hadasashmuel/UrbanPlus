@@ -1,12 +1,11 @@
 ﻿
 using AutoMapper;
-using BLL.Exceptions;
+using BLL.Services.ServiceSupport.EventAggregationServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using DAL.Entities;
-using DAL.Repositories.CategoryRepositories;
+using DAL.Repositories;
 using DAL.Repositories.ReportRepositories;
 using DTO.ReportDTO;
-
 
 namespace BLL.Services.ServicesDB.ReportServices
 {
@@ -15,18 +14,19 @@ namespace BLL.Services.ServicesDB.ReportServices
         private readonly IReportRepository _reportRepository;
         private readonly IImageService _imageService;
         private readonly IMapper _mapper;
+        private readonly IEventAggregationService _eventAggregationService;
 
-        public ReportService( IReportRepository reportRepository, IMapper mapper,IImageService imageService)
+        public ReportService(IReportRepository reportRepository,IMapper mapper,IImageService imageService,IEventAggregationService eventAggregationService)
         {
             _reportRepository = reportRepository;
             _mapper = mapper;
             _imageService = imageService;
+            _eventAggregationService = eventAggregationService;
         }
 
         public List<ShowReportDTO> GetAllReports()
         {
             var reports = _reportRepository.GetAllReports();
-
             return _mapper.Map<List<ShowReportDTO>>(reports);
         }
 
@@ -35,7 +35,7 @@ namespace BLL.Services.ServicesDB.ReportServices
             var report = _reportRepository.GetReportById(id);
 
             if (report == null)
-                throw new NotFoundException($"Report with id {id} was not found");
+                throw new Exception("Report not found");
 
             return _mapper.Map<ShowReportDTO>(report);
         }
@@ -47,7 +47,6 @@ namespace BLL.Services.ServicesDB.ReportServices
             report.UserId = userId;
             report.CreatedAt = DateTime.UtcNow;
 
-            // שמירת נתיבי התמונות שנשמרו
             var savedImages = new List<string>();
 
             try
@@ -58,9 +57,7 @@ namespace BLL.Services.ServicesDB.ReportServices
                     {
                         if (imageDto.ImageUrl == null ||
                             imageDto.ImageUrl.Length == 0)
-                        {
                             continue;
-                        }
 
                         var imageUrl = _imageService.Save(imageDto.ImageUrl);
 
@@ -73,13 +70,29 @@ namespace BLL.Services.ServicesDB.ReportServices
                     }
                 }
 
+                // מציאת אירוע ראשי מתאים או יצירת אירוע חדש
+                var mainEvent =
+                    _eventAggregationService.FindOrCreateMainEvent(report);
+
+                // קישור הדיווח לאירוע הראשי
+                report.MainEventId = mainEvent.MainEventsId;
+
+                // שמירת הדיווח
                 var createdReport = _reportRepository.AddReport(report);
 
-                return _mapper.Map<ShowReportDTO>(createdReport);
+                try
+                {
+                    return _mapper.Map<ShowReportDTO>(createdReport);
+                }
+                catch (AutoMapperMappingException ex)
+                {
+                    Console.WriteLine("FULL MAPPING ERROR:");
+                    Console.WriteLine(ex.ToString());
+                    throw;
+                }
             }
             catch
             {
-                // מחיקת התמונות שנשמרו אם יצירת הדיווח נכשלה
                 foreach (var imageUrl in savedImages)
                 {
                     _imageService.Delete(imageUrl);

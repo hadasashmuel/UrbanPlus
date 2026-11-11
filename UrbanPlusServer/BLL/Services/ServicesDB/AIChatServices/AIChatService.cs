@@ -40,7 +40,11 @@ namespace BLL.Services.ServicesDB.AIChatServices
                         (Func<int, object?>)_aiChatTools.GetMainEventById),
 
                     AIFunctionFactory.Create(
-                        (Func<List<object>>)_aiChatTools.GetAllCategories)
+                        (Func<List<object>>)_aiChatTools.GetAllCategories),
+
+                    AIFunctionFactory.Create(
+                       (Func<string?, string?, bool, List<object>>)
+                       _aiChatTools.SearchMainEvents)
                 ]
             };
         }
