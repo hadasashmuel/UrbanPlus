@@ -20,10 +20,7 @@ namespace BLL
         public MappingProfile()
         {
             // Users
-            CreateMap<Users, ProfileUserDTO>()
-                .ForMember(dest => dest.ProfilePicture,
-                    opt => opt.Ignore())
-                .ReverseMap();
+            CreateMap<Users, ProfileUserDTO>();
 
             CreateMap<Users, ShortProfileUserDTO>();
 

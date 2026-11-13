@@ -96,6 +96,16 @@ namespace DAL.Repositories.MainEventRepositories
 
             return query.ToList();
         }
+        public List<MainEvents> GetOpenMainEvents()
+        {
+            return _context.MainEvents
+                .AsNoTracking()
+                .Where(e =>
+                    e.Status == EventStatus.New ||
+                    e.Status == EventStatus.Verified ||
+                    e.Status == EventStatus.InTreatment)
+                .ToList();
+        }
         public bool DeleteMainEvent(int id)
         {
             var mainEvent = _context.MainEvents .FirstOrDefault(e => e.MainEventsId == id);

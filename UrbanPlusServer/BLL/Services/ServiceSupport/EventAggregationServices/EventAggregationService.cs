@@ -23,8 +23,7 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
         // (עם הערכים האלה: בלי דמיון טקסט, איחוד עד כ-94 מטר)
         private const double MinScore = 0.3;
 
-        public EventAggregationService(
-            IMainEventRepository mainEventRepository)
+        public EventAggregationService(IMainEventRepository mainEventRepository)
         {
             _mainEventRepository = mainEventRepository;
         }

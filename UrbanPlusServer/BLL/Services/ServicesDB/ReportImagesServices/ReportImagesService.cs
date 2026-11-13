@@ -52,8 +52,6 @@ namespace BLL.Services.ServicesDB.ReportImagesServices
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
 
-            if (dto.ReportId <= 0)
-                throw new ArgumentException("ReportId must be greater than zero.");
 
             if (dto.ImageUrl == null || dto.ImageUrl.Length == 0)
                 throw new ArgumentException("ImageUrl is required.");

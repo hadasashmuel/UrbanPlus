@@ -1,33 +1,110 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --green: #789b83;
+  --green-dark: #456b53;
+  --green-light: #e7f0e8;
+  --yellow: #f5e8a9;
+  --cream: #fafaf5;
+  --text: #303b32;
+  --muted: #89928a;
+  --line: #e9eee8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 .profile-page {
   min-height: 100vh;
+  padding: 55px 7%;
+  background: var(--cream);
+  color: var(--text);
+  font-family: 'Heebo', sans-serif;
+}
+
+/* Welcome */
+
+.profile-welcome {
+  max-width: 1120px;
+  margin: 0 auto 35px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 30px;
-  background: #f3f6f4;
-  font-family: Arial, sans-serif;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.profile-eyebrow {
+  display: inline-block;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.profile-welcome h1 {
+  font-size: 34px;
+  font-weight: 800;
+  margin: 8px 0 4px;
+  letter-spacing: -1px;
+}
+
+.profile-welcome p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 15px;
+}
+
+.profile-home-button {
+  border: 1px solid #dce7dc;
+  background: white;
+  color: var(--green-dark);
+  padding: 11px 19px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.profile-home-button:hover {
+  background: var(--green-light);
+}
+
+/* Dashboard */
+
+.profile-dashboard {
+  max-width: 1120px;
+  margin: 0 auto 55px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 18px;
 }
 
 .profile-card {
-  width: 100%;
-  max-width: 450px;
-  padding: 40px;
   background: white;
-  border-radius: 22px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 27px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 18px rgba(55, 76, 58, 0.035);
 }
 
 .profile-avatar {
-  width: 110px;
-  height: 110px;
-  margin: 0 auto 20px;
-  border-radius: 50%;
-  background: #e7f1eb;
+  width: 76px;
+  height: 76px;
+  min-width: 76px;
+  border-radius: 22px;
+  background: var(--green-light);
+  color: var(--green-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 55px;
+  font-size: 30px;
   overflow: hidden;
 }
 
@@ -37,44 +114,342 @@
   object-fit: cover;
 }
 
-.profile-card h1 {
-  color: #254d3c;
-  margin-bottom: 30px;
+.profile-user-info {
+  min-width: 0;
+  flex: 1;
 }
 
-.profile-details {
-  text-align: right;
-  margin-bottom: 30px;
+.profile-label {
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 700;
 }
 
-.profile-details p {
-  padding: 12px;
-  border-bottom: 1px solid #eeeeee;
-  color: #444;
+.profile-user-info h2 {
+  font-size: 21px;
+  margin: 4px 0;
+  font-weight: 800;
 }
 
-.profile-edit-button,
-.profile-back-button {
-  width: 100%;
-  padding: 13px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 16px;
+.profile-user-info p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
 }
 
 .profile-edit-button {
-  background: #285c45;
-  color: white;
+  border: none;
+  border-radius: 11px;
+  padding: 10px 15px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
 }
 
-.profile-back-button {
-  background: #eeeeee;
-  color: #333;
+.profile-edit-button:hover {
+  background: #d8e8da;
 }
+
+/* Stats */
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.profile-stat-card {
+  border-radius: 20px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.reliability-stat {
+  background: #e6f0e7;
+}
+
+.reports-stat {
+  background: #f7efc9;
+}
+
+.stat-icon {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.profile-stat-card span {
+  display: block;
+  font-size: 12px;
+  color: #68766b;
+  font-weight: 600;
+}
+
+.profile-stat-card strong {
+  display: block;
+  font-size: 30px;
+  font-weight: 800;
+  margin: 2px 0;
+  color: var(--text);
+}
+
+.profile-stat-card small {
+  color: #89928a;
+  font-size: 10px;
+}
+
+/* Reports */
+
+.my-reports-section {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.reports-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  gap: 15px;
+}
+
+.reports-heading h2 {
+  font-size: 25px;
+  margin: 5px 0 2px;
+  font-weight: 800;
+}
+
+.reports-heading p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.reports-count {
+  background: var(--yellow);
+  color: #756b3e;
+  padding: 8px 15px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.my-reports-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.my-report-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 17px;
+  min-width: 0;
+  transition: 0.2s ease;
+}
+
+.my-report-card:hover {
+  border-color: #cbdccc;
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(55, 76, 58, 0.06);
+}
+
+.report-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.report-category {
+  background: var(--green-light);
+  color: var(--green-dark);
+  padding: 4px 9px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.report-date {
+  font-size: 10px;
+  color: #a0a69f;
+}
+
+.my-report-card h3 {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0 0 7px;
+  overflow-wrap: anywhere;
+}
+
+.report-description {
+  font-size: 12px;
+  color: #7e887f;
+  line-height: 1.6;
+  margin: 0 0 12px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.report-address {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #8b958b;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.report-address span {
+  color: var(--green);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.my-report-images {
+  display: flex;
+  gap: 7px;
+  margin-top: 13px;
+  overflow: hidden;
+}
+
+.my-report-images img {
+  width: 55px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Empty state */
+
+.empty-reports {
+  background: white;
+  border: 1px dashed #d5e2d5;
+  border-radius: 18px;
+  padding: 45px 20px;
+  text-align: center;
+}
+
+.empty-reports-icon {
+  width: 55px;
+  height: 55px;
+  margin: 0 auto 14px;
+  border-radius: 18px;
+  background: var(--yellow);
+  color: #857b4b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 27px;
+}
+
+.empty-reports h3 {
+  margin: 0 0 7px;
+  font-size: 19px;
+}
+
+.empty-reports p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 auto 18px;
+}
+
+.empty-reports button {
+  border: none;
+  background: var(--green);
+  color: white;
+  border-radius: 10px;
+  padding: 11px 19px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.empty-reports button:hover {
+  background: var(--green-dark);
+}
+
+/* Messages */
 
 .profile-message {
   text-align: center;
-  padding: 40px;
+  color: var(--muted);
+  padding: 25px;
+  font-size: 14px;
+}
+
+/* Responsive */
+
+@media (max-width: 950px) {
+  .profile-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .my-reports-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-page {
+    padding: 28px 5%;
+  }
+
+  .profile-welcome {
+    align-items: flex-start;
+  }
+
+  .profile-welcome h1 {
+    font-size: 27px;
+  }
+
+  .profile-home-button {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+
+  .profile-card {
+    flex-wrap: wrap;
+    padding: 20px;
+  }
+
+  .profile-user-actions {
+    width: 100%;
+  }
+
+  .profile-edit-button {
+    width: 100%;
+  }
+
+  .profile-stats {
+    gap: 9px;
+  }
+
+  .profile-stat-card {
+    padding: 15px 12px;
+  }
+
+  .profile-stat-card strong {
+    font-size: 25px;
+  }
+
+  .my-reports-list {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-heading h2 {
+    font-size: 22px;
+  }
 }

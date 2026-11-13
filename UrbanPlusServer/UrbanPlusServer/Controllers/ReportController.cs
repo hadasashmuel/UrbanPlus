@@ -27,7 +27,16 @@ namespace UrbanPlusServer.Controllers
 
             return Ok(reports);
         }
+        // GET: api/Report/MyReports
+        [HttpGet("MyReports")]
+        public ActionResult<List<ShowReportDTO>> GetMyReports()
+        {
+            int userId = User.GetUserId();
 
+            var reports = _reportService.GetReportsByUser(userId);
+
+            return Ok(reports);
+        }
         // GET: api/Report/5
         [HttpGet("{id}")]
         public ActionResult<ShowReportDTO> GetReportById(int id)

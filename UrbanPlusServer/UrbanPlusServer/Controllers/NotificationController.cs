@@ -60,7 +60,22 @@ namespace UrbanPlusServer.Controllers
 
             return NoContent();
         }
+        [HttpPost("nearby")]
+        public IActionResult CreateNearbyNotifications([ FromBody] UserLocationDTO location)
+        {
+            int userId = User.GetUserId();
 
+            int notificationsCreated =
+                _notificationService.CreateNearbyNotifications(
+                    userId,
+                    location);
+
+            return Ok(new
+            {
+                Message = "Nearby notifications checked successfully",
+                NotificationsCreated = notificationsCreated
+            });
+        }
         // DELETE: api/Notification/10
         [HttpDelete("{id}")]
         public IActionResult DeleteNotification(int id)

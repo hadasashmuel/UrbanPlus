@@ -14,6 +14,7 @@ namespace DAL.Repositories.MainEventRepositories
         List<MainEvents> GetCandidateEvents(int categoryId, DateTime since);
         string? GetCategoryName(int categoryId);
         List<MainEvents> SearchMainEvents(string? categoryName,string? address,bool onlyOpen);
+        List<MainEvents> GetOpenMainEvents();
         bool DeleteMainEvent(int id);
     }
 }

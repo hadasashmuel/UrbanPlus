@@ -74,6 +74,13 @@ namespace DAL.Repositories.NotificationRepositories
             _context.SaveChanges();
             return true;
         }
+        public bool ExistsNearbyNotification(int userId, int mainEventId)
+        {
+            return _context.Notifications.Any(n =>
+                n.UserId == userId &&
+                n.MainEventId == mainEventId &&
+                n.Type == NotificationType.NearbyEvent);
+        }
 
         public bool DeleteNotification(int id, int userId)
         {

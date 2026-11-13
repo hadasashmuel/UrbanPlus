@@ -11,6 +11,7 @@ namespace DAL.Repositories.NotificationRepositories
         Notifications AddNotification(Notifications notification);
         bool UpdateNotification(Notifications notification);
         bool MarkNotificationAsRead(int id, int userId);
+        bool ExistsNearbyNotification(int userId, int mainEventId);
         bool DeleteNotification(int id, int userId);
     }
 }

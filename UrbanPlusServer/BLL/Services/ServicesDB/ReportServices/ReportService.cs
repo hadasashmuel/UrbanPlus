@@ -102,6 +102,12 @@ namespace BLL.Services.ServicesDB.ReportServices
             }
         }
 
+        public List<ShowReportDTO> GetReportsByUser(int userId)
+        {
+            var reports = _reportRepository.GetByUser(userId);
+
+            return _mapper.Map<List<ShowReportDTO>>(reports);
+        }
         public bool DeleteReport(int reportId)
         {
             return _reportRepository.DeleteReport(reportId);

@@ -11,6 +11,7 @@ namespace BLL.Services.ServicesDB.NotificationServices
         List<ShowNotificationDTO> GetNotificationsByUserId(int userId);
         List<ShowNotificationDTO> GetUnreadNotificationsByUserId(int userId);
         bool MarkNotificationAsRead(int id, int userId);
+        int CreateNearbyNotifications(int userId, UserLocationDTO location);
         bool DeleteNotification(int id, int userId);
     }
 }

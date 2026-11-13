@@ -1,7 +1,4 @@
 ﻿using DTO.ReportDTO;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BLL.Services.ServicesDB.ReportServices
 {
@@ -12,5 +9,6 @@ namespace BLL.Services.ServicesDB.ReportServices
         ShowReportDTO CreateReport(CreateReportDTO dto, int userId);
         bool DeleteReport(int reportId);
 
+        List<ShowReportDTO> GetReportsByUser(int userId);
     }
 }
