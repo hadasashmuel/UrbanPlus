@@ -11,7 +11,7 @@ namespace BLL.Services.ServicesDB.UserBadgeServices
 
         ShowUserBadgeDTO AwardBadgeToUser(int userId, int badgeId);
         List<ShowBadgeDTO> GetMine(int userId);
-
+        void CheckAndAwardBadges(int userId);
         bool DeleteUserBadge(int id);
     }
 }

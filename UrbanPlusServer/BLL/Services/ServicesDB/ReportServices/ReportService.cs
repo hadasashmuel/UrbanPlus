@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using BLL.Services.ServicesDB.UserBadgeServices;
 using BLL.Services.ServiceSupport.EventAggregationServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using DAL.Entities;
@@ -13,15 +14,17 @@ namespace BLL.Services.ServicesDB.ReportServices
     {
         private readonly IReportRepository _reportRepository;
         private readonly IImageService _imageService;
+        private readonly IUserBadgeService _userBadgeService;
         private readonly IMapper _mapper;
         private readonly IEventAggregationService _eventAggregationService;
 
-        public ReportService(IReportRepository reportRepository,IMapper mapper,IImageService imageService,IEventAggregationService eventAggregationService)
+        public ReportService(IReportRepository reportRepository,IMapper mapper, IImageService imageService, IEventAggregationService eventAggregationService, IUserBadgeService userBadgeService)
         {
             _reportRepository = reportRepository;
             _mapper = mapper;
             _imageService = imageService;
             _eventAggregationService = eventAggregationService;
+            _userBadgeService = userBadgeService;
         }
 
         public List<ShowReportDTO> GetAllReports()
@@ -79,6 +82,7 @@ namespace BLL.Services.ServicesDB.ReportServices
 
                 // שמירת הדיווח
                 var createdReport = _reportRepository.AddReport(report);
+                _userBadgeService.CheckAndAwardBadges(userId);
 
                 try
                 {

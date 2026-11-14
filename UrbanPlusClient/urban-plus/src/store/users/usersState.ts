@@ -1,3 +1,12 @@
+
+export interface UserBadge {
+  badgeId: number;
+  name: string;
+  description: string;
+  icon: string;
+  createdAt: string;
+}
+
 export interface ProfileUser {
   userId: number;
   firstName: string;
@@ -7,7 +16,7 @@ export interface ProfileUser {
   profilePicture: string | null;
   scoreReliability: number;
   createdAt: string;
-  userBadges: unknown[];
+  userBadges: UserBadge[];
   votes: unknown[];
   savedEvents: unknown[];
 }

@@ -129,3 +129,26 @@
     font-size: 24px;
   }
 }
+
+.register-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: #777;
+  font-size: 14px;
+}
+
+.register-divider::before,
+.register-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+.register-google {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}

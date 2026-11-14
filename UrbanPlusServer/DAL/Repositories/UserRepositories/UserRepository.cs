@@ -1,4 +1,5 @@
 ﻿using DAL.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -35,7 +36,10 @@ namespace DAL.Repositories.UserRepositories
         }
         public Users? GetById(int userId)
         {
-            return _context.Users.FirstOrDefault(u => u.UserId == userId);
+            return _context.Users
+                .Include(u => u.UserBadges)
+                    .ThenInclude(ub => ub.Badge)
+                .FirstOrDefault(u => u.UserId == userId);
         }
 
         public Users? GetByEmailAndProvider(string email,AuthProvider authProvider)

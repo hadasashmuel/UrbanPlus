@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BLL.Exceptions;
+using BLL.Services.ServicesDB.UserBadgeServices;
 using DAL.Entities;
 using DAL.Repositories.SaveEventRepositories;
 using DTO.SaveEventDTO;
@@ -9,14 +10,14 @@ namespace BLL.Services.ServicesDB.SaveEventServices
     public class SaveEventService : ISaveEventService
     {
         private readonly ISaveEventRepository _repository;
+        private readonly IUserBadgeService _userBadgeService;
         private readonly IMapper _mapper;
 
-        public SaveEventService(
-            ISaveEventRepository repository,
-            IMapper mapper)
+        public SaveEventService( ISaveEventRepository repository,IMapper mapper, IUserBadgeService userBadgeService)
         {
             _repository = repository;
             _mapper = mapper;
+            _userBadgeService = userBadgeService;
         }
 
         public List<ShowSavedEventsDTO> GetSavedEventsByUserId( int userId)
@@ -43,6 +44,7 @@ namespace BLL.Services.ServicesDB.SaveEventServices
             savedEvent.CreatedAt = DateTime.UtcNow;
 
             var created = _repository.Add(savedEvent);
+            _userBadgeService.CheckAndAwardBadges(userId);
 
             return _mapper.Map<ShowSavedEventsDTO>(created);
         }

@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using BLL.Exceptions;
+using BLL.Services.ServicesDB.UserBadgeServices;
 using DAL.Entities;
 using DAL.Repositories.VoteRepositories;
 using DTO.VoteDTO;
@@ -9,12 +10,14 @@ namespace BLL.Services.ServicesDB.VoteServices
     public class VoteService : IVoteService
     {
         private readonly IVoteRepository _voteRepository;
+        private readonly IUserBadgeService _userBadgeService;
         private readonly IMapper _mapper;
 
-        public VoteService(IVoteRepository voteRepository, IMapper mapper)
+        public VoteService(IVoteRepository voteRepository, IMapper mapper, IUserBadgeService userBadgeService)
         {
             _voteRepository = voteRepository;
             _mapper = mapper;
+            _userBadgeService = userBadgeService;
         }
 
         public List<ShowVoteDTO> GetAllVotes()
@@ -50,6 +53,7 @@ namespace BLL.Services.ServicesDB.VoteServices
             vote.CreatedAt = DateTime.UtcNow;
 
             var createdVote = _voteRepository.Add(vote);
+            _userBadgeService.CheckAndAwardBadges(userId);
 
             return _mapper.Map<ShowVoteDTO>(createdVote);
         }

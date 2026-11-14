@@ -275,9 +275,9 @@
 .report-category {
   background: var(--green-light);
   color: var(--green-dark);
-  padding: 4px 9px;
+  padding: 3px 8px;
   border-radius: 7px;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
 }
 
@@ -451,5 +451,589 @@
 
   .reports-heading h2 {
     font-size: 22px;
+  }
+}
+
+/* כרטיס דיווח לחיץ */
+
+.clickable-report {
+  cursor: pointer;
+  position: relative;
+}
+
+.clickable-report:focus-visible {
+  outline: 2px solid #789b83;
+  outline-offset: 3px;
+}
+
+.report-card-more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding-top: 11px;
+  border-top: 1px solid #edf1ed;
+  color: #668875;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.report-card-more span {
+  font-size: 17px;
+  transition: transform 0.2s ease;
+}
+
+.clickable-report:hover .report-card-more span {
+  transform: translateX(-4px);
+}
+
+/* שכבת הרקע של החלון */
+
+.report-details-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(37, 52, 47, 0.48);
+  backdrop-filter: blur(7px);
+  animation: detailsFadeIn 0.22s ease;
+}
+
+/* החלון עצמו */
+
+.report-details-modal {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #f8faf8;
+  border: 1px solid rgba(255,255,255,0.8);
+  border-radius: 22px;
+  box-shadow: 0 20px 65px rgba(30, 54, 44, 0.2);
+  animation: detailsModalAppear 0.28s ease;
+}
+
+.report-details-modal::-webkit-scrollbar {
+  width: 5px;
+}
+
+.report-details-modal::-webkit-scrollbar-thumb {
+  background: #cbded2;
+  border-radius: 10px;
+}
+
+/* כותרת */
+
+.report-details-header {
+  position: relative;
+  padding: 35px 35px 25px;
+  background: linear-gradient(120deg, #e7f0e9, #eaf1f2);
+  border-bottom: 1px solid #e3ebe5;
+}
+
+.report-details-close {
+  position: absolute;
+  top: 17px;
+  left: 18px;
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.8);
+  color: #62786a;
+  font-size: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.report-details-close:hover {
+  background: white;
+  color: #355d49;
+  transform: rotate(90deg);
+}
+
+.report-details-eyebrow {
+  display: block;
+  color: #81978a;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  margin-bottom: 17px;
+}
+
+.report-details-category {
+  display: inline-block;
+  padding: 5px 11px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.75);
+  color: #52745d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.report-details-header h2 {
+  margin: 12px 0;
+  color: #34483c;
+  font-size: 25px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.report-details-date {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #84958a;
+  font-size: 12px;
+}
+
+/* תוכן החלון */
+
+.report-details-content {
+  padding: 27px 35px;
+}
+
+.report-details-section {
+  margin-bottom: 27px;
+}
+
+.report-details-section h3 {
+  color: #40594a;
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0 0 11px;
+}
+
+.report-details-description {
+  margin: 0;
+  padding: 17px;
+  background: white;
+  border: 1px solid #e9eee9;
+  border-radius: 12px;
+  color: #68786d;
+  font-size: 14px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.report-details-location {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #edf3ef;
+  border-radius: 11px;
+  color: #60786a;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.report-details-location span {
+  color: #719681;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+
+/* גלריית תמונות */
+
+.report-details-images-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.report-details-images-heading span {
+  color: #9aa79e;
+  font-size: 11px;
+}
+
+.report-details-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.report-details-image-button {
+  position: relative;
+  display: block;
+  height: 170px;
+  padding: 0;
+  border: none;
+  border-radius: 13px;
+  overflow: hidden;
+  background: #e8eee9;
+  cursor: pointer;
+}
+
+.report-details-image-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.report-details-image-button:hover img {
+  transform: scale(1.05);
+}
+
+.report-details-image-button span {
+  position: absolute;
+  bottom: 9px;
+  left: 9px;
+  padding: 5px 9px;
+  background: rgba(36, 55, 44, 0.72);
+  color: white;
+  border-radius: 7px;
+  font-size: 10px;
+}
+
+/* מצב ללא תמונות */
+
+.report-no-images {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px dashed #d8e3da;
+  border-radius: 12px;
+  color: #93a198;
+}
+
+.report-no-images span {
+  font-size: 23px;
+}
+
+.report-no-images p {
+  margin: 0;
+  font-size: 12px;
+}
+
+/* תחתית החלון */
+
+.report-details-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 18px 35px;
+  border-top: 1px solid #e8eee8;
+  background: white;
+}
+
+.report-details-footer > span {
+  color: #87958a;
+  font-size: 12px;
+}
+
+.report-details-footer button {
+  border: none;
+  border-radius: 9px;
+  padding: 9px 19px;
+  background: #789b83;
+  color: white;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.report-details-footer button:hover {
+  background: #456b53;
+}
+
+/* תמונה מוגדלת */
+
+.report-image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 35px;
+  background: rgba(20, 28, 25, 0.9);
+  backdrop-filter: blur(5px);
+}
+
+.report-image-lightbox img {
+  max-width: 90%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+}
+
+.report-image-lightbox-close {
+  position: absolute;
+  top: 20px;
+  left: 25px;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  font-size: 29px;
+  cursor: pointer;
+}
+
+/* אנימציות */
+
+@keyframes detailsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes detailsModalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* התאמה לטלפון */
+
+@media (max-width: 600px) {
+  .report-details-overlay {
+    padding: 10px;
+  }
+
+  .report-details-modal {
+    max-height: 94vh;
+    border-radius: 17px;
+  }
+
+  .report-details-header {
+    padding: 30px 22px 22px;
+  }
+
+  .report-details-header h2 {
+    font-size: 21px;
+  }
+
+  .report-details-content {
+    padding: 22px;
+  }
+
+  .report-details-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .report-details-image-button {
+    height: 190px;
+  }
+
+  .report-details-footer {
+    padding: 15px 22px;
+  }
+
+  .report-details-footer > span {
+    font-size: 10px;
+  }
+
+  .report-image-lightbox {
+    padding: 15px;
+  }
+
+  .report-image-lightbox img {
+    max-width: 100%;
+  }
+}
+
+
+/* ============================= */
+/* My Badges */
+/* ============================= */
+
+.my-badges-section {
+  max-width: 1120px;
+  margin: 0 auto 55px;
+}
+
+.badges-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.badges-heading h2 {
+  font-size: 25px;
+  margin: 5px 0 2px;
+  font-weight: 800;
+}
+
+.badges-heading p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.badges-count {
+  background: var(--green-light);
+  color: var(--green-dark);
+  padding: 8px 15px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.my-badges-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.my-badge-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+  padding: 19px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  transition: 0.2s ease;
+  box-shadow: 0 4px 18px rgba(55, 76, 58, 0.025);
+}
+
+.my-badge-card:hover {
+  border-color: #cbdccc;
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(55, 76, 58, 0.06);
+}
+
+.badge-icon-wrapper {
+  width: 65px;
+  height: 65px;
+  min-width: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 17px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-size: 28px;
+  overflow: hidden;
+}
+
+.badge-icon-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 9px;
+}
+
+.badge-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.badge-info h3 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.badge-info p {
+  margin: 0 0 9px;
+  color: #7e887f;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.badge-info small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #98a399;
+  font-size: 10px;
+}
+
+.badge-info small span {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.empty-badges {
+  background: white;
+  border: 1px dashed #d5e2d5;
+  border-radius: 18px;
+  padding: 38px 20px;
+  text-align: center;
+}
+
+.empty-badges-icon {
+  width: 55px;
+  height: 55px;
+  margin: 0 auto 14px;
+  border-radius: 18px;
+  background: var(--yellow);
+  color: #857b4b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 27px;
+}
+
+.empty-badges h3 {
+  margin: 0 0 7px;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.empty-badges p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 auto;
+  max-width: 430px;
+  line-height: 1.8;
+}
+
+/* Responsive badges */
+
+@media (max-width: 950px) {
+  .my-badges-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .badges-heading h2 {
+    font-size: 22px;
+  }
+
+  .my-badges-list {
+    grid-template-columns: 1fr;
+  }
+
+  .my-badge-card {
+    padding: 15px;
+  }
+
+  .badge-icon-wrapper {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
   }
 }

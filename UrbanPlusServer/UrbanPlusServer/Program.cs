@@ -1,4 +1,3 @@
-
 // BLL
 using BLL;
 using BLL.Services.ServicesDB.AIChatServices;
@@ -20,7 +19,6 @@ using BLL.Services.ServiceSupport.EventAggregationServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServiceSupport.TokenServices;
 using BLL.Services.ServiceSupport.EmailServices;
-
 
 // DAL
 using DAL.Entities;
@@ -72,6 +70,7 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
 // ====================
 // Swagger + JWT
 // ====================
@@ -172,26 +171,24 @@ builder.Services.AddScoped<IEventAggregationService, EventAggregationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddScoped<AIChatTools>();
+
 // ====================
 // Image Service
 // ====================
 
-var imagesFolder = builder.Configuration["ImagesFolder"];
-var emailPassword = Environment.GetEnvironmentVariable("AppPassword");
-
-if (string.IsNullOrWhiteSpace(imagesFolder))
-{
-    throw new InvalidOperationException( "ImagesFolder is not configured.");
-}
-
-var fullImagesFolder = Path.GetFullPath(
-    Path.Combine(builder.Environment.ContentRootPath, imagesFolder));
+// תיקיית התמונות נמצאת בתוך UrbanPlusServer
+var fullImagesFolder = Path.Combine(
+    builder.Environment.ContentRootPath,
+    "Images"
+);
 
 Directory.CreateDirectory(fullImagesFolder);
 
-builder.Services.AddSingleton<IImageService>(
-    _ => new ImageService(fullImagesFolder));
+Console.WriteLine("Images folder: " + fullImagesFolder);
 
+builder.Services.AddSingleton<IImageService>(
+    _ => new ImageService(fullImagesFolder)
+);
 
 // ====================
 // AutoMapper
@@ -224,7 +221,6 @@ if (string.IsNullOrWhiteSpace(googleClientSecret))
         "GoogleClientSecret is missing. Set the environment variable GoogleClientSecret.");
 }
 
-
 // ====================
 // JWT Authentication
 // ====================
@@ -235,17 +231,20 @@ var jwtAudience = builder.Configuration["Jwt:Audience"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
-    throw new InvalidOperationException( "Jwt:Key is missing. Set the environment variable Jwt__Key.");
+    throw new InvalidOperationException(
+        "Jwt:Key is missing. Set the environment variable Jwt__Key.");
 }
 
 if (string.IsNullOrWhiteSpace(jwtIssuer))
 {
-    throw new InvalidOperationException( "Jwt:Issuer is missing. Set the environment variable Jwt__Issuer.");
+    throw new InvalidOperationException(
+        "Jwt:Issuer is missing. Set the environment variable Jwt__Issuer.");
 }
 
 if (string.IsNullOrWhiteSpace(jwtAudience))
 {
-    throw new InvalidOperationException("Jwt:Audience is missing. Set the environment variable Jwt__Audience.");
+    throw new InvalidOperationException(
+        "Jwt:Audience is missing. Set the environment variable Jwt__Audience.");
 }
 
 builder.Services
@@ -281,6 +280,10 @@ builder.Services.AddAuthorization(options =>
 // ====================
 
 var app = builder.Build();
+
+// ====================
+// Static Images
+// ====================
 
 app.UseStaticFiles(new StaticFileOptions
 {

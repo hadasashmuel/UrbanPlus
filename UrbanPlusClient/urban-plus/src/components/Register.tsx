@@ -1,9 +1,14 @@
+
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import FormField from "./FormField";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { registerUser } from "../store/users/usersThunks";
+import {
+  registerUser,
+  googleLoginUser,
+} from "../store/users/usersThunks";
 import "./Register.css";
 
 function Register() {
@@ -21,6 +26,7 @@ function Register() {
   const loading = useAppSelector((state) => state.users.loading);
   const serverError = useAppSelector((state) => state.users.error);
 
+  // הרשמה רגילה
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
@@ -59,6 +65,18 @@ function Register() {
       ).unwrap();
 
       navigate("/login", { state: { registered: true } });
+    } catch {
+      // שגיאת השרת מוצגת למשתמש
+    }
+  }
+
+  // הרשמה / התחברות באמצעות Google
+  async function handleGoogleSuccess(credential: string) {
+    setError("");
+
+    try {
+      await dispatch(googleLoginUser(credential)).unwrap();
+      navigate("/map");
     } catch {
       // שגיאת השרת מוצגת למשתמש
     }
@@ -141,6 +159,30 @@ function Register() {
         >
           {loading ? "נרשמת..." : "אישור ההרשמה"}
         </button>
+
+        <div className="register-divider">
+          <span>או הרשמה באמצעות</span>
+        </div>
+
+        <div className="register-google">
+          <GoogleLogin
+            onSuccess={(credentialResponse) => {
+              if (credentialResponse.credential) {
+                handleGoogleSuccess(credentialResponse.credential);
+              } else {
+                setError("לא התקבל אישור התחברות מ-Google");
+              }
+            }}
+            onError={() => {
+              setError("ההרשמה באמצעות Google נכשלה");
+            }}
+            text="continue_with"
+            shape="rectangular"
+            theme="outline"
+            size="large"
+            width="300"
+          />
+        </div>
 
         <p className="register-footer">
           כבר יש לך חשבון? <Link to="/login">התחברות</Link>

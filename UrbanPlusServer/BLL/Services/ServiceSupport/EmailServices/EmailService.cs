@@ -26,7 +26,7 @@ namespace BLL.Services.ServiceSupport.EmailServices
 
                 var senderName =_configuration["EmailSettings:SenderName"];
 
-                var password = Environment.GetEnvironmentVariable("AppPassword");
+                var password = _configuration["EmailSettings:AppPassword"];
 
                 if (string.IsNullOrWhiteSpace(senderEmail) || string.IsNullOrWhiteSpace(password))
                 {
