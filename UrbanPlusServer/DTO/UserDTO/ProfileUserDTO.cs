@@ -1,4 +1,5 @@
-﻿using DAL.Entities;
+﻿
+using DAL.Entities;
 using DTO.SaveEventDTO;
 using DTO.UserBadgeDTO;
 using DTO.VoteDTO;
@@ -13,6 +14,10 @@ namespace DTO.UserDTO
         public string LastName { get; set; }
         public string Email { get; set; }
         public AuthProvider AuthProvider { get; set; }
+
+        // תפקיד המשתמש: 0 = לקוח, 1 = מנהל
+        public int RoleCode { get; set; }
+
         public string? ProfilePicture { get; set; }
         public double ScoreReliability { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -21,3 +26,4 @@ namespace DTO.UserDTO
         public List<ShowSavedEventsDTO> SavedEvents { get; set; }
     }
 }
+ 

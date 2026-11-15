@@ -51,6 +51,9 @@ export interface EventsState {
   creatingVote: boolean;
   deletingVote: boolean;
 
+  // ניהול אירועים – מנהל
+  deletingMainEvent: boolean;
+
   error: string | null;
 }
 
@@ -69,6 +72,9 @@ export const initialState: EventsState = {
 
   creatingVote: false,
   deletingVote: false,
+
+  // ניהול אירועים – מנהל
+  deletingMainEvent: false,
 
   error: null,
 };

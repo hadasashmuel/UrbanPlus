@@ -1,4 +1,3 @@
-
 // BLL
 using BLL;
 using BLL.Services.ServicesDB.AIChatServices;
@@ -20,6 +19,7 @@ using BLL.Services.ServiceSupport.EventAggregationServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServiceSupport.TokenServices;
 using BLL.Services.ServiceSupport.EmailServices;
+using BLL.Services.ServiceSupport.NotificationServices;
 
 // DAL
 using DAL.Entities;
@@ -40,17 +40,22 @@ using DAL.Repositories.VoteRepositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
+using System.Security.Claims;
+using System.Text;
+
 // Google Gemini
 using Google.GenAI;
 
-using System.Text;
 using UrbanPlusServer.Filters;
+using UrbanPlusServer.Hubs;
+using UrbanPlusServer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +68,16 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<GlobalExceptionFilter>();
 });
 
+// ====================
+// SignalR
+// ====================
+
+builder.Services.AddSignalR();
+
+// ====================
+// CORS
+// ====================
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactClient", policy =>
@@ -70,7 +85,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins("http://localhost:5173")
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -159,7 +175,11 @@ builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IMainEventService, MainEventService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+
+// Notification Services
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationRealtimeSender, NotificationRealtimeSender>();
+
 builder.Services.AddScoped<IReportImageService, ReportImageService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ISaveEventService, SaveEventService>();
@@ -264,7 +284,27 @@ builder.Services
 
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtKey))
+                Encoding.UTF8.GetBytes(jwtKey)),
+
+            RoleClaimType = ClaimTypes.Role
+        };
+
+        // SignalR JWT authentication
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs/notifications"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -305,5 +345,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// SignalR Hub
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

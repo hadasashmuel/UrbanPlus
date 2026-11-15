@@ -20,7 +20,8 @@ namespace DAL.Repositories.CategoryRepositories
 
         public Categories? GetCategoryById(int id)
         {
-            return _context.Categories.AsNoTracking().FirstOrDefault(c => c.CategoryId == id);
+            return _context.Categories.AsNoTracking()
+                .FirstOrDefault(c => c.CategoryId == id);
         }
 
         public Categories AddCategory(Categories category)
@@ -31,9 +32,26 @@ namespace DAL.Repositories.CategoryRepositories
             return category;
         }
 
+        public bool UpdateCategory(Categories category)
+        {
+            var existingCategory = _context.Categories
+                .FirstOrDefault(c => c.CategoryId == category.CategoryId);
+
+            if (existingCategory == null)
+                return false;
+
+            existingCategory.CategoryName = category.CategoryName;
+            existingCategory.CategoryDescription = category.CategoryDescription;
+
+            _context.SaveChanges();
+
+            return true;
+        }
+
         public bool DeleteCategory(int id)
         {
-            var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
+            var category = _context.Categories
+                .FirstOrDefault(c => c.CategoryId == id);
 
             if (category == null)
                 return false;

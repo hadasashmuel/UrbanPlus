@@ -42,12 +42,84 @@ export const fetchMyReports = createAsyncThunk<
 
       if (!response.ok) {
         const errorMessage = await response.text();
-        return rejectWithValue(
-          errorMessage || "לא ניתן לטעון את הדיווחים"
-        );
+        return rejectWithValue(errorMessage || "לא ניתן לטעון את הדיווחים");
       }
 
       return (await response.json()) as Report[];
+    } catch {
+      return rejectWithValue("לא ניתן להתחבר לשרת");
+    }
+  }
+);
+
+// שליפת כל הדיווחים עבור המנהל
+export const fetchAllReports = createAsyncThunk<
+  Report[],
+  void,
+  {
+    state: { users: { token: string | null } };
+    rejectValue: string;
+  }
+>(
+  "reports/fetchAllReports",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().users.token;
+
+      if (!token) {
+        return rejectWithValue("אין משתמש מחובר");
+      }
+
+      const response = await fetch(REPORT_API_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        return rejectWithValue(errorMessage || "לא ניתן לטעון את כל הדיווחים");
+      }
+
+      return (await response.json()) as Report[];
+    } catch {
+      return rejectWithValue("לא ניתן להתחבר לשרת");
+    }
+  }
+);
+
+// מחיקת דיווח על ידי מנהל
+export const deleteReport = createAsyncThunk<
+  number,
+  number,
+  {
+    state: { users: { token: string | null } };
+    rejectValue: string;
+  }
+>(
+  "reports/deleteReport",
+  async (reportId, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().users.token;
+
+      if (!token) {
+        return rejectWithValue("אין משתמש מחובר");
+      }
+
+      const response = await fetch(`${REPORT_API_URL}/${reportId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        return rejectWithValue(errorMessage || "מחיקת הדיווח נכשלה");
+      }
+
+      return reportId;
     } catch {
       return rejectWithValue("לא ניתן להתחבר לשרת");
     }
@@ -82,7 +154,7 @@ export const createReport = createAsyncThunk<
       formData.append("InputAddress", reportData.inputAddress);
 
       reportData.images.forEach((image, index) => {
-        formData.append(`ImageList[${index}].ImageUrl`, image);
+        formData.append(`ImageList[${index}]`, image);
       });
 
       const response = await fetch(REPORT_API_URL, {
@@ -95,10 +167,7 @@ export const createReport = createAsyncThunk<
 
       if (!response.ok) {
         const errorMessage = await response.text();
-
-        return rejectWithValue(
-          errorMessage || "יצירת הדיווח נכשלה"
-        );
+        return rejectWithValue(errorMessage || "יצירת הדיווח נכשלה");
       }
 
       return (await response.json()) as Report;

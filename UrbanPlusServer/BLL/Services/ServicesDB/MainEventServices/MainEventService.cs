@@ -35,83 +35,30 @@ namespace BLL.Services.ServicesDB.MainEventServices
             var mainEvent = _repository.GetMainEventById(id);
 
             if (mainEvent == null)
-                throw new NotFoundException($"mainEvent with id {id} was not found"); ;
+                throw new NotFoundException(
+                    $"Main event with id {id} was not found.");
 
             return _mapper.Map<ShowMainEventDTO>(mainEvent);
         }
 
-        //public ShowMainEventDTO CreateMainEvent( CreateMainEventDTO dto)
-        //{
-        //    if (dto == null)
-        //        throw new ArgumentNullException(nameof(dto));
-
-        //    if (string.IsNullOrWhiteSpace(dto.Title))
-        //        throw new ArgumentException(
-        //            "Event title is required.");
-
-        //    if (dto.Title.Length > 80)
-        //        throw new ArgumentException(
-        //            "Event title cannot exceed 80 characters.");
-
-        //    if (dto.EstimatedResolutionMinutes < 0)
-        //        throw new ArgumentException(
-        //            "Estimated resolution time cannot be negative.");
-
-        //    if (dto.Latitude < -90 || dto.Latitude > 90)
-        //        throw new ArgumentException(
-        //            "Latitude is invalid.");
-
-        //    if (dto.Longitude < -180 || dto.Longitude > 180)
-        //        throw new ArgumentException(
-        //            "Longitude is invalid.");
-
-        //    var mainEvent = _mapper.Map<MainEvents>(dto);
-
-        //    mainEvent.CreatedAt = DateTime.UtcNow;
-
-        //    var createdEvent =
-        //        _repository.AddMainEvent(mainEvent);
-
-        //    return _mapper.Map<ShowMainEventDTO>(createdEvent);
-        //}
-
-        //public bool UpdateMainEvent(int id, UpdateMainEventDTO dto)
-        //{
-        //    if (id <= 0 || dto == null)
-        //        return false;
-
-        //    var existingEvent =
-        //        _repository.GetMainEventById(id);
-
-        //    if (existingEvent == null)
-        //        return false;
-
-        //    if (string.IsNullOrWhiteSpace(dto.Title))
-        //        return false;
-
-        //    if (dto.Title.Length > 80)
-        //        return false;
-
-        //    if (dto.EstimatedResolutionMinutes < 0)
-        //        return false;
-
-        //    if (dto.Latitude < -90 || dto.Latitude > 90)
-        //        return false;
-
-        //    if (dto.Longitude < -180 || dto.Longitude > 180)
-        //        return false;
-
-        //    _mapper.Map(dto, existingEvent);
-
-        //    existingEvent.MainEventsId = id;
-
-        //    return _repository.UpdateMainEvent(existingEvent);
-        //}
-
-        public bool DeleteMainEvent(int id)
+        public bool DeleteMainEvent(int id, string reason)
         {
             if (id <= 0)
-                return false;
+                throw new ArgumentException(
+                    "Event ID must be greater than zero.");
+
+            if (string.IsNullOrWhiteSpace(reason) ||
+                reason.Trim().Length < 3)
+            {
+                throw new ArgumentException(
+                    "A valid deletion reason is required.");
+            }
+
+            var mainEvent = _repository.GetMainEventById(id);
+
+            if (mainEvent == null)
+                throw new NotFoundException(
+                    $"Main event with id {id} was not found.");
 
             return _repository.DeleteMainEvent(id);
         }

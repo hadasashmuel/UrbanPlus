@@ -10,7 +10,6 @@ using DTO.UserDTO;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.SqlServer.Server;
 using System.Security.Cryptography;
 
 namespace BLL.Services.ServicesDB.UserServices
@@ -25,7 +24,14 @@ namespace BLL.Services.ServicesDB.UserServices
         private readonly IPasswordHasher<Users> _hasher;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository,IImageService imageService,IMapper mapper, ITokenService tokens,IPasswordHasher<Users> hasher, IEmailService emailService,IConfiguration configuration)
+        public UserService(
+            IUserRepository userRepository,
+            IImageService imageService,
+            IMapper mapper,
+            ITokenService tokens,
+            IPasswordHasher<Users> hasher,
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             _userRepository = userRepository;
             _imageService = imageService;
@@ -77,6 +83,7 @@ namespace BLL.Services.ServicesDB.UserServices
 
             return createdUser != null;
         }
+
         public AuthResponseUserDto? Login(LoginUserDTO dto)
         {
             if (dto == null)
@@ -91,7 +98,6 @@ namespace BLL.Services.ServicesDB.UserServices
             var user = _userRepository.GetByEmailAndProvider(
                 email, dto.AuthProvider);
 
-            // לא חושפים אם המשתמש קיים במערכת
             if (user == null)
                 return null;
 
@@ -113,20 +119,25 @@ namespace BLL.Services.ServicesDB.UserServices
             var user = _userRepository.GetById(userId);
 
             if (user == null)
-                throw new NotFoundException( $"User with id {userId} was not found.");
+                throw new NotFoundException(
+                    $"User with id {userId} was not found.");
 
-            return _mapper.Map<ProfileUserDTO>(user);
+            var profile = _mapper.Map<ProfileUserDTO>(user);
+            profile.RoleCode = user.RoleCode;
+            return profile;
         }
 
         public ShortProfileUserDTO GetShortUserById(int userId)
         {
             if (userId <= 0)
-                throw new ArgumentException( "User ID must be greater than zero.");
+                throw new ArgumentException(
+                    "User ID must be greater than zero.");
 
             var user = _userRepository.GetById(userId);
 
             if (user == null)
-                throw new NotFoundException($"User with id {userId} was not found.");
+                throw new NotFoundException(
+                    $"User with id {userId} was not found.");
 
             return _mapper.Map<ShortProfileUserDTO>(user);
         }
@@ -134,7 +145,8 @@ namespace BLL.Services.ServicesDB.UserServices
         public ProfileUserDTO UpdateUser(int userId, UpdateUserDTO dto)
         {
             if (userId <= 0)
-                throw new ArgumentException( "User ID must be greater than zero.");
+                throw new ArgumentException(
+                    "User ID must be greater than zero.");
 
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
@@ -142,24 +154,26 @@ namespace BLL.Services.ServicesDB.UserServices
             var user = _userRepository.GetById(userId);
 
             if (user == null)
-                throw new NotFoundException( $"User with id {userId} was not found.");
+                throw new NotFoundException(
+                    $"User with id {userId} was not found.");
 
             if (string.IsNullOrWhiteSpace(dto.FirstName))
                 throw new ArgumentException("First name is required.");
 
             if (dto.FirstName.Trim().Length > 200)
-                throw new ArgumentException( "First name cannot exceed 200 characters.");
+                throw new ArgumentException(
+                    "First name cannot exceed 200 characters.");
 
             if (string.IsNullOrWhiteSpace(dto.LastName))
                 throw new ArgumentException("Last name is required.");
 
             if (dto.LastName.Trim().Length > 200)
-                throw new ArgumentException("Last name cannot exceed 200 characters.");
+                throw new ArgumentException(
+                    "Last name cannot exceed 200 characters.");
 
             user.FirstName = dto.FirstName.Trim();
             user.LastName = dto.LastName.Trim();
 
-            // עדכון תמונת פרופיל, אם נשלחה תמונה חדשה
             if (dto.ProfilePicture != null)
             {
                 var oldImage = user.ProfilePicture;
@@ -171,8 +185,8 @@ namespace BLL.Services.ServicesDB.UserServices
                 {
                     var updatedUser = _userRepository.Update(user);
 
-                    // מחיקת התמונה הישנה רק אחרי עדכון מוצלח
-                    if (!string.IsNullOrWhiteSpace(oldImage))_imageService.Delete(oldImage);
+                    if (!string.IsNullOrWhiteSpace(oldImage))
+                        _imageService.Delete(oldImage);
 
                     return _mapper.Map<ProfileUserDTO>(updatedUser);
                 }
@@ -188,7 +202,8 @@ namespace BLL.Services.ServicesDB.UserServices
             return _mapper.Map<ProfileUserDTO>(result);
         }
 
-        public async Task<AuthResponseUserDto?> GoogleLogin(GoogleLoginDTO dto)
+        public async Task<AuthResponseUserDto?> GoogleLogin(
+            GoogleLoginDTO dto)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
@@ -199,7 +214,8 @@ namespace BLL.Services.ServicesDB.UserServices
             var clientId = _configuration["GoogleClientId"];
 
             if (string.IsNullOrWhiteSpace(clientId))
-                throw new InvalidOperationException("GoogleClientId is missing.");
+                throw new InvalidOperationException(
+                    "GoogleClientId is missing.");
 
             GoogleJsonWebSignature.Payload payload;
 
@@ -225,16 +241,11 @@ namespace BLL.Services.ServicesDB.UserServices
 
             var email = payload.Email.Trim().ToLowerInvariant();
 
-            // חיפוש משתמש קיים לפי כתובת האימייל,
-            // ללא תלות בספק ההתחברות
             var existingUser = _userRepository.GetByEmail(email);
 
             if (existingUser != null)
-            {
                 return _tokens.CreateToken(existingUser);
-            }
 
-            // יצירת משתמש חדש
             var user = new Users
             {
                 FirstName = payload.GivenName ?? payload.Name ?? "Google User",
@@ -246,7 +257,6 @@ namespace BLL.Services.ServicesDB.UserServices
                 ScoreReliability = 50
             };
 
-            // יצירת סיסמה אקראית
             var randomPassword = Convert.ToBase64String(
                 RandomNumberGenerator.GetBytes(32));
 
@@ -258,7 +268,6 @@ namespace BLL.Services.ServicesDB.UserServices
             if (createdUser == null)
                 return null;
 
-            // שליחת מייל ברוכים הבאים בהרשמה ראשונה בלבד
             _emailService.SendWelcomeEmail(
                 user.Email,
                 user.FirstName);
@@ -266,20 +275,57 @@ namespace BLL.Services.ServicesDB.UserServices
             return _tokens.CreateToken(user);
         }
 
-        public bool DeleteUser(int userId)
+        // ====================
+        // Admin - Get All Users
+        // ====================
+
+        public List<AdminUserDTO> GetAllUsers()
+        {
+            var users = _userRepository.GetAll();
+
+            return users.Select(user => new AdminUserDTO
+            {
+                UserId = user.UserId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                ProfilePicture = user.ProfilePicture,
+                RoleCode = user.RoleCode,
+                ScoreReliability = user.ScoreReliability,
+                CreatedAt = user.CreatedAt
+            }).ToList();
+        }
+
+        // ====================
+        // Admin - Delete User
+        // ====================
+
+        public bool DeleteUser(int userId, string reason)
         {
             if (userId <= 0)
-                throw new ArgumentException( "User ID must be greater than zero.");
+                throw new ArgumentException(
+                    "User ID must be greater than zero.");
+
+            if (string.IsNullOrWhiteSpace(reason) ||
+                reason.Trim().Length < 3)
+            {
+                throw new ArgumentException(
+                    "A valid deletion reason is required.");
+            }
 
             var user = _userRepository.GetById(userId);
 
             if (user == null)
-                throw new NotFoundException( $"User with id {userId} was not found.");
+                throw new NotFoundException(
+                    $"User with id {userId} was not found.");
 
             var deleted = _userRepository.Delete(userId);
 
-            if (deleted && !string.IsNullOrWhiteSpace(user.ProfilePicture))
+            if (deleted &&
+                !string.IsNullOrWhiteSpace(user.ProfilePicture))
+            {
                 _imageService.Delete(user.ProfilePicture);
+            }
 
             return deleted;
         }

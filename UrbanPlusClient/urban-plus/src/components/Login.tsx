@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   loginUser,
   googleLoginUser,
+  fetchMyProfile,
 } from "../store/users/usersThunks";
 import { GoogleLogin } from "@react-oauth/google";
 import "./Login.css";
@@ -25,6 +25,24 @@ function Login() {
     document.title = "התחברות | URBAN+";
   }, []);
 
+  // מעבר לעמוד המתאים לפי תפקיד המשתמש
+  async function navigateByRole() {
+    try {
+      const user = await dispatch(fetchMyProfile()).unwrap();
+
+      console.log("פרטי המשתמש שהתקבלו:", user);
+      console.log("תפקיד המשתמש:", user.roleCode);
+
+      if (user.roleCode === 1) {
+        navigate("/admin");
+      } else {
+        navigate("/map");
+      }
+    } catch (error) {
+      console.error("לא ניתן לטעון את פרטי המשתמש:", error);
+    }
+  }
+
   // התחברות רגילה
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -41,9 +59,9 @@ function Login() {
       console.log("תשובת התחברות מהשרת:", result);
       console.log("הטוקן שהתקבל:", result.token);
 
-      navigate("/map");
-    } catch {
-      // השגיאה מוצגת מתוך Redux
+      await navigateByRole();
+    } catch (error) {
+      console.error("ההתחברות נכשלה:", error);
     }
   }
 
@@ -57,9 +75,9 @@ function Login() {
       console.log("תשובת התחברות Google:", result);
       console.log("הטוקן שהתקבל:", result.token);
 
-      navigate("/map");
-    } catch {
-      // השגיאה מוצגת מתוך Redux
+      await navigateByRole();
+    } catch (error) {
+      console.error("התחברות Google נכשלה:", error);
     }
   }
 
@@ -110,12 +128,10 @@ function Login() {
           {loading ? "מתחבר..." : "אישור ההתחברות"}
         </button>
 
-        {/* הפרדה בין סוגי ההתחברות */}
         <div className="auth-divider">
           <span>או התחברי באמצעות</span>
         </div>
 
-        {/* התחברות Google */}
         <div className="google-login">
           <GoogleLogin
             onSuccess={(response) => {
@@ -132,7 +148,6 @@ function Login() {
             size="large"
             logo_alignment="center"
             width="300"
-            
           />
         </div>
 

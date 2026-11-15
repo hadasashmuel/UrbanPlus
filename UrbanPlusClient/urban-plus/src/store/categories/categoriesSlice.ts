@@ -1,10 +1,12 @@
 
 import { createSlice } from "@reduxjs/toolkit";
 import { initialState } from "./categoriesState";
+
 import {
   fetchCategories,
   fetchCategoryById,
   createCategory,
+  updateCategory,
   deleteCategory,
 } from "./categoriesThunks";
 
@@ -67,6 +69,29 @@ const categoriesSlice = createSlice({
         state.error = action.payload ?? "Failed to create category";
       })
 
+      // עדכון קטגוריה
+      .addCase(updateCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateCategory.fulfilled, (state, action) => {
+        state.loading = false;
+
+        const index = state.categories.findIndex(
+          (category) => category.categoryId === action.payload.categoryId
+        );
+
+        if (index !== -1) {
+          state.categories[index] = action.payload;
+        }
+
+        state.error = null;
+      })
+      .addCase(updateCategory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Failed to update category";
+      })
+
       // מחיקת קטגוריה
       .addCase(deleteCategory.pending, (state) => {
         state.loading = true;
@@ -74,9 +99,11 @@ const categoriesSlice = createSlice({
       })
       .addCase(deleteCategory.fulfilled, (state, action) => {
         state.loading = false;
+
         state.categories = state.categories.filter(
           (category) => category.categoryId !== action.payload
         );
+
         state.error = null;
       })
       .addCase(deleteCategory.rejected, (state, action) => {

@@ -250,6 +250,15 @@ function Profile() {
             >
               ✎ עדכון פרטים
             </button>
+
+            {user.roleCode === 1 && (
+              <button
+                className="profile-admin-button"
+                onClick={() => navigate("/admin")}
+              >
+                ▦ לוח מנהל
+              </button>
+            )}
           </div>
         </div>
 

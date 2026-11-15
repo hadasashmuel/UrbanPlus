@@ -21,6 +21,12 @@ export interface CreateVoteRequest {
   typeVote: number;
 }
 
+// נתונים למחיקת אירוע
+export interface DeleteMainEventRequest {
+  mainEventId: number;
+  reason: string;
+}
+
 // שליפת כל האירועים
 export const fetchMainEvents = createAsyncThunk<
   MainEvent[],
@@ -263,6 +269,52 @@ export const deleteVote = createAsyncThunk<
       }
 
       return voteId;
+    } catch {
+      return rejectWithValue("Could not connect to server");
+    }
+  }
+);
+
+// =====================================
+//          ניהול אירועים – מנהל
+// =====================================
+
+// מחיקת אירוע
+export const deleteMainEvent = createAsyncThunk<
+  number,
+  DeleteMainEventRequest,
+  ThunkConfig
+>(
+  "events/deleteMainEvent",
+  async ({ mainEventId, reason }, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().users.token;
+
+      if (!token) {
+        return rejectWithValue("אין משתמש מחובר");
+      }
+
+      const response = await fetch(
+        `${MAIN_EVENT_API}/admin/${mainEventId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            reason,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        return rejectWithValue(
+          (await response.text()) || "Failed to delete event"
+        );
+      }
+
+      return mainEventId;
     } catch {
       return rejectWithValue("Could not connect to server");
     }

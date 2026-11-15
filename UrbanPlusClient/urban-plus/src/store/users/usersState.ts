@@ -13,12 +13,25 @@ export interface ProfileUser {
   lastName: string;
   email: string;
   authProvider: number;
+  roleCode: number;
   profilePicture: string | null;
   scoreReliability: number;
   createdAt: string;
   userBadges: UserBadge[];
   votes: unknown[];
   savedEvents: unknown[];
+}
+
+// משתמש לצורך לוח המנהל
+export interface AdminUser {
+  userId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  profilePicture: string | null;
+  roleCode: number;
+  scoreReliability: number;
+  createdAt: string;
 }
 
 export interface AuthResponseUser {
@@ -32,6 +45,11 @@ export interface UsersState {
   expiresAt: string | null;
   loading: boolean;
   error: string | null;
+
+  // ניהול משתמשים - מנהל
+  adminUsers: AdminUser[];
+  adminUsersLoading: boolean;
+  adminUsersError: string | null;
 }
 
 export const initialState: UsersState = {
@@ -40,4 +58,9 @@ export const initialState: UsersState = {
   expiresAt: null,
   loading: false,
   error: null,
+
+  // ניהול משתמשים
+  adminUsers: [],
+  adminUsersLoading: false,
+  adminUsersError: null,
 };

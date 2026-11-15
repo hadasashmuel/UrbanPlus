@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -26,6 +26,14 @@ import {
   createVote,
   deleteVote,
 } from "../store/events/eventsThunks";
+
+import {
+  clearRealtimeNotification,
+} from "../store/notifications/notificationsSlice";
+
+import {
+  createNearbyNotifications,
+} from "../store/notifications/notificationsThunks";
 
 import "../App.css";
 
@@ -155,6 +163,11 @@ function Map() {
 
   const token = useAppSelector((state) => state.users.token);
 
+  // התראה חדשה שהתקבלה דרך SignalR
+  const realtimeNotification = useAppSelector(
+    (state) => state.notifications.realtimeNotification
+  );
+
   const [selectedEventId, setSelectedEventId] =
     useState<number | null>(null);
 
@@ -166,24 +179,23 @@ function Map() {
   const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState("");
 
-  // האירוע שנבחר
+  const [locationReady, setLocationReady] = useState(false);
+
+  const lastNearbyRequest = useRef<string | null>(null);
+
   const selectedEvent = mainEvents.find(
     (event) => event.mainEventsId === selectedEventId
   );
 
-  // בדיקה האם האירוע במעקב
   const savedEvent = selectedEvent
     ? savedEvents.find(
-        (item) =>
-          item.mainEventId === selectedEvent.mainEventsId
+        (item) => item.mainEventId === selectedEvent.mainEventsId
       )
     : undefined;
 
-  // בדיקה האם המשתמש כבר הצביע
   const userVote = selectedEvent
     ? votes.find(
-        (vote) =>
-          vote.mainEventId === selectedEvent.mainEventsId
+        (vote) => vote.mainEventId === selectedEvent.mainEventsId
       )
     : undefined;
 
@@ -201,6 +213,20 @@ function Map() {
       dispatch(fetchMyVotes());
     }
   }, [dispatch, token]);
+
+  // =====================================
+  //       הצגת התראות בזמן אמת
+  // =====================================
+
+  useEffect(() => {
+    if (!realtimeNotification) return;
+
+    const timeout = window.setTimeout(() => {
+      dispatch(clearRealtimeNotification());
+    }, 6000);
+
+    return () => window.clearTimeout(timeout);
+  }, [realtimeNotification, dispatch]);
 
   // =====================================
   //             איתור מיקום
@@ -222,11 +248,11 @@ function Map() {
       (pos) => {
         if (!active) return;
 
-        setPosition([
-          pos.coords.latitude,
-          pos.coords.longitude,
-        ]);
+        const latitude = pos.coords.latitude;
+        const longitude = pos.coords.longitude;
 
+        setPosition([latitude, longitude]);
+        setLocationReady(true);
         setLoading(false);
         setLocationError("");
       },
@@ -251,6 +277,36 @@ function Map() {
   }, []);
 
   // =====================================
+  //       שליחת מיקום ליצירת התראות
+  // =====================================
+
+  useEffect(() => {
+    if (!token || !locationReady) return;
+
+    const requestKey = `${token}:${position[0]}:${position[1]}`;
+
+    if (lastNearbyRequest.current === requestKey) return;
+
+    lastNearbyRequest.current = requestKey;
+
+    dispatch(
+      createNearbyNotifications({
+        latitude: position[0],
+        longitude: position[1],
+      })
+    )
+      .unwrap()
+      .catch((error) => {
+        console.error(
+          "שגיאה ביצירת התראות בקרבת המשתמש:",
+          error
+        );
+
+        lastNearbyRequest.current = null;
+      });
+  }, [dispatch, token, locationReady, position]);
+
+  // =====================================
   //             שמירת אירוע
   // =====================================
 
@@ -273,7 +329,6 @@ function Map() {
       return;
     }
 
-    // אין הצבעה קודמת – יוצרים הצבעה
     if (!userVote) {
       dispatch(
         createVote({
@@ -285,13 +340,11 @@ function Map() {
       return;
     }
 
-    // לחיצה על אותה הצבעה – מבטלים אותה
     if (userVote.typeVote === typeVote) {
       dispatch(deleteVote(userVote.voteId));
       return;
     }
 
-    // לחיצה על הצבעה הפוכה – מחליפים הצבעה
     try {
       await dispatch(deleteVote(userVote.voteId)).unwrap();
 
@@ -348,6 +401,90 @@ function Map() {
         padding: 0,
       }}
     >
+      {/* ================================= */}
+      {/*       התראה קופצת בזמן אמת         */}
+      {/* ================================= */}
+
+      {token && realtimeNotification && (
+        <div
+          style={{
+            position: "fixed",
+            top: "90px",
+            right: "20px",
+            zIndex: 3000,
+            width: "340px",
+            maxWidth: "calc(100vw - 40px)",
+            background: "white",
+            borderRight: "5px solid #789b83",
+            borderRadius: "14px",
+            padding: "20px",
+            direction: "rtl",
+            boxShadow: "0 5px 25px rgba(0,0,0,0.2)",
+            display: "flex",
+            gap: "14px",
+            alignItems: "flex-start",
+            animation: "notificationSlideIn 0.3s ease-out",
+          }}
+        >
+          <button
+            onClick={() =>
+              dispatch(clearRealtimeNotification())
+            }
+            style={{
+              position: "absolute",
+              left: "10px",
+              top: "7px",
+              border: "none",
+              background: "transparent",
+              fontSize: "22px",
+              color: "#777",
+              cursor: "pointer",
+            }}
+            aria-label="סגירת התראה"
+          >
+            ×
+          </button>
+
+          <span style={{ fontSize: "26px" }}>🔔</span>
+
+          <div>
+            <strong
+              style={{
+                display: "block",
+                color: "#456b52",
+                fontSize: "16px",
+                marginBottom: "8px",
+              }}
+            >
+              התראה חדשה!
+            </strong>
+
+            <p
+              style={{
+                margin: 0,
+                color: "#374151",
+                fontSize: "14px",
+                lineHeight: 1.5,
+              }}
+            >
+              {realtimeNotification.content}
+            </p>
+
+            {realtimeNotification.titleMainEvent && (
+              <small
+                style={{
+                  display: "block",
+                  marginTop: "8px",
+                  color: "#789b83",
+                }}
+              >
+                {realtimeNotification.titleMainEvent}
+              </small>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* הודעת מיקום */}
       {locationError && (
         <div
@@ -425,7 +562,6 @@ function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* מיקום נוכחי */}
         <Marker position={position}>
           <Popup>
             {loading
@@ -436,7 +572,6 @@ function Map() {
           </Popup>
         </Marker>
 
-        {/* סמני אירועים */}
         {mainEvents.map((event) => (
           <Marker
             key={event.mainEventsId}
@@ -486,7 +621,6 @@ function Map() {
               position: "relative",
             }}
           >
-            {/* סגירת חלון */}
             <button
               onClick={() => setSelectedEventId(null)}
               style={{
@@ -506,7 +640,6 @@ function Map() {
               ×
             </button>
 
-            {/* כותרת האירוע */}
             <div
               style={{
                 borderBottom: "1px solid #e5e7eb",
@@ -554,7 +687,6 @@ function Map() {
                 {getStatusLabel(selectedEvent.status)}
               </span>
 
-              {/* לייק ודיסלייק בחלק העליון */}
               <div
                 style={{
                   display: "flex",
@@ -595,7 +727,6 @@ function Map() {
               </div>
             </div>
 
-            {/* פרטי האירוע */}
             <h3 style={{ fontSize: "17px", color: "#111827" }}>
               פרטי האירוע
             </h3>
@@ -642,7 +773,6 @@ function Map() {
                 : "טרם הסתיים"}
             </div>
 
-            {/* נתונים */}
             <div
               style={{
                 display: "grid",
@@ -700,10 +830,6 @@ function Map() {
               </div>
             </div>
 
-            {/* ================================= */}
-            {/*             מעקב אחר אירוע          */}
-            {/* ================================= */}
-
             <div
               style={{
                 borderTop: "1px solid #e5e7eb",
@@ -746,7 +872,6 @@ function Map() {
               )}
             </div>
 
-            {/* מספר הודעות */}
             <div
               style={{
                 marginTop: "20px",

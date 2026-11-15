@@ -1,6 +1,10 @@
 
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { AuthResponseUser, ProfileUser } from "./usersState";
+import type {
+  AuthResponseUser,
+  ProfileUser,
+  AdminUser,
+} from "./usersState";
 
 const API_URL = "https://localhost:7019/api/User";
 
@@ -173,6 +177,7 @@ export const updateUser = createAsyncThunk<
     }
   }
 );
+
 // התחברות באמצעות Google
 export const googleLoginUser = createAsyncThunk<
   AuthResponseUser,
@@ -199,6 +204,87 @@ export const googleLoginUser = createAsyncThunk<
       return await response.json();
     } catch {
       return rejectWithValue("Could not connect to server");
+    }
+  }
+);
+
+// ======================================
+// ניהול משתמשים - מנהל מערכת
+// ======================================
+
+// שליפת כל המשתמשים
+export const fetchAdminUsers = createAsyncThunk<
+  AdminUser[],
+  void,
+  { state: { users: { token: string | null } }; rejectValue: string }
+>(
+  "users/fetchAdminUsers",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().users.token;
+
+      if (!token) {
+        return rejectWithValue("אין משתמש מחובר");
+      }
+
+      const response = await fetch(`${API_URL}/admin/all`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        return rejectWithValue(
+          (await response.text()) || "לא ניתן לטעון את רשימת המשתמשים"
+        );
+      }
+
+      return await response.json();
+    } catch {
+      return rejectWithValue("שגיאה בהתחברות לשרת");
+    }
+  }
+);
+
+// מחיקת משתמש עם סיבה
+interface DeleteAdminUserRequest {
+  userId: number;
+  reason: string;
+}
+
+export const deleteAdminUser = createAsyncThunk<
+  number,
+  DeleteAdminUserRequest,
+  { state: { users: { token: string | null } }; rejectValue: string }
+>(
+  "users/deleteAdminUser",
+  async ({ userId, reason }, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().users.token;
+
+      if (!token) {
+        return rejectWithValue("אין משתמש מחובר");
+      }
+
+      const response = await fetch(`${API_URL}/admin/${userId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ reason }),
+      });
+
+      if (!response.ok) {
+        return rejectWithValue(
+          (await response.text()) || "מחיקת המשתמש נכשלה"
+        );
+      }
+
+      return userId;
+    } catch {
+      return rejectWithValue("שגיאה בהתחברות לשרת");
     }
   }
 );

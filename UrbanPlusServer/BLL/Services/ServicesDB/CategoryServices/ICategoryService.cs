@@ -1,4 +1,5 @@
-﻿using DTO.CategoryDTO;
+﻿
+using DTO.CategoryDTO;
 
 namespace BLL.Services.ServicesDB.CategoryServices
 {
@@ -7,6 +8,7 @@ namespace BLL.Services.ServicesDB.CategoryServices
         List<ShowCategoryDTO> GetAllCategories();
         ShowCategoryDTO GetCategoryById(int id);
         ShowCategoryDTO CreateCategory(CreateCategoryDTO dto);
+        ShowCategoryDTO UpdateCategory(int id, UpdateCategoryDTO dto);
         bool DeleteCategory(int id);
     }
 }

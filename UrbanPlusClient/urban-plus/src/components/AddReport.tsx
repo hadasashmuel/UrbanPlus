@@ -32,12 +32,16 @@ function AddReport({ onClose }: AddReportProps) {
   const [longitude, setLongitude] = useState<number | null>(null);
 
   const [locationLoading, setLocationLoading] = useState(false);
+  const [locationAction, setLocationAction] = useState<
+    "gps" | "address" | null
+  >(null);
   const [locationError, setLocationError] = useState("");
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
+  // איתור מיקום נוכחי באמצעות GPS והמרתו לכתובת
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
       setLocationError("הדפדפן אינו תומך באיתור מיקום");
@@ -45,6 +49,7 @@ function AddReport({ onClose }: AddReportProps) {
     }
 
     setLocationLoading(true);
+    setLocationAction("gps");
     setLocationError("");
 
     navigator.geolocation.getCurrentPosition(
@@ -65,8 +70,8 @@ function AddReport({ onClose }: AddReportProps) {
           }
 
           const data = await response.json();
-
           const address = data.address;
+
           const street =
             address.road ||
             address.pedestrian ||
@@ -121,6 +126,69 @@ function AddReport({ onClose }: AddReportProps) {
     );
   };
 
+  // שינוי כתובת ידנית מבטל קואורדינטות קודמות
+  const handleAddressChange = (value: string) => {
+    setInputAddress(value);
+    setLatitude(null);
+    setLongitude(null);
+    setLocationError("");
+  };
+
+  // המרת כתובת לקווי רוחב ואורך
+  const handleConvertAddress = async () => {
+    if (!inputAddress.trim()) {
+      setLocationError("יש להזין כתובת לפני ההמרה");
+      return;
+    }
+
+    setLocationLoading(true);
+    setLocationAction("address");
+    setLocationError("");
+
+    try {
+      const encodedAddress = encodeURIComponent(inputAddress.trim());
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=il&accept-language=he&q=${encodedAddress}`
+      );
+
+      if (!response.ok) {
+        throw new Error("שגיאה בקבלת נתוני הכתובת");
+      }
+
+      const data = await response.json();
+
+      if (!data || data.length === 0) {
+        setLatitude(null);
+        setLongitude(null);
+        setLocationError(
+          "לא הצלחנו למצוא את הכתובת. בדקו את הכתובת ונסו שוב."
+        );
+        return;
+      }
+
+      const lat = Number(data[0].lat);
+      const lng = Number(data[0].lon);
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        throw new Error("הקואורדינטות שהתקבלו אינן תקינות");
+      }
+
+      setLatitude(lat);
+      setLongitude(lng);
+      setLocationError("");
+    } catch (err) {
+      console.error("Address conversion error:", err);
+      setLatitude(null);
+      setLongitude(null);
+      setLocationError(
+        "לא הצלחנו להמיר את הכתובת למיקום. נסו שוב."
+      );
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
   const handleImagesChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setImages(Array.from(event.target.files));
@@ -135,7 +203,9 @@ function AddReport({ onClose }: AddReportProps) {
       }
 
       if (latitude === null || longitude === null) {
-        setLocationError("יש לאתר את המיקום באמצעות GPS");
+        setLocationError(
+          "יש לאתר את המיקום באמצעות GPS או להמיר את הכתובת לקואורדינטות"
+        );
         return;
       }
     }
@@ -249,7 +319,7 @@ function AddReport({ onClose }: AddReportProps) {
           {step === 1 && (
             <div className="report-form-step">
               <h2>איפה נמצא המפגע?</h2>
-              <p>אתרו את המיקום והכתובת תתמלא אוטומטית</p>
+              <p>בחרו כיצד תרצו להזין את מיקום המפגע</p>
 
               <button
                 type="button"
@@ -257,16 +327,29 @@ function AddReport({ onClose }: AddReportProps) {
                 onClick={handleGetLocation}
                 disabled={locationLoading}
               >
-                {locationLoading
+                {locationLoading && locationAction === "gps"
                   ? "מאתר מיקום וכתובת..."
                   : "📍 השתמש במיקום הנוכחי שלי"}
               </button>
 
+              <button
+                type="button"
+                className="location-button"
+                onClick={handleConvertAddress}
+                disabled={locationLoading || !inputAddress.trim()}
+              >
+                {locationLoading && locationAction === "address"
+                  ? "ממיר כתובת לקואורדינטות..."
+                  : "📍 המר כתובת למיקום"}
+              </button>
+
               {latitude !== null && longitude !== null && (
                 <div className="location-success">
-                  ✓ המיקום אותר בהצלחה
+                  ✓ המיקום זוהה בהצלחה
                   <small>
-                    {latitude.toFixed(6)}, {longitude.toFixed(6)}
+                    קו רוחב: {latitude.toFixed(6)}
+                    <br />
+                    קו אורך: {longitude.toFixed(6)}
                   </small>
                 </div>
               )}
@@ -285,9 +368,9 @@ function AddReport({ onClose }: AddReportProps) {
                   type="text"
                   value={inputAddress}
                   onChange={(event) =>
-                    setInputAddress(event.target.value)
+                    handleAddressChange(event.target.value)
                   }
-                  placeholder="הכתובת תתמלא לאחר איתור המיקום"
+                  placeholder="הזינו כתובת..."
                   required
                 />
               </div>
@@ -432,7 +515,7 @@ function AddReport({ onClose }: AddReportProps) {
                 type="button"
                 className="add-report-submit"
                 onClick={handleNext}
-                disabled={loading}
+                disabled={loading || locationLoading}
               >
                 המשך
               </button>

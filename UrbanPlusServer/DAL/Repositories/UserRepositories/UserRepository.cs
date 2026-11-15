@@ -1,8 +1,9 @@
-﻿using DAL.Entities;
+﻿
+using DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace DAL.Repositories.UserRepositories
 {
@@ -30,10 +31,12 @@ namespace DAL.Repositories.UserRepositories
                 throw;
             }
         }
+
         public Users? GetByEmail(string email)
         {
             return _context.Users.FirstOrDefault(u => u.Email == email);
         }
+
         public Users? GetById(int userId)
         {
             return _context.Users
@@ -42,7 +45,7 @@ namespace DAL.Repositories.UserRepositories
                 .FirstOrDefault(u => u.UserId == userId);
         }
 
-        public Users? GetByEmailAndProvider(string email,AuthProvider authProvider)
+        public Users? GetByEmailAndProvider(string email, AuthProvider authProvider)
         {
             return _context.Users
                 .FirstOrDefault(u =>
@@ -77,9 +80,24 @@ namespace DAL.Repositories.UserRepositories
         }
 
         public Users? GetOwned(int id, int userId) =>
-            _context.Users.FirstOrDefault(u => u.UserId == id && u.UserId == userId);
+            _context.Users.FirstOrDefault(u =>
+                u.UserId == id && u.UserId == userId);
 
         public List<Users> GetByUser(int userId) =>
-            _context.Users.Where(u => u.UserId == userId).ToList();
+            _context.Users
+                .Where(u => u.UserId == userId)
+                .ToList();
+
+        // ====================
+        // Admin
+        // ====================
+
+        public List<Users> GetAll()
+        {
+            return _context.Users
+                .AsNoTracking()
+                .OrderByDescending(u => u.CreatedAt)
+                .ToList();
+        }
     }
 }

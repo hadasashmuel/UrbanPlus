@@ -7,6 +7,8 @@ import {
   fetchMyProfile,
   updateUser,
   googleLoginUser,
+  fetchAdminUsers,
+  deleteAdminUser,
 } from "./usersThunks";
 
 const usersSlice = createSlice({
@@ -30,6 +32,7 @@ const usersSlice = createSlice({
         state.loading = false;
         state.error = action.payload ?? "Login failed";
       })
+
       // התחברות באמצעות Google
       .addCase(googleLoginUser.pending, (state) => {
         state.loading = true;
@@ -44,7 +47,8 @@ const usersSlice = createSlice({
       .addCase(googleLoginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload ?? "Google login failed";
-      })  
+      })
+
       // הרשמה
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
@@ -87,6 +91,41 @@ const usersSlice = createSlice({
       .addCase(updateUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload ?? "עדכון הפרטים נכשל";
+      })
+
+      // ======================================
+      // ניהול משתמשים - מנהל מערכת
+      // ======================================
+
+      // טעינת כל המשתמשים
+      .addCase(fetchAdminUsers.pending, (state) => {
+        state.adminUsersLoading = true;
+        state.adminUsersError = null;
+      })
+      .addCase(fetchAdminUsers.fulfilled, (state, action) => {
+        state.adminUsersLoading = false;
+        state.adminUsers = action.payload;
+        state.adminUsersError = null;
+      })
+      .addCase(fetchAdminUsers.rejected, (state, action) => {
+        state.adminUsersLoading = false;
+        state.adminUsersError =
+          action.payload ?? "לא ניתן לטעון את רשימת המשתמשים";
+      })
+
+      // מחיקת משתמש
+      .addCase(deleteAdminUser.pending, (state) => {
+        state.adminUsersError = null;
+      })
+      .addCase(deleteAdminUser.fulfilled, (state, action) => {
+        state.adminUsers = state.adminUsers.filter(
+          (user) => user.userId !== action.payload
+        );
+        state.adminUsersError = null;
+      })
+      .addCase(deleteAdminUser.rejected, (state, action) => {
+        state.adminUsersError =
+          action.payload ?? "מחיקת המשתמש נכשלה";
       });
   },
 });

@@ -1,0 +1,158 @@
+
+.notification-bell-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.notification-bell-button {
+  position: relative;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 25px;
+  padding: 8px;
+  transition: transform 0.2s;
+}
+
+.notification-bell-button:hover {
+  transform: scale(1.1);
+}
+
+.notification-bell-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 20px;
+  background: #e53935;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  width: 340px;
+  max-height: 430px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  z-index: 2000;
+  direction: rtl;
+  overflow: hidden;
+  color: #263238;
+}
+
+.notification-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 18px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.notification-dropdown-header h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.notification-dropdown-close {
+  border: none;
+  background: transparent;
+  font-size: 25px;
+  cursor: pointer;
+  color: #777;
+}
+
+.notification-dropdown-list {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.notification-empty {
+  padding: 35px 15px;
+  text-align: center;
+  color: #888;
+}
+
+.notification-empty span {
+  font-size: 30px;
+}
+
+.notification-card {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
+}
+
+.notification-card.unread {
+  background: #f0f7ff;
+}
+
+.notification-card-content {
+  text-align: right;
+}
+
+.notification-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.notification-card-title strong {
+  font-size: 14px;
+}
+
+.notification-card-content p {
+  margin: 0 0 7px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.notification-card-content small {
+  color: #888;
+  font-size: 11px;
+}
+
+.notification-unread-dot {
+  width: 8px;
+  height: 8px;
+  background: #2196f3;
+  border-radius: 50%;
+}
+
+.notification-card-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.notification-card-actions button {
+  border: none;
+  background: transparent;
+  color: #1976d2;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 3px 0;
+}
+
+.notification-card-actions .notification-delete-button {
+  color: #d32f2f;
+}
+
+@media (max-width: 450px) {
+  .notification-dropdown {
+    width: min(340px, calc(100vw - 30px));
+    left: -90px;
+  }
+}

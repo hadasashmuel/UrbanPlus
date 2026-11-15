@@ -1,0 +1,636 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap');
+
+.admin-categories-page {
+  min-height: 100vh;
+  direction: rtl;
+  background: #fafaf5;
+  color: #303b32;
+  font-family: 'Heebo', sans-serif;
+  padding: 35px 5%;
+  box-sizing: border-box;
+}
+
+.admin-categories-content {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* כרטיס סיכום */
+
+.admin-categories-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: fit-content;
+  min-width: 210px;
+  padding: 18px 25px;
+  margin-bottom: 25px;
+  background: white;
+  border: 1px solid #edf0eb;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(49, 94, 67, 0.05);
+}
+
+.admin-categories-summary-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff7f0;
+  border-radius: 14px;
+  font-size: 23px;
+}
+
+.admin-categories-summary div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-categories-summary span {
+  color: #89928b;
+  font-size: 13px;
+}
+
+.admin-categories-summary strong {
+  color: #315e43;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+/* כרטיס ראשי */
+
+.admin-categories-card {
+  background: white;
+  border: 1px solid #edf0eb;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 5px 22px rgba(49, 94, 67, 0.05);
+}
+
+/* סרגל עליון */
+
+.admin-categories-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.admin-categories-toolbar h2 {
+  margin: 0;
+  color: #315e43;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.admin-categories-toolbar p {
+  margin: 4px 0 0;
+  color: #929a93;
+  font-size: 13px;
+}
+
+.admin-categories-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-categories-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 300px;
+  max-width: 100%;
+  padding: 0 14px;
+  background: #fafbf8;
+  border: 1px solid #e5eae4;
+  border-radius: 12px;
+  transition: 0.2s ease;
+}
+
+.admin-categories-search:focus-within {
+  border-color: #70a987;
+  box-shadow: 0 0 0 3px rgba(112, 169, 135, 0.1);
+}
+
+.admin-categories-search span {
+  color: #789b83;
+  font-size: 25px;
+}
+
+.admin-categories-search input {
+  width: 100%;
+  height: 43px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #303b32;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.admin-categories-search input::placeholder {
+  color: #a6aea7;
+}
+
+.admin-categories-add-button {
+  padding: 11px 17px;
+  border: 1px solid #548d6b;
+  border-radius: 11px;
+  background: #548d6b;
+  color: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-categories-add-button:hover {
+  background: #416f52;
+  border-color: #416f52;
+  transform: translateY(-1px);
+}
+
+/* טבלה */
+
+.admin-categories-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-categories-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.admin-categories-table thead {
+  background: #f5f8f3;
+}
+
+.admin-categories-table th {
+  padding: 15px 16px;
+  color: #66816d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-categories-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f0f2ee;
+  color: #59645c;
+  font-size: 13px;
+}
+
+.admin-categories-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.admin-categories-table tbody tr:hover {
+  background: #fafcf9;
+}
+
+.admin-categories-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-category-name {
+  color: #35483a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-category-description {
+  max-width: 450px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #7d887f !important;
+}
+
+.admin-category-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-category-edit-button {
+  padding: 7px 13px;
+  border: 1px solid #dce9dd;
+  border-radius: 9px;
+  background: white;
+  color: #548d6b;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-category-edit-button:hover {
+  background: #eff7f0;
+}
+
+.admin-category-delete-button {
+  padding: 7px 13px;
+  border: 1px solid #f0d9d5;
+  border-radius: 9px;
+  background: white;
+  color: #c16d63;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-category-delete-button:hover {
+  background: #fff2ef;
+  border-color: #e5b7b0;
+}
+
+/* תחתית הטבלה */
+
+.admin-categories-footer {
+  padding-top: 18px;
+  border-top: 1px solid #f0f2ee;
+  margin-top: 10px;
+  color: #929a93;
+  font-size: 12px;
+}
+
+/* מצבי טעינה, שגיאה וריק */
+
+.admin-categories-message,
+.admin-categories-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 230px;
+  text-align: center;
+  color: #89928b;
+}
+
+.admin-categories-empty span {
+  font-size: 35px;
+  margin-bottom: 10px;
+}
+
+.admin-categories-empty h3 {
+  margin: 0;
+  color: #456b53;
+  font-size: 18px;
+}
+
+.admin-categories-empty p {
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.admin-categories-error {
+  padding: 25px;
+  text-align: center;
+  color: #bd665d;
+  font-size: 14px;
+}
+
+.admin-categories-error button {
+  display: block;
+  margin: 15px auto 0;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 9px;
+  background: #eff7f0;
+  color: #456b53;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.admin-categories-loader {
+  width: 35px;
+  height: 35px;
+  border: 3px solid #e7f0e8;
+  border-top-color: #70a987;
+  border-radius: 50%;
+  animation: adminCategoriesSpin 0.8s linear infinite;
+}
+
+@keyframes adminCategoriesSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* חלונות מודאליים */
+
+.admin-categories-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(30, 43, 34, 0.42);
+  backdrop-filter: blur(3px);
+  overflow-y: auto;
+}
+
+.admin-categories-form-modal,
+.admin-categories-delete-modal {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.16);
+  animation: adminCategoriesModalAppear 0.2s ease;
+}
+
+.admin-categories-form-modal {
+  max-width: 480px;
+  padding: 28px;
+}
+
+.admin-categories-delete-modal {
+  max-width: 420px;
+  padding: 30px;
+}
+
+@keyframes adminCategoriesModalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* כותרת מודאל */
+
+.admin-categories-modal-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.admin-categories-modal-heading h2 {
+  margin: 0;
+  color: #315e43;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.admin-categories-modal-heading p {
+  margin: 5px 0 0;
+  color: #929a93;
+  font-size: 13px;
+}
+
+.admin-categories-close-button {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 9px;
+  background: #f5f8f3;
+  color: #66816d;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.admin-categories-close-button:hover:not(:disabled) {
+  background: #e7f0e8;
+}
+
+.admin-categories-close-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* שדות טופס */
+
+.admin-categories-form-modal label {
+  display: block;
+  margin-bottom: 8px;
+  color: #405c49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-categories-form-modal label span {
+  color: #c16d63;
+}
+
+.admin-categories-form-modal input,
+.admin-categories-form-modal textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin-bottom: 5px;
+  border: 1px solid #e2e9e1;
+  border-radius: 11px;
+  outline: none;
+  background: #fafbf8;
+  color: #303b32;
+  font-family: inherit;
+  font-size: 13px;
+  transition: 0.2s ease;
+}
+
+.admin-categories-form-modal input {
+  height: 45px;
+}
+
+.admin-categories-form-modal textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.admin-categories-form-modal input:focus,
+.admin-categories-form-modal textarea:focus {
+  border-color: #70a987;
+  box-shadow: 0 0 0 3px rgba(112, 169, 135, 0.1);
+}
+
+.admin-categories-form-modal input::placeholder,
+.admin-categories-form-modal textarea::placeholder {
+  color: #a6aea7;
+}
+
+.admin-categories-character-count {
+  margin-bottom: 18px;
+  color: #a0a9a1;
+  font-size: 11px;
+  text-align: left;
+}
+
+.admin-categories-modal-error {
+  margin-top: 10px;
+  color: #c16d63;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* כפתורי מודאל */
+
+.admin-categories-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.admin-categories-modal-actions button {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-categories-modal-cancel {
+  border: 1px solid #e2e8e2;
+  background: white;
+  color: #718075;
+}
+
+.admin-categories-modal-cancel:hover:not(:disabled) {
+  background: #f5f8f3;
+}
+
+.admin-categories-modal-confirm {
+  border: 1px solid #548d6b;
+  background: #548d6b;
+  color: white;
+}
+
+.admin-categories-modal-confirm:hover:not(:disabled) {
+  background: #416f52;
+}
+
+.admin-categories-delete-confirm {
+  border: 1px solid #c16d63;
+  background: #c16d63;
+  color: white;
+}
+
+.admin-categories-delete-confirm:hover:not(:disabled) {
+  background: #a9554c;
+}
+
+.admin-categories-modal-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* מודאל מחיקה */
+
+.admin-categories-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  margin: 0 auto 15px;
+  border-radius: 13px;
+  background: #fff1ed;
+  color: #c16d63;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.admin-categories-delete-modal h2 {
+  margin: 0;
+  color: #315e43;
+  text-align: center;
+  font-size: 21px;
+}
+
+.admin-categories-delete-modal > p {
+  margin: 12px 0;
+  color: #818a82;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.admin-categories-delete-modal > p strong {
+  color: #405c49;
+}
+
+.admin-categories-delete-warning {
+  padding: 10px;
+  border-radius: 9px;
+  background: #fff8ed;
+  color: #a17c46 !important;
+  font-size: 12px !important;
+}
+
+/* התאמה למסכים קטנים */
+
+@media (max-width: 750px) {
+  .admin-categories-page {
+    padding: 22px 15px;
+  }
+
+  .admin-categories-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-categories-toolbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-categories-search {
+    width: auto;
+  }
+
+  .admin-categories-add-button {
+    width: 100%;
+  }
+
+  .admin-categories-card {
+    padding: 17px 12px;
+  }
+
+  .admin-categories-table th,
+  .admin-categories-table td {
+    padding: 12px 10px;
+  }
+
+  .admin-categories-form-modal,
+  .admin-categories-delete-modal {
+    padding: 23px 19px;
+  }
+
+  .admin-categories-modal-actions {
+    flex-direction: column;
+  }
+}
+
+/* התאמה למעטפת הניהול */
+
+.admin-categories-page.admin-categories-embedded {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+}

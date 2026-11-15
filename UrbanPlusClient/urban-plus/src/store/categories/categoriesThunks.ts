@@ -94,6 +94,51 @@ export const createCategory = createAsyncThunk<
   }
 );
 
+// עדכון קטגוריה
+interface UpdateCategoryRequest {
+  id: number;
+  categoryData: {
+    categoryName: string;
+    categoryDescription: string;
+  };
+}
+
+export const updateCategory = createAsyncThunk<
+  Category,
+  UpdateCategoryRequest,
+  { state: { users: { token: string | null } }; rejectValue: string }
+>(
+  "categories/updateCategory",
+  async ({ id, categoryData }, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().users.token;
+
+      if (!token) {
+        return rejectWithValue("אין משתמש מחובר");
+      }
+
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(categoryData),
+      });
+
+      if (!response.ok) {
+        return rejectWithValue(
+          (await response.text()) || "Failed to update category"
+        );
+      }
+
+      return await response.json();
+    } catch {
+      return rejectWithValue("Could not connect to server");
+    }
+  }
+);
+
 // מחיקת קטגוריה
 export const deleteCategory = createAsyncThunk<
   number,

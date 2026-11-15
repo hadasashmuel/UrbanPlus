@@ -18,6 +18,10 @@ namespace UrbanPlusServer.Controllers
             _userService = userService;
         }
 
+        // ====================
+        // Register
+        // ====================
+
         // POST: api/User/register
         [AllowAnonymous]
         [HttpPost("register")]
@@ -28,10 +32,15 @@ namespace UrbanPlusServer.Controllers
             return Ok("User created successfully.");
         }
 
+        // ====================
+        // Login
+        // ====================
+
         // POST: api/User/login
         [AllowAnonymous]
         [HttpPost("login")]
-        public ActionResult<AuthResponseUserDto> Login( [FromBody] LoginUserDTO dto)
+        public ActionResult<AuthResponseUserDto> Login(
+            [FromBody] LoginUserDTO dto)
         {
             var result = _userService.Login(dto);
 
@@ -41,9 +50,11 @@ namespace UrbanPlusServer.Controllers
             return Ok(result);
         }
 
+        // POST: api/User/google-login
         [AllowAnonymous]
         [HttpPost("google-login")]
-        public async Task<ActionResult<AuthResponseUserDto>> GoogleLogin([FromBody] GoogleLoginDTO dto)
+        public async Task<ActionResult<AuthResponseUserDto>> GoogleLogin(
+            [FromBody] GoogleLoginDTO dto)
         {
             var result = await _userService.GoogleLogin(dto);
 
@@ -52,6 +63,10 @@ namespace UrbanPlusServer.Controllers
 
             return Ok(result);
         }
+
+        // ====================
+        // User Profile
+        // ====================
 
         // GET: api/User/me
         [HttpGet("me")]
@@ -65,7 +80,8 @@ namespace UrbanPlusServer.Controllers
         // GET: api/User/5/short
         [AllowAnonymous]
         [HttpGet("{userId}/short")]
-        public ActionResult<ShortProfileUserDTO> GetShortUserById(int userId)
+        public ActionResult<ShortProfileUserDTO> GetShortUserById(
+            int userId)
         {
             var user = _userService.GetShortUserById(userId);
 
@@ -74,21 +90,45 @@ namespace UrbanPlusServer.Controllers
 
         // PUT: api/User
         [HttpPut]
-        public ActionResult<ProfileUserDTO> UpdateUser([FromForm] UpdateUserDTO dto)
+        public ActionResult<ProfileUserDTO> UpdateUser(
+            [FromForm] UpdateUserDTO dto)
         {
-            var updatedUser = _userService.UpdateUser(User.GetUserId(), dto);
+            var updatedUser = _userService.UpdateUser(
+                User.GetUserId(), dto);
 
             return Ok(updatedUser);
         }
 
-        // DELETE: api/User/5
-        [Authorize(Roles = "1")]
-        [HttpDelete("{userId}")]
-        public IActionResult DeleteUser(int userId)
-        {
-            _userService.DeleteUser(userId);
+        // Admin - Get All Users
 
-            return NoContent();
+
+        // GET: api/User/admin/all
+        [Authorize(Roles = "1")]
+        [HttpGet("admin/all")]
+        public ActionResult<List<AdminUserDTO>> GetAllUsers()
+        {
+            var users = _userService.GetAllUsers();
+
+            return Ok(users);
+        }
+
+        // Admin - Delete User
+
+
+        // DELETE: api/User/admin/5
+        [Authorize(Roles = "1")]
+        [HttpDelete("admin/{userId}")]
+        public IActionResult DeleteUser(
+            int userId,
+            [FromBody] DeleteUserDTO dto)
+        {
+            var deleted = _userService.DeleteUser(
+                userId, dto.Reason);
+
+            if (!deleted)
+                return NotFound("User could not be deleted.");
+
+            return Ok("User deleted successfully.");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using DTO.UserDTO;
+﻿
+using DTO.UserDTO;
 
 namespace BLL.Services.ServicesDB.UserServices
 {
@@ -11,6 +12,10 @@ namespace BLL.Services.ServicesDB.UserServices
         ProfileUserDTO? UpdateUser(int userId, UpdateUserDTO dto);
 
         Task<AuthResponseUserDto?> GoogleLogin(GoogleLoginDTO dto);
-        bool DeleteUser(int userId);
+
+        bool DeleteUser(int userId, string reason);
+
+        // Admin
+        List<AdminUserDTO> GetAllUsers();
     }
 }

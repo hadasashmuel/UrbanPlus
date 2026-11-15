@@ -24,7 +24,6 @@ namespace UrbanPlusServer.Controllers
         public ActionResult<List<ShowCategoryDTO>> GetAllCategories()
         {
             var categories = _categoryService.GetAllCategories();
-
             return Ok(categories);
         }
 
@@ -34,14 +33,13 @@ namespace UrbanPlusServer.Controllers
         public ActionResult<ShowCategoryDTO> GetCategoryById(int id)
         {
             var category = _categoryService.GetCategoryById(id);
-
             return Ok(category);
         }
 
         // POST: api/Category
         [Authorize(Roles = "1")]
         [HttpPost]
-        public ActionResult<ShowCategoryDTO> CreateCategory( [FromBody] CreateCategoryDTO dto)
+        public ActionResult<ShowCategoryDTO> CreateCategory([FromBody] CreateCategoryDTO dto)
         {
             var createdCategory = _categoryService.CreateCategory(dto);
 
@@ -51,13 +49,23 @@ namespace UrbanPlusServer.Controllers
                 createdCategory);
         }
 
+        // PUT: api/Category/5
+        [Authorize(Roles = "1")]
+        [HttpPut("{id}")]
+        public ActionResult<ShowCategoryDTO> UpdateCategory(
+            int id,
+            [FromBody] UpdateCategoryDTO dto)
+        {
+            var updatedCategory = _categoryService.UpdateCategory(id, dto);
+            return Ok(updatedCategory);
+        }
+
         // DELETE: api/Category/5
         [Authorize(Roles = "1")]
         [HttpDelete("{id}")]
         public IActionResult DeleteCategory(int id)
         {
             _categoryService.DeleteCategory(id);
-
             return NoContent();
         }
     }

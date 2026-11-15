@@ -1,7 +1,6 @@
-﻿using DAL.Entities;
-using System;
+﻿
+using DAL.Entities;
 using System.Collections.Generic;
-using System.Text;
 
 namespace DAL.Repositories.UserRepositories
 {
@@ -9,12 +8,15 @@ namespace DAL.Repositories.UserRepositories
     {
         Users Add(Users user);
         Users? GetById(int userId);
-        Users? GetByEmailAndProvider(string email,AuthProvider authProvider);
+        Users? GetByEmailAndProvider(string email, AuthProvider authProvider);
         Users Update(Users user);
         bool IsEmailExists(string email);
         Users? GetByEmail(string email);
         bool Delete(int userId);
         Users? GetOwned(int id, int userId);
         List<Users> GetByUser(int userId);
+
+        // Admin
+        List<Users> GetAll();
     }
 }

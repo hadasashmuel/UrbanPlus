@@ -22,12 +22,14 @@ export interface Report {
 
 export interface ReportsState {
   myReports: Report[];
+  allReports: Report[];
   loading: boolean;
   error: string | null;
 }
 
 export const initialState: ReportsState = {
   myReports: [],
+  allReports: [],
   loading: false,
   error: null,
 };

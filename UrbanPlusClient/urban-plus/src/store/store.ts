@@ -5,6 +5,8 @@ import categoriesReducer from "./categories/categoriesSlice";
 import reportsReducer from "./reports/reportsSlice";
 import aiChatReducer from "./AIChat/aiChatSlice";
 import eventsReducer from "./events/eventsSlice";
+import badgesReducer from "./badges/badgesSlice";
+import notificationsReducer from "./notifications/notificationsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +15,8 @@ export const store = configureStore({
     reports: reportsReducer,
     aiChat: aiChatReducer,
     events: eventsReducer,
+    badges: badgesReducer,
+    notifications: notificationsReducer,
   },
 });
 

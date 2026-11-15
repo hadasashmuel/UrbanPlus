@@ -4,12 +4,12 @@ import { useNavigate, Outlet } from "react-router-dom";
 import MapScreen from "./Map";
 import AddReport from "./AddReport";
 import AIChat from "./AIChat";
+import NotificationsBell from "./NotificationsBell";
 import { useAppSelector } from "../store/hooks";
 import "./Home.css";
 
 function HomeScreen() {
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
 
   const navigate = useNavigate();
   const token = useAppSelector((state) => state.users.token);
@@ -45,36 +45,7 @@ function HomeScreen() {
             </div>
           ) : (
             <div className="auth-buttons">
-              <div className="notification-wrapper">
-                <button
-                  className="notification-button"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  title="ההתראות שלי"
-                  aria-label="ההתראות שלי"
-                >
-                  🔔
-                </button>
-
-                {showNotifications && (
-                  <div className="notifications-panel">
-                    <div className="notifications-header">
-                      <h3>ההתראות שלי</h3>
-
-                      <button
-                        onClick={() => setShowNotifications(false)}
-                        aria-label="סגירה"
-                      >
-                        ×
-                      </button>
-                    </div>
-
-                    <div className="notifications-empty">
-                      <span>🔔</span>
-                      <p>אין עדיין התראות להצגה</p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <NotificationsBell />
 
               <button
                 className="user-icon-button"
@@ -109,7 +80,6 @@ function HomeScreen() {
 
       <AIChat />
 
-      {/* חלונות התחברות והרשמה צפים מעל המפה */}
       <Outlet />
 
       {isReportOpen && (
