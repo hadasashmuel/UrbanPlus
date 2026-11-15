@@ -1,10 +1,10 @@
 ﻿
 using AutoMapper;
+using Azure.Core;
+using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServicesDB.UserBadgeServices;
 using BLL.Services.ServiceSupport.EventAggregationServices;
-using BLL.Services.ServiceSupport.ImageServices;
 using DAL.Entities;
-using DAL.Repositories;
 using DAL.Repositories.ReportRepositories;
 using DTO.ReportDTO;
 
@@ -18,7 +18,12 @@ namespace BLL.Services.ServicesDB.ReportServices
         private readonly IMapper _mapper;
         private readonly IEventAggregationService _eventAggregationService;
 
-        public ReportService(IReportRepository reportRepository,IMapper mapper, IImageService imageService, IEventAggregationService eventAggregationService, IUserBadgeService userBadgeService)
+        public ReportService(
+            IReportRepository reportRepository,
+            IMapper mapper,
+            IImageService imageService,
+            IEventAggregationService eventAggregationService,
+            IUserBadgeService userBadgeService)
         {
             _reportRepository = reportRepository;
             _mapper = mapper;
@@ -54,15 +59,15 @@ namespace BLL.Services.ServicesDB.ReportServices
 
             try
             {
+                // שמירת התמונות
                 if (dto.ImageList != null)
                 {
-                    foreach (var imageDto in dto.ImageList)
+                    foreach (var imageFile in dto.ImageList)
                     {
-                        if (imageDto.ImageUrl == null ||
-                            imageDto.ImageUrl.Length == 0)
+                        if (imageFile == null || imageFile.Length == 0)
                             continue;
 
-                        var imageUrl = _imageService.Save(imageDto.ImageUrl);
+                        var imageUrl = _imageService.Save(imageFile);
 
                         savedImages.Add(imageUrl);
 
@@ -82,6 +87,8 @@ namespace BLL.Services.ServicesDB.ReportServices
 
                 // שמירת הדיווח
                 var createdReport = _reportRepository.AddReport(report);
+
+                // בדיקת זכאות לתגים
                 _userBadgeService.CheckAndAwardBadges(userId);
 
                 try
@@ -97,6 +104,7 @@ namespace BLL.Services.ServicesDB.ReportServices
             }
             catch
             {
+                // מחיקת תמונות במקרה של כישלון
                 foreach (var imageUrl in savedImages)
                 {
                     _imageService.Delete(imageUrl);
@@ -112,6 +120,7 @@ namespace BLL.Services.ServicesDB.ReportServices
 
             return _mapper.Map<List<ShowReportDTO>>(reports);
         }
+
         public bool DeleteReport(int reportId)
         {
             return _reportRepository.DeleteReport(reportId);

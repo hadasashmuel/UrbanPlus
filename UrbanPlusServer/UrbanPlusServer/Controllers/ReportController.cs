@@ -27,6 +27,7 @@ namespace UrbanPlusServer.Controllers
 
             return Ok(reports);
         }
+
         // GET: api/Report/MyReports
         [HttpGet("MyReports")]
         public ActionResult<List<ShowReportDTO>> GetMyReports()
@@ -37,6 +38,7 @@ namespace UrbanPlusServer.Controllers
 
             return Ok(reports);
         }
+
         // GET: api/Report/5
         [HttpGet("{id}")]
         public ActionResult<ShowReportDTO> GetReportById(int id)
@@ -48,8 +50,11 @@ namespace UrbanPlusServer.Controllers
 
         // POST: api/Report
         [HttpPost]
-        public ActionResult<ShowReportDTO> CreateReport( [FromForm] CreateReportDTO dto)
+        [Consumes("multipart/form-data")]
+        public ActionResult<ShowReportDTO> CreateReport([FromForm] CreateReportDTO dto)
         {
+            Console.WriteLine("Files in request: " + Request.Form.Files.Count);
+            Console.WriteLine("ImageList: " + (dto.ImageList == null ? "null" : dto.ImageList.Count.ToString()));
             int userId = User.GetUserId();
 
             var createdReport = _reportService.CreateReport(dto, userId);

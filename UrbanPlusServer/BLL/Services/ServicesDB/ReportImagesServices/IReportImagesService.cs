@@ -11,3 +11,4 @@ namespace BLL.Services.ServicesDB.ReportImagesServices
         bool DeleteReportImage(int id);
     }
 }
+

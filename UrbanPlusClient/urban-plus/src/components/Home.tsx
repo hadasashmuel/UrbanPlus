@@ -1,18 +1,16 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MapScreen from "./Map";
 import AddReport from "./AddReport";
+import AIChat from "./AIChat";
 import { useAppSelector } from "../store/hooks";
 import "./Home.css";
 
 function HomeScreen() {
-  const [showChat, setShowChat] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
   const navigate = useNavigate();
-
   const token = useAppSelector((state) => state.users.token);
   const isLoggedIn = !!token;
 
@@ -60,6 +58,7 @@ function HomeScreen() {
                   <div className="notifications-panel">
                     <div className="notifications-header">
                       <h3>ההתראות שלי</h3>
+
                       <button
                         onClick={() => setShowNotifications(false)}
                         aria-label="סגירה"
@@ -93,34 +92,12 @@ function HomeScreen() {
           className="floating-report"
           onClick={() => setIsReportOpen(true)}
         >
-          <span>＋</span>
-          דיווח על מפגע
+          <span className="report-plus">＋</span>
+          <span>דיווח על מפגע</span>
         </button>
       )}
 
-      <button onClick={() => navigate("/update-user")}>
-        עדכון פרטי משתמש
-      </button>
-
-      <button
-        className="chat-float-button"
-        onClick={() => setShowChat(!showChat)}
-      >
-        <span>☏</span>
-        צ'אט עם Urban+
-      </button>
-
-      {showChat && (
-        <div className="chat-floating-panel">
-          <button
-            className="chat-close"
-            onClick={() => setShowChat(false)}
-            aria-label="סגירת צ'אט"
-          >
-            ×
-          </button>
-        </div>
-      )}
+      <AIChat />
 
       {isReportOpen && (
         <AddReport onClose={() => setIsReportOpen(false)} />

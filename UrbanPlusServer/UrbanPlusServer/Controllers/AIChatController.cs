@@ -1,13 +1,13 @@
-﻿using BLL.Services.ServicesDB.AIChatServices;
-using DAL.Entities;
+﻿
+using BLL.Services.ServicesDB.AIChatServices;
 using DTO.AIChatMessagesDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace UrbanPlusServer.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
@@ -36,8 +36,8 @@ namespace UrbanPlusServer.Controllers
 
         [HttpPost("stream")]
         public async Task StreamMessage(
-        [FromBody] SendAIMessageDTO dto,
-        CancellationToken cancellationToken)
+            [FromBody] SendAIMessageDTO dto,
+            CancellationToken cancellationToken)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -52,18 +52,28 @@ namespace UrbanPlusServer.Controllers
             Response.Headers.CacheControl = "no-cache";
             Response.Headers.Append("X-Accel-Buffering", "no");
 
+            var jsonOptions = new JsonSerializerOptions(
+                JsonSerializerDefaults.Web);
+
             await foreach (var chunk in _aiChatService.StreamMessage(
                 userId,
                 dto,
                 cancellationToken))
             {
-                await Response.WriteAsync($"data: {System.Text.Json.JsonSerializer.Serialize(chunk)}\n\n", cancellationToken);
+                var json = JsonSerializer.Serialize(chunk, jsonOptions);
+
+                await Response.WriteAsync(
+                    $"data: {json}\n\n",
+                    cancellationToken);
+
                 await Response.Body.FlushAsync(cancellationToken);
             }
 
-            await Response.WriteAsync("data: [DONE]\n\n", cancellationToken);
+            await Response.WriteAsync(
+                "data: [DONE]\n\n",
+                cancellationToken);
+
             await Response.Body.FlushAsync(cancellationToken);
         }
     }
 }
-

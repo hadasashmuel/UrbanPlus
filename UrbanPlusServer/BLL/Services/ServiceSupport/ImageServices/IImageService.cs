@@ -11,4 +11,3 @@ namespace BLL.Services.ServiceSupport.ImageServices
         void Delete(string fileName);
     }
 }
-

@@ -1,5 +1,6 @@
 ﻿
 using DTO.ReportImageDTO;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace DTO.ReportDTO
@@ -31,6 +32,6 @@ namespace DTO.ReportDTO
         [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Address cannot contain only spaces")]
         public string InputAddress { get; set; }
 
-        public List<CreateReportImageDTO>? ImageList { get; set; } = new List<CreateReportImageDTO>();
+        public List<IFormFile>? ImageList { get; set; } 
     }
 }

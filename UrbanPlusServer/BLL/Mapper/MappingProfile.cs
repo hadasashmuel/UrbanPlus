@@ -21,7 +21,6 @@ namespace BLL
         {
             // Users
             CreateMap<Users, ProfileUserDTO>();
-
             CreateMap<Users, ShortProfileUserDTO>();
 
             CreateMap<CreateUserDTO, Users>()

@@ -1,3 +1,4 @@
+
 // BLL
 using BLL;
 using BLL.Services.ServicesDB.AIChatServices;
@@ -44,8 +45,10 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using OpenAI;
-using System.ClientModel;
+
+// Google Gemini
+using Google.GenAI;
+
 using System.Text;
 using UrbanPlusServer.Filters;
 
@@ -113,24 +116,22 @@ builder.Services.AddDbContext<UrbanPlusContext>(
     options => options.UseSqlServer(connStr));
 
 // ====================
-// Gemini AI
+// Gemini AI - Official Google SDK
 // ====================
 
-var apiKey = builder.Configuration["Gemini:ApiKey"]
-    ?? throw new InvalidOperationException("Gemini:ApiKey is missing");
+var apiKey = builder.Configuration["Gemini:ApiKey"];
 
-var options = new OpenAIClientOptions
+if (string.IsNullOrWhiteSpace(apiKey))
 {
-    Endpoint = new Uri(
-        "https://generativelanguage.googleapis.com/v1beta/openai/")
-};
+    throw new InvalidOperationException(
+        "Gemini:ApiKey is missing");
+}
 
-IChatClient innerClient = new OpenAIClient(
-    new ApiKeyCredential(apiKey), options)
-    .GetChatClient("gemini-3.1-flash-lite")
-    .AsIChatClient();
+IChatClient innerClient = new Google.GenAI.Client(apiKey: apiKey)
+    .AsIChatClient("gemini-3.8-flash");
 
-builder.Services.AddChatClient(innerClient)
+builder.Services
+    .AddChatClient(innerClient)
     .UseFunctionInvocation();
 
 // ====================
@@ -176,7 +177,6 @@ builder.Services.AddScoped<AIChatTools>();
 // Image Service
 // ====================
 
-// תיקיית התמונות נמצאת בתוך UrbanPlusServer
 var fullImagesFolder = Path.Combine(
     builder.Environment.ContentRootPath,
     "Images"

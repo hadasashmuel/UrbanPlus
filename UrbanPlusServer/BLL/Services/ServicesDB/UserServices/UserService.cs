@@ -1,8 +1,8 @@
 ﻿
 using AutoMapper;
 using BLL.Exceptions;
-using BLL.Services.ServiceSupport.EmailServices;
 using BLL.Services.ServiceSupport.ImageServices;
+using BLL.Services.ServiceSupport.EmailServices;
 using BLL.Services.ServiceSupport.TokenServices;
 using DAL.Entities;
 using DAL.Repositories.UserRepositories;
