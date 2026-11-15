@@ -1,84 +1,85 @@
 
+/* רקע וחלונית התחברות */
 .auth-overlay {
   position: fixed;
   inset: 0;
   z-index: 2000;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+
+  padding: 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  direction: rtl;
+
   background: rgba(28, 42, 34, 0.22);
   backdrop-filter: blur(3px);
-  direction: rtl;
 }
 
 .auth-card {
   position: relative;
   width: 100%;
-  max-width: 440px;
+  max-width: 460px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   box-sizing: border-box;
-  padding: 42px 38px 32px;
+
+  padding: 32px 38px;
+
   border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: 26px;
-  background: rgba(255, 255, 255, 0.97);
+
+  background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 22px 70px rgba(30, 48, 38, 0.2);
+
   text-align: right;
 }
 
+/* לוגו */
 .auth-logo {
-  margin-bottom: 24px;
+  margin-bottom: 14px;
+
   color: #378052;
   font-family: Georgia, serif;
-  font-size: 34px;
+  font-size: 32px;
+  font-weight: 700;
   letter-spacing: 2px;
+
   text-align: center;
 }
 
+/* כותרת */
 .auth-card h2 {
   margin: 0 0 8px;
   color: #3d5360;
-  font-size: 29px;
-  font-weight: 700;
+  font-size: 28px;
   text-align: center;
 }
 
 .auth-subtitle {
-  margin: 0 0 28px;
+  margin: 0 0 22px;
   color: #778994;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.6;
   text-align: center;
 }
 
-.auth-card .auth-close {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: #f0f3f0;
-  color: #53656d;
-  font-size: 27px;
-  cursor: pointer;
-}
-
-.auth-card .auth-close:hover {
-  background: #e3ebe3;
-}
-
-/* עיצוב שדות הטופס */
+/* שדות התחברות */
 .auth-card input {
   width: 100%;
-  min-height: 48px;
+  min-height: 46px;
   box-sizing: border-box;
-  padding: 12px 14px;
+
+  padding: 11px 14px;
+
   border: 1px solid #d5ded8;
   border-radius: 12px;
+
   background: #fff;
   color: #344b40;
+
   font: inherit;
   outline: none;
 }
@@ -92,67 +93,65 @@
   color: #6c9b75;
 }
 
-.auth-link,
-.auth-footer a {
+/* קישור שכחתי סיסמה */
+.auth-link {
+  display: inline-block;
+  margin-top: 8px;
+
   color: #4d9361;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  font-size: 13px;
+  text-decoration: none;
 }
 
-.forgot-link {
-  display: block;
-  margin: 14px 0 24px;
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* הודעת שגיאה */
+.register-error {
+  margin: 8px 0;
+  color: #c0392b;
   font-size: 14px;
 }
 
+/* כפתור התחברות */
 .auth-card .auth-submit {
   width: 100%;
-  min-height: 54px;
+  min-height: 52px;
+  margin-top: 14px;
+
   border: none;
   border-radius: 12px;
+
   background: #8fb894;
-  color: white;
-  font-size: 19px;
+  color: #fff;
+
+  font-size: 18px;
   font-weight: 700;
+
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s;
 }
 
 .auth-card .auth-submit:hover {
   background: #6fa47b;
-  transform: translateY(-1px);
 }
 
-.auth-footer {
-  margin: 24px 0 0;
-  color: #778994;
-  font-size: 14px;
-  text-align: center;
+.auth-card .auth-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
-
-@media (max-width: 480px) {
-  .auth-overlay {
-    padding: 16px;
-  }
-
-  .auth-card {
-    padding: 38px 22px 26px;
-    border-radius: 22px;
-  }
-
-  .auth-logo {
-    font-size: 29px;
-  }
 
 /* הפרדה בין התחברות רגילה ל-Google */
 .auth-divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
-  margin: 22px 0;
-  color: #888;
-  font-size: 13px;
+
+  margin: 18px 0;
+
+  color: #777;
+  font-size: 14px;
 }
 
 .auth-divider::before,
@@ -160,20 +159,70 @@
   content: "";
   flex: 1;
   height: 1px;
-  background-color: #e5e5e5;
+  background: #ddd;
 }
 
-/* אזור התחברות Google */
+/* Google */
 .google-login {
   display: flex;
   justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin: 0 auto 10px;
+  margin-bottom: 18px;
 }
 
-.google-login > div {
-  max-width: 100%;
+/* תחתית הכרטיס */
+.auth-footer {
+  margin: 20px 0 0;
+
+  color: #778994;
+  font-size: 14px;
+  text-align: center;
 }
 
+.auth-footer a {
+  color: #4d9361;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* חזרה לעמוד הראשי */
+.auth-back {
+  display: block;
+  margin: 18px auto 0;
+
+  padding: 8px 16px;
+
+  border: 1px solid #d5ded8;
+  border-radius: 10px;
+
+  background: transparent;
+  color: #6c8275;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-back:hover {
+  background: #eff7f0;
+  color: #397451;
+}
+
+/* התאמה למובייל */
+@media (max-width: 480px) {
+  .auth-overlay {
+    padding: 12px;
+  }
+
+  .auth-card {
+    max-height: calc(100vh - 24px);
+    padding: 26px 22px;
+    border-radius: 22px;
+  }
+
+  .auth-card h2 {
+    font-size: 24px;
+  }
 }

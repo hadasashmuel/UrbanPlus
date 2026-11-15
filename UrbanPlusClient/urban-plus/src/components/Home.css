@@ -22,7 +22,7 @@
   z-index: 1000;
 
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 
   padding: 15px 30px;
@@ -42,12 +42,21 @@
   color: #70A987;
 }
 
+/* אזור הכפתורים בצד ימין */
 .topbar-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.auth-buttons {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
+/* כפתורי הרשמה והתחברות */
 .auth-button {
   padding: 9px 20px;
   border-radius: 10px;
@@ -78,6 +87,44 @@
   background: #548D6B;
 }
 
+/* כפתור האירועים הפעילים */
+.active-events-nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  background: #ffffff !important;
+  color: #626b65 !important;
+
+  border: 1px solid #d9dfda !important;
+  border-radius: 20px;
+
+  padding: 8px 17px;
+
+  font-family: 'Heebo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+  white-space: nowrap;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.active-events-nav-button:hover {
+  background: #eef1ee !important;
+  color: #405c49 !important;
+  border-color: #bdc9bf !important;
+  transform: translateY(-1px);
+}
+
+.active-events-nav-button span {
+  font-size: 16px;
+}
+
+/* התראות */
 .notification-wrapper {
   position: relative;
 }
@@ -153,7 +200,7 @@
   margin: 0;
 }
 
-/* כפתור דיווח - לבן וגדול */
+/* כפתור דיווח */
 .floating-report {
   position: fixed;
   bottom: 28px;
@@ -227,6 +274,7 @@
 @media (max-width: 600px) {
   .topbar {
     padding: 12px 16px;
+    gap: 8px;
   }
 
   .logo {
@@ -234,7 +282,21 @@
   }
 
   .topbar-actions {
-    gap: 8px;
+    gap: 7px;
+  }
+
+  .auth-buttons {
+    gap: 7px;
+  }
+
+  .active-events-nav-button {
+    padding: 7px 12px;
+    font-size: 11px;
+    gap: 5px;
+  }
+
+  .active-events-nav-button span {
+    font-size: 14px;
   }
 
   .auth-button {

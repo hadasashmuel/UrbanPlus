@@ -4,6 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchMyProfile } from "../store/users/usersThunks";
 import { fetchMyReports } from "../store/reports/reportsThunks";
+import {
+  fetchMainEvents,
+  fetchSavedEvents,
+  fetchMyVotes,
+} from "../store/events/eventsThunks";
 import "./Profile.css";
 
 const API_BASE = "https://localhost:7019";
@@ -40,9 +45,7 @@ const getImageSrc = (imageUrl: string): string => {
 
 const getReportImages = (report: Report): ReportImage[] => {
   if (Array.isArray(report.imageList)) {
-    return report.imageList.filter(
-      (image) => !!image?.imageUrl
-    );
+    return report.imageList.filter((image) => !!image?.imageUrl);
   }
 
   if (report.imageList?.imageUrl) {
@@ -54,6 +57,11 @@ const getReportImages = (report: Report): ReportImage[] => {
   }
 
   return [];
+};
+
+const formatDate = (date: string) => {
+  if (!date) return "";
+  return new Date(date).toLocaleDateString("he-IL");
 };
 
 function Profile() {
@@ -81,12 +89,40 @@ function Profile() {
     (state) => state.reports.error
   );
 
-  // התגים שהמשתמש צבר
+  // אירועים שמורים והצבעות
+  const mainEvents = useAppSelector(
+    (state) => state.events.mainEvents
+  );
+
+  const savedEvents = useAppSelector(
+    (state) => state.events.savedEvents
+  );
+
+  const votes = useAppSelector(
+    (state) => state.events.votes
+  );
+
+  const loadingMainEvents = useAppSelector(
+    (state) => state.events.loadingMainEvents
+  );
+
+  const loadingSavedEvents = useAppSelector(
+    (state) => state.events.loadingSavedEvents
+  );
+
+  const loadingMyVotes = useAppSelector(
+    (state) => state.events.loadingMyVotes
+  );
+
   const userBadges = user?.userBadges ?? [];
 
   useEffect(() => {
     dispatch(fetchMyProfile());
     dispatch(fetchMyReports());
+
+    dispatch(fetchMainEvents());
+    dispatch(fetchSavedEvents());
+    dispatch(fetchMyVotes());
   }, [dispatch]);
 
   useEffect(() => {
@@ -111,6 +147,38 @@ function Profile() {
     setSelectedReport(null);
     setSelectedImage(null);
   };
+
+  // התאמת האירועים השמורים לפרטי האירועים
+  const savedEventDetails = savedEvents
+    .map((savedEvent) => {
+      const event = mainEvents.find(
+        (item) => item.mainEventsId === savedEvent.mainEventId
+      );
+
+      if (!event) return null;
+
+      return {
+        savedEvent,
+        event,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  // התאמת ההצבעות לפרטי האירועים
+  const voteDetails = votes
+    .map((vote) => {
+      const event = mainEvents.find(
+        (item) => item.mainEventsId === vote.mainEventId
+      );
+
+      if (!event) return null;
+
+      return {
+        vote,
+        event,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
   if (loading && !user) {
     return <p className="profile-message">טוען את הפרופיל...</p>;
@@ -203,6 +271,33 @@ function Profile() {
               <small>דיווחים ששלחת למערכת</small>
             </div>
           </article>
+
+          <article className="profile-stat-card badges-stat">
+            <div className="stat-icon">✧</div>
+            <div>
+              <span>התגים שלי</span>
+              <strong>{userBadges.length}</strong>
+              <small>הישגים שצברת בקהילה</small>
+            </div>
+          </article>
+
+          <article className="profile-stat-card saved-events-stat">
+            <div className="stat-icon">♡</div>
+            <div>
+              <span>אירועים שמורים</span>
+              <strong>{savedEvents.length}</strong>
+              <small>אירועים ששמרת</small>
+            </div>
+          </article>
+
+          <article className="profile-stat-card votes-stat">
+            <div className="stat-icon">☑</div>
+            <div>
+              <span>ההצבעות שלי</span>
+              <strong>{votes.length}</strong>
+              <small>הצבעות שביצעת</small>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -260,15 +355,174 @@ function Profile() {
                   <small>
                     <span>✓</span>
                     התקבל בתאריך{" "}
-                    {new Date(
-                      badge.createdAt
-                    ).toLocaleDateString("he-IL")}
+                    {formatDate(badge.createdAt)}
                   </small>
                 </div>
               </article>
             ))}
           </div>
         )}
+      </section>
+
+      {/* האירועים השמורים שלי */}
+      <section className="my-saved-events-section">
+        <div className="saved-events-heading">
+          <div>
+            <span className="profile-eyebrow">
+              YOUR SAVED EVENTS
+            </span>
+            <h2>האירועים ששמרתי</h2>
+            <p>כל האירועים שבחרת לשמור במקום אחד.</p>
+          </div>
+
+          <span className="saved-events-count">
+            {savedEvents.length} אירועים
+          </span>
+        </div>
+
+        {(loadingMainEvents || loadingSavedEvents) && (
+          <p className="profile-message">
+            טוען את האירועים השמורים...
+          </p>
+        )}
+
+        {!loadingMainEvents &&
+          !loadingSavedEvents &&
+          savedEvents.length === 0 && (
+            <div className="empty-saved-events">
+              <div className="empty-saved-events-icon">♡</div>
+              <h3>עדיין לא שמרת אירועים</h3>
+              <p>
+                אפשר לשמור אירועים מהמפה ולחזור אליהם כאן בכל זמן.
+              </p>
+            </div>
+          )}
+
+        {!loadingMainEvents &&
+          !loadingSavedEvents &&
+          savedEvents.length > 0 &&
+          savedEventDetails.length === 0 && (
+            <p className="profile-message">
+              לא נמצאו פרטי האירועים השמורים.
+            </p>
+          )}
+
+        {!loadingMainEvents &&
+          !loadingSavedEvents &&
+          savedEventDetails.length > 0 && (
+            <div className="my-saved-events-list">
+              {savedEventDetails.map(({ savedEvent, event }) => (
+                <article
+                  className="my-saved-event-card"
+                  key={savedEvent.savedEventId}
+                >
+                  <div className="saved-event-card-top">
+                    <span className="saved-event-category">
+                      {event.categoryName}
+                    </span>
+                    <span className="saved-event-date">
+                      נשמר בתאריך {formatDate(savedEvent.createdAt)}
+                    </span>
+                  </div>
+
+                  <h3>{event.title}</h3>
+
+                  <div className="saved-event-address">
+                    <span>⌖</span>
+                    {event.address || "לא צוין מיקום"}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+      </section>
+
+      {/* ההצבעות שלי */}
+      <section className="my-votes-section">
+        <div className="votes-heading">
+          <div>
+            <span className="profile-eyebrow">
+              YOUR VOTES
+            </span>
+            <h2>ההצבעות שלי</h2>
+            <p>ההצבעות שביצעת על אירועים בקהילה.</p>
+          </div>
+
+          <span className="votes-count">
+            {votes.length} הצבעות
+          </span>
+        </div>
+
+        {(loadingMainEvents || loadingMyVotes) && (
+          <p className="profile-message">
+            טוען את ההצבעות...
+          </p>
+        )}
+
+        {!loadingMainEvents &&
+          !loadingMyVotes &&
+          votes.length === 0 && (
+            <div className="empty-votes">
+              <div className="empty-votes-icon">☑</div>
+              <h3>עדיין לא הצבעת על אירועים</h3>
+              <p>
+                ההצבעות שלך עוזרות לקהילה לאמת את המידע על האירועים.
+              </p>
+            </div>
+          )}
+
+        {!loadingMainEvents &&
+          !loadingMyVotes &&
+          votes.length > 0 &&
+          voteDetails.length === 0 && (
+            <p className="profile-message">
+              לא נמצאו פרטי האירועים שעליהם הצבעת.
+            </p>
+          )}
+
+        {!loadingMainEvents &&
+          !loadingMyVotes &&
+          voteDetails.length > 0 && (
+            <div className="my-votes-list">
+              {voteDetails.map(({ vote, event }) => (
+                <article
+                  className="my-vote-card"
+                  key={vote.voteId}
+                >
+                  <div className="vote-card-top">
+                    <span className="vote-category">
+                      {event.categoryName}
+                    </span>
+
+                    <span className="vote-date">
+                      {formatDate(vote.createdAt)}
+                    </span>
+                  </div>
+
+                  <h3>{event.title}</h3>
+
+                  <div className="vote-card-bottom">
+                    <span className="vote-address">
+                      <span>⌖</span>
+                      {event.address || "לא צוין מיקום"}
+                    </span>
+
+                    <span
+                      className={`vote-type ${
+                        vote.typeVote === 0
+                          ? "vote-exists"
+                          : "vote-not-exists"
+                      }`}
+                    >
+                      {vote.typeVote === 0
+                        ? "👍 קיים"
+                        : "👎 לא קיים"}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
       </section>
 
       {/* הדיווחים שלי */}
@@ -341,9 +595,7 @@ function Profile() {
                       </span>
 
                       <span className="report-date">
-                        {new Date(report.createdAt).toLocaleDateString(
-                          "he-IL"
-                        )}
+                        {formatDate(report.createdAt)}
                       </span>
                     </div>
 
@@ -418,9 +670,7 @@ function Profile() {
 
               <span className="report-details-date">
                 <span>◷</span>
-                {new Date(
-                  selectedReport.createdAt
-                ).toLocaleDateString("he-IL")}
+                {formatDate(selectedReport.createdAt)}
               </span>
             </div>
 

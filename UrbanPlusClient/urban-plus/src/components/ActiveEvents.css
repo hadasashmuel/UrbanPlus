@@ -1,0 +1,436 @@
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
+
+.active-events-page {
+  min-height: 100vh;
+  padding: 35px 6%;
+  background: #fafaf5;
+  color: #303b32;
+  font-family: 'Heebo', sans-serif;
+  direction: rtl;
+}
+
+.active-events-header {
+  max-width: 1200px;
+  margin: 0 auto 35px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.active-events-back {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 1px solid #dce7dd;
+  background: white;
+  color: #456b53;
+  border-radius: 25px;
+  padding: 9px 17px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.active-events-back:hover {
+  background: #e7f0e8;
+}
+
+.active-events-heading {
+  margin: 55px auto 0;
+  text-align: center;
+}
+
+.active-events-eyebrow {
+  color: #789b83;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+.active-events-heading h1 {
+  margin: 8px 0;
+  color: #456b53;
+  font-size: 36px;
+  font-weight: 900;
+}
+
+.active-events-heading p {
+  margin: 0;
+  color: #78847a;
+  font-size: 15px;
+}
+
+.active-events-total {
+  min-width: 115px;
+  padding: 15px 20px;
+  border-radius: 18px;
+  background: #e7f0e8;
+  color: #456b53;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.active-events-total strong {
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.active-events-total span {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* כרטיסי האירועים - יישור לצד ימין */
+.active-events-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  direction: rtl;
+  justify-content: end;
+}
+
+.active-event-card {
+  width: 100%;
+  min-width: 0;
+  padding: 23px;
+  background: white;
+  border: 1px solid #e8eee8;
+  border-radius: 20px;
+  box-shadow: 0 5px 18px rgba(48, 59, 50, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  font-family: inherit;
+  text-align: right;
+  direction: rtl;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+}
+
+.active-event-card:hover {
+  transform: translateY(-4px);
+  border-color: #9bb9a0;
+  box-shadow: 0 10px 25px rgba(48, 59, 50, 0.12);
+}
+
+.active-event-card:focus-visible {
+  outline: 3px solid #789b83;
+  outline-offset: 3px;
+}
+
+.active-event-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.event-status {
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: #e7f0e8;
+  color: #456b53;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.event-category {
+  color: #879187;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.active-event-card h2 {
+  margin: 0 0 10px;
+  color: #303b32;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.event-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0 0 18px;
+  color: #78847a;
+  font-size: 14px;
+}
+
+.event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 15px 0;
+  border-top: 1px solid #eef1ec;
+  border-bottom: 1px solid #eef1ec;
+}
+
+.event-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #59665b;
+  font-size: 13px;
+}
+
+.event-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+  color: #78917d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.event-card-open {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #eef1ec;
+  color: #456b53;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* הודעות ומצב ריק */
+.active-events-message,
+.active-events-empty {
+  max-width: 650px;
+  margin: 70px auto;
+  padding: 35px;
+  border-radius: 20px;
+  background: white;
+  text-align: center;
+  color: #59665b;
+  box-shadow: 0 5px 18px rgba(48, 59, 50, 0.05);
+}
+
+.active-events-message.error {
+  color: #a34e4e;
+  background: #fff4f2;
+}
+
+.active-events-empty .empty-icon {
+  font-size: 42px;
+}
+
+.active-events-empty h2 {
+  color: #456b53;
+  font-size: 21px;
+}
+
+.active-events-empty p {
+  color: #78847a;
+  font-size: 14px;
+}
+
+/* חלון פרטי האירוע */
+.event-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  direction: rtl;
+}
+
+.event-modal {
+  position: relative;
+  background: white;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  padding: 25px;
+}
+
+.event-modal-close {
+  position: absolute;
+  left: 18px;
+  top: 15px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  font-size: 21px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.event-modal-heading {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 18px;
+  margin-bottom: 15px;
+}
+
+.event-modal-category {
+  display: inline-block;
+  color: white;
+  padding: 5px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.event-modal-heading h2 {
+  margin: 0 0 10px;
+  font-size: 23px;
+  color: #111827;
+}
+
+.event-modal-status {
+  display: inline-block;
+  background: #dcfce7;
+  color: #166534;
+  padding: 6px 13px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.event-modal-votes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.event-modal-votes button {
+  font-family: inherit;
+}
+
+.event-modal-section-title {
+  font-size: 17px;
+  color: #111827;
+}
+
+.event-modal-detail {
+  line-height: 1.6;
+}
+
+.event-modal-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.event-modal-stats > div {
+  border-radius: 12px;
+  padding: 12px 5px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.event-modal-stats > div:nth-child(1) {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.event-modal-stats > div:nth-child(2) {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.event-modal-stats > div:nth-child(3) {
+  background: #faf5ff;
+  color: #7e22ce;
+}
+
+.event-modal-stats strong {
+  font-size: 23px;
+}
+
+.event-modal-stats span {
+  font-size: 12px;
+}
+
+.event-modal-follow {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 18px;
+  margin-top: 10px;
+}
+
+.event-modal-follow button {
+  background: #456b53;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.event-modal-follow button:hover {
+  background: #34543f;
+}
+
+.event-modal-follow button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.event-modal-follow p {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.event-modal-messages {
+  margin-top: 20px;
+  color: #6b7280;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 650px) {
+  .active-events-page {
+    padding: 25px 5%;
+  }
+
+  .active-events-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .active-events-heading {
+    margin-top: 65px;
+  }
+
+  .active-events-heading h1 {
+    font-size: 29px;
+  }
+
+  .active-events-total {
+    align-self: center;
+    min-width: 140px;
+  }
+
+  .active-events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-modal {
+    padding: 22px 18px;
+  }
+}

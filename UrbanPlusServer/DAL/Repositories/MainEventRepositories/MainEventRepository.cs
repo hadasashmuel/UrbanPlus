@@ -15,7 +15,15 @@ namespace DAL.Repositories.MainEventRepositories
 
         public List<MainEvents> GetAllMainEvents()
         {
-            return _context.MainEvents.AsNoTracking().ToList();
+            return _context.MainEvents
+                .AsNoTracking()
+                .Include(e => e.Category)
+                .Include(e => e.Votes)
+                .Include(e => e.SavedEvents)
+                .Include(e => e.Reports)
+                .Include(e => e.Messages)
+                .AsSplitQuery()
+                .ToList();
         }
 
         public MainEvents? GetMainEventById(int id)

@@ -1,7 +1,5 @@
-﻿using DTO.VoteDTO;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+using DTO.VoteDTO;
 
 namespace BLL.Services.ServicesDB.VoteServices
 {
@@ -9,6 +7,7 @@ namespace BLL.Services.ServicesDB.VoteServices
     {
         List<ShowVoteDTO> GetAllVotes();
         ShowVoteDTO GetVoteById(int id);
+        List<ShowVoteDTO> GetVotesByUser(int userId);
         ShowVoteDTO CreateVotes(CreateVoteDTO dto, int userId);
         bool DeleteVote(int voteId, int userId);
     }

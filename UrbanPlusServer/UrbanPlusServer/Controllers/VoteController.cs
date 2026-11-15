@@ -26,6 +26,15 @@ namespace UrbanPlusServer.Controllers
             return Ok(votes);
         }
 
+        [Authorize]
+        [HttpGet("mine")]
+        public ActionResult<List<ShowVoteDTO>> GetMyVotes()
+        {
+            var votes = _voteService.GetVotesByUser(User.GetUserId());
+            return Ok(votes);
+        }
+
+
         // GET: api/Vote/5
         [HttpGet("{id}")]
         public ActionResult<ShowVoteDTO> GetVoteById(int id)

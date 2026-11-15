@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 import MapScreen from "./Map";
 import AddReport from "./AddReport";
 import AIChat from "./AIChat";
@@ -27,7 +28,7 @@ function HomeScreen() {
 
         <div className="topbar-actions">
           {!isLoggedIn ? (
-            <>
+            <div className="auth-buttons">
               <button
                 className="auth-button register-button"
                 onClick={() => navigate("/register")}
@@ -41,9 +42,9 @@ function HomeScreen() {
               >
                 התחברות
               </button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="auth-buttons">
               <div className="notification-wrapper">
                 <button
                   className="notification-button"
@@ -82,8 +83,17 @@ function HomeScreen() {
               >
                 👤
               </button>
-            </>
+            </div>
           )}
+
+          <button
+            type="button"
+            className="active-events-nav-button"
+            onClick={() => navigate("/active-events")}
+          >
+            <span>☰</span>
+            לכל האירועים הפעילים
+          </button>
         </div>
       </header>
 
@@ -98,6 +108,9 @@ function HomeScreen() {
       )}
 
       <AIChat />
+
+      {/* חלונות התחברות והרשמה צפים מעל המפה */}
+      <Outlet />
 
       {isReportOpen && (
         <AddReport onClose={() => setIsReportOpen(false)} />

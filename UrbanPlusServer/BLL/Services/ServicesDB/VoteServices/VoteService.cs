@@ -5,6 +5,7 @@ using BLL.Services.ServicesDB.UserBadgeServices;
 using DAL.Entities;
 using DAL.Repositories.VoteRepositories;
 using DTO.VoteDTO;
+
 namespace BLL.Services.ServicesDB.VoteServices
 {
     public class VoteService : IVoteService
@@ -13,7 +14,10 @@ namespace BLL.Services.ServicesDB.VoteServices
         private readonly IUserBadgeService _userBadgeService;
         private readonly IMapper _mapper;
 
-        public VoteService(IVoteRepository voteRepository, IMapper mapper, IUserBadgeService userBadgeService)
+        public VoteService(
+            IVoteRepository voteRepository,
+            IMapper mapper,
+            IUserBadgeService userBadgeService)
         {
             _voteRepository = voteRepository;
             _mapper = mapper;
@@ -23,7 +27,6 @@ namespace BLL.Services.ServicesDB.VoteServices
         public List<ShowVoteDTO> GetAllVotes()
         {
             var votes = _voteRepository.GetAll();
-
             return _mapper.Map<List<ShowVoteDTO>>(votes);
         }
 
@@ -37,14 +40,26 @@ namespace BLL.Services.ServicesDB.VoteServices
             return _mapper.Map<ShowVoteDTO>(vote);
         }
 
+        // שליפת ההצבעות של המשתמש המחובר
+        public List<ShowVoteDTO> GetVotesByUser(int userId)
+        {
+            var votes = _voteRepository.GetByUser(userId);
+            return _mapper.Map<List<ShowVoteDTO>>(votes);
+        }
 
         public ShowVoteDTO CreateVotes(CreateVoteDTO dto, int userId)
         {
-            var alreadyVoted =_voteRepository.ExistsForUserAndMainEvent( userId, dto.MainEventId);
+            var alreadyVoted =
+                _voteRepository.ExistsForUserAndMainEvent(
+                    userId,
+                    dto.MainEventId
+                );
 
             if (alreadyVoted)
             {
-                throw new InvalidOperationException("The user has already voted for this event.");
+                throw new InvalidOperationException(
+                    "The user has already voted for this event."
+                );
             }
 
             var vote = _mapper.Map<Votes>(dto);
@@ -53,6 +68,7 @@ namespace BLL.Services.ServicesDB.VoteServices
             vote.CreatedAt = DateTime.UtcNow;
 
             var createdVote = _voteRepository.Add(vote);
+
             _userBadgeService.CheckAndAwardBadges(userId);
 
             return _mapper.Map<ShowVoteDTO>(createdVote);

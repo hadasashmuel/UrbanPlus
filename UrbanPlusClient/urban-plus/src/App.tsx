@@ -6,7 +6,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import UpdateUser from "./components/UpdateUser";
 import Profile from "./components/Profile";
-
+import ActiveEvents from "./components/ActiveEvents";
 
 import "./App.css";
 
@@ -14,11 +14,15 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* דף הבית נשאר ברקע גם בהתחברות ובהרשמה */}
+        <Route path="/" element={<Home />}>
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+        </Route>
+
         <Route path="/update-user" element={<UpdateUser />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/active-events" element={<ActiveEvents />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
