@@ -17,14 +17,20 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Install dependencies
-        run: dotnet restore UrbanPlusServer
+      - name: Publish Server
+        # החליפי את הנתיב ל-csproj הספציפי של פרויקט ה-API שלך
+        run: dotnet publish UrbanPlusServer/UrbanPlusServer.csproj --configuration Release --output ./publish-server --runtime win-x86
 
-      - name: Build
-        run: dotnet build UrbanPlusServer --configuration Release --no-restore
-
-      - name: Publish
-        run: dotnet publish UrbanPlusServer --configuration Release --output ./publish-server --runtime win-x86
+      - name: Put App Offline (Unlock IIS files)
+        shell: pwsh
+        env:
+          FTP_HOST: ${{ secrets.SERVER_FTP_HOST }}
+          FTP_USER: ${{ secrets.SERVER_FTP_USER }}
+          FTP_PASS: ${{ secrets.SERVER_FTP_PASS }}
+        run: |
+          Set-Content -Path "app_offline.htm" -Value "<h1>Updating application, back in a moment...</h1>"
+          curl.exe -T "app_offline.htm" "ftp://$env:FTP_HOST/wwwroot/app_offline.htm" --user "$($env:FTP_USER):$($env:FTP_PASS)" --ftp-ssl -k
+          Start-Sleep -Seconds 3
 
       - name: Deploy Server to MonsterASP.NET via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -34,6 +40,20 @@ jobs:
           password: ${{ secrets.SERVER_FTP_PASS }}
           local-dir: ./publish-server/
           server-dir: ./wwwroot/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/app_offline.htm
+
+      - name: Bring App Online
+        if: always()
+        shell: pwsh
+        env:
+          FTP_HOST: ${{ secrets.SERVER_FTP_HOST }}
+          FTP_USER: ${{ secrets.SERVER_FTP_USER }}
+          FTP_PASS: ${{ secrets.SERVER_FTP_PASS }}
+        run: |
+          curl.exe -Q "-DELE /wwwroot/app_offline.htm" "ftp://$env:FTP_HOST/" --user "$($env:FTP_USER):$($env:FTP_PASS)" --ftp-ssl -k
 
   # --- 2. צד לקוח (React + Vite) ---
   build_and_deploy_client:
