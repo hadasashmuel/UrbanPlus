@@ -17,44 +17,22 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Publish Server
-        run: dotnet publish UrbanPlusServer/UrbanPlusServer.csproj --configuration Release --output ./publish-server --runtime win-x86
+      - name: Install dependencies
+        run: dotnet restore UrbanPlusServer
 
-      - name: Put App Offline (Unlock IIS files)
-        shell: pwsh
-        env:
-          FTP_HOST: ${{ secrets.SERVER_FTP_HOST }}
-          FTP_USER: ${{ secrets.SERVER_FTP_USER }}
-          FTP_PASS: ${{ secrets.SERVER_FTP_PASS }}
-        run: |
-          $cleanHost = $env:FTP_HOST -replace '^ftps?://', '' -replace '/$', ''
-          Set-Content -Path "app_offline.htm" -Value "<h1>Updating application, back in a moment...</h1>"
-          curl.exe -T "app_offline.htm" "ftp://$cleanHost/wwwroot/app_offline.htm" --user "$($env:FTP_USER):$($env:FTP_PASS)" --ssl-reqd -k
-          Start-Sleep -Seconds 3
+      - name: Build
+        run: dotnet build UrbanPlusServer --configuration Release --no-restore
 
-      - name: Deploy Server to MonsterASP.NET via FTPS
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Publish
+        run: dotnet publish UrbanPlusServer/UrbanPlusServer.csproj --configuration Release --output ./publish --runtime win-x86
+
+      - name: Deploy Server to MonsterASP.NET via WebDeploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
         with:
-          server: ${{ secrets.SERVER_FTP_HOST }}
-          username: ${{ secrets.SERVER_FTP_USER }}
-          password: ${{ secrets.SERVER_FTP_PASS }}
-          local-dir: ./publish-server/
-          server-dir: ./wwwroot/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/app_offline.htm
-
-      - name: Bring App Online
-        if: always()
-        shell: pwsh
-        env:
-          FTP_HOST: ${{ secrets.SERVER_FTP_HOST }}
-          FTP_USER: ${{ secrets.SERVER_FTP_USER }}
-          FTP_PASS: ${{ secrets.SERVER_FTP_PASS }}
-        run: |
-          $cleanHost = $env:FTP_HOST -replace '^ftps?://', '' -replace '/$', ''
-          curl.exe -Q "-DELE /wwwroot/app_offline.htm" "ftp://$cleanHost/" --user "$($env:FTP_USER):$($env:FTP_PASS)" --ssl-reqd -k
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
 
   # --- 2. צד לקוח (React + Vite) ---
   build_and_deploy_client:
