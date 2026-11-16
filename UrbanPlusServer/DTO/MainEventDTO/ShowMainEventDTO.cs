@@ -27,6 +27,7 @@ namespace DTO.MainEventDTO
         public int CountVotes { get; set; }
         public int CountSavedEvents { get; set; }
         public int CountReports { get; set; }
+        public List<string> ImageUrls { get; set; } = new();
         public List<ShowMessageDTO> Messages { get; set; }
     }
 }

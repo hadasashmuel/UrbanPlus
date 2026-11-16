@@ -88,6 +88,7 @@
 }
 
 /* כרטיסי האירועים */
+
 .active-events-grid {
   max-width: 1200px;
   margin: 0 auto;
@@ -202,6 +203,7 @@
 }
 
 /* הודעות ומצב ריק */
+
 .active-events-message,
 .active-events-empty {
   max-width: 650px;
@@ -234,6 +236,7 @@
 }
 
 /* חלון פרטי האירוע */
+
 .event-modal-overlay {
   position: fixed;
   inset: 0;
@@ -259,6 +262,7 @@
 }
 
 /* פרטי האירוע מימין והצ'אט משמאל */
+
 .event-modal-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -279,6 +283,7 @@
 }
 
 /* התאמת הצ'אט לחלון החדש */
+
 .event-modal-chat .event-chat {
   margin-top: 0;
   padding-top: 0;
@@ -392,7 +397,8 @@
   font-size: 12px;
 }
 
-/* מעקב וביטול מעקב - שניהם בעיצוב קישור */
+/* מעקב וביטול מעקב */
+
 .event-modal-follow {
   border-top: 1px solid #e5e7eb;
   padding-top: 18px;
@@ -437,7 +443,100 @@
   text-align: center;
 }
 
+/* ================================
+   גלריית תמונות מהדיווחים
+================================ */
+
+.event-report-images {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.event-report-images .event-modal-section-title {
+  margin: 0 0 14px;
+  color: #456b53;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.event-report-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+}
+
+.event-report-image-button {
+  display: block;
+  width: 100%;
+  height: 115px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f3f6f2;
+  cursor: zoom-in;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.event-report-image-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 14px rgba(48, 59, 50, 0.15);
+}
+
+.event-report-image-button:focus-visible {
+  outline: 3px solid #789b83;
+  outline-offset: 3px;
+}
+
+.event-report-image-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ================================
+   תמונה מוגדלת
+================================ */
+
+.event-image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.88);
+  cursor: zoom-out;
+}
+
+.event-image-lightbox img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 12px;
+  cursor: default;
+}
+
+.event-image-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 38px;
+  cursor: pointer;
+}
+
+.event-image-lightbox-close:hover {
+  color: #dce7dd;
+}
+
 /* התאמה למסכים קטנים */
+
 @media (max-width: 650px) {
   .active-events-page {
     padding: 25px 5%;
@@ -471,6 +570,7 @@
   }
 
   /* במסכים קטנים הצ'אט מופיע מתחת לפרטים */
+
   .event-modal-layout {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -481,5 +581,20 @@
     border-top: 1px solid #e5e7eb;
     padding-right: 0;
     padding-top: 20px;
+  }
+
+  /* גלריה במסכים קטנים */
+
+  .event-report-images-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .event-report-image-button {
+    height: 95px;
+  }
+
+  .event-image-lightbox {
+    padding: 15px;
   }
 }

@@ -15,12 +15,16 @@ namespace DAL.Repositories.BadgeRepositories
 
         public List<Badges> GetAllBadges()
         {
-            return _context.Badges.AsNoTracking().ToList();
+            return _context.Badges
+                .AsNoTracking()
+                .ToList();
         }
 
         public Badges? GetBadgeById(int id)
         {
-            return _context.Badges .AsNoTracking().FirstOrDefault(b => b.BadgeId == id);
+            return _context.Badges
+                .AsNoTracking()
+                .FirstOrDefault(b => b.BadgeId == id);
         }
 
         public Badges AddBadge(Badges badge)
@@ -29,6 +33,23 @@ namespace DAL.Repositories.BadgeRepositories
             _context.SaveChanges();
 
             return badge;
+        }
+
+        public bool UpdateBadge(Badges badge)
+        {
+            var existingBadge = _context.Badges
+                .FirstOrDefault(b => b.BadgeId == badge.BadgeId);
+
+            if (existingBadge == null)
+                return false;
+
+            existingBadge.BadgeName = badge.BadgeName;
+            existingBadge.Description = badge.Description;
+            existingBadge.IconUrl = badge.IconUrl;
+
+            _context.SaveChanges();
+
+            return true;
         }
 
         public bool DeleteBadge(int id)

@@ -15,6 +15,20 @@ import type { MainEvent } from "../store/events/eventsState";
 import EventChat from "./EventChat";
 import "./ActiveEvents.css";
 
+const IMAGE_BASE_URL = "https://localhost:7019";
+
+function getReportImageUrl(imageUrl: string) {
+  if (/^https?:\/\//i.test(imageUrl)) {
+    return imageUrl;
+  }
+
+  if (imageUrl.startsWith("/")) {
+    return `${IMAGE_BASE_URL}${imageUrl}`;
+  }
+
+  return `${IMAGE_BASE_URL}/images/${imageUrl}`;
+}
+
 function getStatusName(status: number | string) {
   const statusNames: Record<string, string> = {
     "0": "חדש",
@@ -89,6 +103,8 @@ function ActiveEvents() {
   const [selectedEventId, setSelectedEventId] = useState<number | null>(
     null
   );
+
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
   const activeEvents = mainEvents.filter(isActiveEvent);
 
@@ -285,7 +301,10 @@ function ActiveEvents() {
       {selectedEvent && (
         <div
           className="event-modal-overlay"
-          onClick={() => setSelectedEventId(null)}
+          onClick={() => {
+            setSelectedEventId(null);
+            setExpandedImage(null);
+          }}
         >
           <div
             className="event-modal"
@@ -293,17 +312,18 @@ function ActiveEvents() {
           >
             <button
               className="event-modal-close"
-              onClick={() => setSelectedEventId(null)}
+              onClick={() => {
+                setSelectedEventId(null);
+                setExpandedImage(null);
+              }}
               aria-label="סגירת חלון"
             >
               ×
             </button>
 
             <div className="event-modal-layout">
-
               {/* צד ימין - פרטי האירוע */}
               <div className="event-modal-details">
-
                 <div className="event-modal-heading">
                   <span
                     className="event-modal-category"
@@ -399,6 +419,69 @@ function ActiveEvents() {
                     : "טרם הסתיים"}
                 </div>
 
+                {/* תמונות מהדיווחים המשויכים לאירוע */}
+                {selectedEvent.imageUrls?.length > 0 && (
+                  <section
+                    style={{
+                      marginTop: "22px",
+                      paddingTop: "16px",
+                      borderTop: "1px solid #e5e7eb",
+                    }}
+                  >
+                    <h3 className="event-modal-section-title">
+                      תמונות מהדיווחים ({selectedEvent.imageUrls.length})
+                    </h3>
+
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fill, minmax(110px, 1fr))",
+                        gap: "12px",
+                        marginTop: "14px",
+                      }}
+                    >
+                      {selectedEvent.imageUrls.map((imageUrl, index) => {
+                        const imageSrc = getReportImageUrl(imageUrl);
+
+                        return (
+                          <button
+                            type="button"
+                            key={`${imageUrl}-${index}`}
+                            onClick={() => setExpandedImage(imageSrc)}
+                            aria-label={`הגדלת תמונה ${index + 1}`}
+                            style={{
+                              border: "none",
+                              padding: 0,
+                              background: "transparent",
+                              cursor: "zoom-in",
+                              borderRadius: "12px",
+                              overflow: "hidden",
+                            }}
+                          >
+                            <img
+                              src={imageSrc}
+                              alt={`תמונה מדיווח ${index + 1}`}
+                              loading="lazy"
+                              style={{
+                                width: "100%",
+                                height: "110px",
+                                objectFit: "cover",
+                                display: "block",
+                                borderRadius: "12px",
+                                border: "1px solid #e5e7eb",
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.style.opacity = "0.3";
+                              }}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+
                 <div className="event-modal-stats">
                   <div>
                     <strong>{selectedEvent.countReports}</strong>
@@ -453,8 +536,56 @@ function ActiveEvents() {
                   mainEventId={selectedEvent.mainEventsId}
                 />
               </div>
-
             </div>
+
+            {/* תצוגת תמונה מוגדלת */}
+            {expandedImage && (
+              <div
+                onClick={() => setExpandedImage(null)}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 10000,
+                  background: "rgba(0, 0, 0, 0.88)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "30px",
+                  cursor: "zoom-out",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setExpandedImage(null)}
+                  aria-label="סגירת תמונה מוגדלת"
+                  style={{
+                    position: "absolute",
+                    top: "20px",
+                    right: "25px",
+                    border: "none",
+                    background: "transparent",
+                    color: "white",
+                    fontSize: "38px",
+                    cursor: "pointer",
+                  }}
+                >
+                  ×
+                </button>
+
+                <img
+                  src={expandedImage}
+                  alt="תמונה מוגדלת מהדיווח"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    maxWidth: "90vw",
+                    maxHeight: "85vh",
+                    objectFit: "contain",
+                    borderRadius: "12px",
+                    cursor: "default",
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

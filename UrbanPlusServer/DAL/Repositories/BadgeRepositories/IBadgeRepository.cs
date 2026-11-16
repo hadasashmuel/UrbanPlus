@@ -1,7 +1,5 @@
-﻿using DAL.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+using DAL.Entities;
 
 namespace DAL.Repositories.BadgeRepositories
 {
@@ -10,6 +8,7 @@ namespace DAL.Repositories.BadgeRepositories
         List<Badges> GetAllBadges();
         Badges? GetBadgeById(int id);
         Badges AddBadge(Badges badge);
+        bool UpdateBadge(Badges badge);
         bool DeleteBadge(int id);
     }
 }

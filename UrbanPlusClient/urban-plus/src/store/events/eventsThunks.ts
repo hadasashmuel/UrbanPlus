@@ -27,6 +27,16 @@ export interface DeleteMainEventRequest {
   reason: string;
 }
 
+// נתונים לעדכון אירוע
+export interface UpdateMainEventRequest {
+  mainEventId: number;
+  categoryId: number;
+  title: string;
+  status: number;
+  severity: number;
+  estimatedResolutionMinutes: number;
+}
+
 // שליפת כל האירועים
 export const fetchMainEvents = createAsyncThunk<
   MainEvent[],
@@ -278,6 +288,56 @@ export const deleteVote = createAsyncThunk<
 // =====================================
 //          ניהול אירועים – מנהל
 // =====================================
+
+// עדכון אירוע
+export const updateMainEvent = createAsyncThunk<
+  UpdateMainEventRequest,
+  UpdateMainEventRequest,
+  ThunkConfig
+>(
+  "events/updateMainEvent",
+  async (eventData, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const token = getState().users.token;
+
+      if (!token) {
+        return rejectWithValue("אין משתמש מחובר");
+      }
+
+      const response = await fetch(
+        `${MAIN_EVENT_API}/admin/${eventData.mainEventId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            categoryId: eventData.categoryId,
+            title: eventData.title,
+            status: eventData.status,
+            severity: eventData.severity,
+            estimatedResolutionMinutes:
+              eventData.estimatedResolutionMinutes,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        return rejectWithValue(
+          (await response.text()) || "Failed to update event"
+        );
+      }
+
+      // רענון הרשימה כדי לקבל גם את שם הקטגוריה המעודכן
+      dispatch(fetchMainEvents());
+
+      return eventData;
+    } catch {
+      return rejectWithValue("Could not connect to server");
+    }
+  }
+);
 
 // מחיקת אירוע
 export const deleteMainEvent = createAsyncThunk<

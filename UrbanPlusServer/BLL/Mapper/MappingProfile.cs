@@ -44,7 +44,10 @@ namespace BLL
 
             // Badges
             CreateMap<Badges, ShowBadgeDTO>();
-            CreateMap<CreateBadgeDTO, Badges>();
+
+            CreateMap<CreateBadgeDTO, Badges>()
+                .ForMember(dest => dest.IconUrl,
+                    opt => opt.Ignore());
 
             // Main Events
             CreateMap<MainEvents, ShortShowMainEventDTO>()
@@ -67,7 +70,18 @@ namespace BLL
                 .ForMember(dest => dest.CountSavedEvents,
                     opt => opt.MapFrom(src => src.SavedEvents.Count))
                 .ForMember(dest => dest.CountReports,
-                    opt => opt.MapFrom(src => src.Reports.Count));
+                    opt => opt.MapFrom(src => src.Reports.Count))
+                .ForMember(dest => dest.ImageUrls,
+                    opt => opt.MapFrom(src =>
+                        src.Reports
+                            .Where(r => r.Images != null)
+                            .SelectMany(r => r.Images)
+                            .Select(img => img.ImageUrl)
+                            .Where(url =>
+                                !string.IsNullOrWhiteSpace(url))
+                            .Distinct()
+                            .ToList()
+                    ));
 
             // Reports
             CreateMap<CreateReportDTO, Reports>()

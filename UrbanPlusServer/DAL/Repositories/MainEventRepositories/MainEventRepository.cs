@@ -21,6 +21,7 @@ namespace DAL.Repositories.MainEventRepositories
                 .Include(e => e.Votes)
                 .Include(e => e.SavedEvents)
                 .Include(e => e.Reports)
+                  .ThenInclude(r => r.Images)
                 .Include(e => e.Messages)
                 .AsSplitQuery()
                 .ToList();
@@ -28,7 +29,16 @@ namespace DAL.Repositories.MainEventRepositories
 
         public MainEvents? GetMainEventById(int id)
         {
-            return _context.MainEvents.AsNoTracking().FirstOrDefault(e => e.MainEventsId == id);
+            return _context.MainEvents
+                .AsNoTracking()
+                .Include(e => e.Category)
+                .Include(e => e.Votes)
+                .Include(e => e.SavedEvents)
+                .Include(e => e.Reports)
+                    .ThenInclude(r => r.Images)
+                .Include(e => e.Messages)
+                .AsSplitQuery()
+                .FirstOrDefault(e => e.MainEventsId == id);
         }
 
         public MainEvents AddMainEvent(MainEvents mainEvent)

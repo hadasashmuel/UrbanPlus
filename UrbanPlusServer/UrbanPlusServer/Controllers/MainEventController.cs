@@ -33,13 +33,22 @@ namespace UrbanPlusServer.Controllers
             var mainEvent = _mainEventService.GetMainEventById(id);
             return Ok(mainEvent);
         }
+        // PUT: api/MainEvent/admin/5
+        [Authorize(Roles = "1")]
+        [HttpPut("admin/{id:int}")]
+        public IActionResult UpdateMainEvent( int id, [FromBody] UpdateMainEventDTO dto)
+        {
+            var result = _mainEventService.UpdateMainEvent(id, dto);
 
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
         // DELETE: api/MainEvent/admin/5
         [Authorize(Roles = "1")]
         [HttpDelete("admin/{id:int}")]
-        public IActionResult DeleteMainEvent(
-            int id,
-            [FromBody] DeleteMainEventDTO dto)
+        public IActionResult DeleteMainEvent(  int id,[FromBody] DeleteMainEventDTO dto)
         {
             var result = _mainEventService.DeleteMainEvent(
                 id,

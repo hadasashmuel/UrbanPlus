@@ -5,9 +5,67 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   fetchMainEvents,
   deleteMainEvent,
+  updateMainEvent,
 } from "../store/events/eventsThunks";
+import { fetchCategories } from "../store/categories/categoriesThunks";
 import type { MainEvent } from "../store/events/eventsState";
 import "./AdminEvents.css";
+
+interface EditForm {
+  title: string;
+  categoryId: string;
+  status: string;
+  severity: string;
+  estimatedResolutionMinutes: string;
+}
+
+const statusOptions = [
+  { value: 0, label: "חדש" },
+  { value: 1, label: "אומת" },
+  { value: 2, label: "בטיפול" },
+  { value: 3, label: "טופל" },
+  { value: 4, label: "נסגר" },
+];
+
+const severityOptions = [
+  { value: 0, label: "נמוכה" },
+  { value: 1, label: "בינונית" },
+  { value: 2, label: "גבוהה" },
+  { value: 3, label: "קריטית" },
+];
+
+const getEnumNumber = (
+  value: number | string,
+  options: { value: number; label: string }[],
+  englishNames: string[]
+): number => {
+  if (typeof value === "number" && Number.isInteger(value)) {
+    return options.some((option) => option.value === value) ? value : 0;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  const numericValue = Number(normalized);
+
+  if (
+    normalized !== "" &&
+    Number.isInteger(numericValue) &&
+    options.some((option) => option.value === numericValue)
+  ) {
+    return numericValue;
+  }
+
+  const hebrewOption = options.find(
+    (option) => option.label === normalized
+  );
+
+  if (hebrewOption) return hebrewOption.value;
+
+  const englishIndex = englishNames.findIndex(
+    (name) => name.toLowerCase() === normalized
+  );
+
+  return englishIndex >= 0 ? englishIndex : 0;
+};
 
 function AdminEvents() {
   const dispatch = useAppDispatch();
@@ -23,6 +81,9 @@ function AdminEvents() {
     (state) => state.events.deletingMainEvent
   );
   const error = useAppSelector((state) => state.events.error);
+  const categories = useAppSelector(
+    (state) => state.categories.categories
+  );
 
   const [search, setSearch] = useState("");
   const [selectedEvent, setSelectedEvent] =
@@ -35,9 +96,22 @@ function AdminEvents() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
+  const [editingEvent, setEditingEvent] =
+    useState<MainEvent | null>(null);
+  const [editForm, setEditForm] = useState<EditForm>({
+    title: "",
+    categoryId: "",
+    status: "0",
+    severity: "0",
+    estimatedResolutionMinutes: "",
+  });
+  const [editError, setEditError] = useState("");
+  const [updating, setUpdating] = useState(false);
+
   useEffect(() => {
     if (token) {
       dispatch(fetchMainEvents());
+      dispatch(fetchCategories());
     }
   }, [dispatch, token]);
 
@@ -67,6 +141,109 @@ function AdminEvents() {
   const closeDetailsModal = () => {
     setShowDetailsModal(false);
     setSelectedEvent(null);
+  };
+
+  const openEditModal = (event: MainEvent) => {
+    setEditingEvent(event);
+    setEditError("");
+
+    setEditForm({
+      title: event.title ?? "",
+      categoryId: String(event.categoryId ?? ""),
+      status: String(
+        getEnumNumber(event.status, statusOptions, [
+          "New",
+          "Verified",
+          "InTreatment",
+          "Treated",
+          "Closed",
+        ])
+      ),
+      severity: String(
+        getEnumNumber(event.severity, severityOptions, [
+          "Low",
+          "Medium",
+          "High",
+          "Critical",
+        ])
+      ),
+      estimatedResolutionMinutes: String(
+        event.estimatedResolutionMinutes ?? ""
+      ),
+    });
+  };
+
+  const closeEditModal = () => {
+    if (updating) return;
+
+    setEditingEvent(null);
+    setEditError("");
+  };
+
+  const handleEditChange = (
+    field: keyof EditForm,
+    value: string
+  ) => {
+    setEditForm((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
+
+    setEditError("");
+  };
+
+  const handleUpdate = async () => {
+    if (!editingEvent) return;
+
+    const trimmedTitle = editForm.title.trim();
+    const categoryId = Number(editForm.categoryId);
+    const estimatedMinutes = Number(
+      editForm.estimatedResolutionMinutes
+    );
+
+    if (trimmedTitle.length < 2 || trimmedTitle.length > 100) {
+      setEditError("הכותרת חייבת להכיל בין 2 ל־100 תווים");
+      return;
+    }
+
+    if (!Number.isInteger(categoryId) || categoryId <= 0) {
+      setEditError("יש לבחור קטגוריה");
+      return;
+    }
+
+    if (
+      !Number.isInteger(estimatedMinutes) ||
+      estimatedMinutes <= 0
+    ) {
+      setEditError("יש להזין זמן טיפול משוער גדול מאפס");
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setEditError("");
+
+      await dispatch(
+        updateMainEvent({
+          mainEventId: editingEvent.mainEventsId,
+          categoryId,
+          title: trimmedTitle,
+          status: Number(editForm.status),
+          severity: Number(editForm.severity),
+          estimatedResolutionMinutes: estimatedMinutes,
+        })
+      ).unwrap();
+
+      setEditingEvent(null);
+    } catch (updateError) {
+      setEditError(
+        typeof updateError === "string"
+          ? updateError
+          : "עדכון האירוע נכשל. נסי שוב"
+      );
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const openDeleteModal = (eventId: number) => {
@@ -102,10 +279,10 @@ function AdminEvents() {
       ).unwrap();
 
       closeDeleteModal();
-    } catch (error) {
+    } catch (deleteError) {
       setDeleteError(
-        typeof error === "string"
-          ? error
+        typeof deleteError === "string"
+          ? deleteError
           : "מחיקת האירוע נכשלה. נסי שוב"
       );
     }
@@ -255,6 +432,13 @@ function AdminEvents() {
                             onClick={() => openDetailsModal(event)}
                           >
                             פרטים
+                          </button>
+
+                          <button
+                            className="admin-event-edit-button"
+                            onClick={() => openEditModal(event)}
+                          >
+                            עריכה
                           </button>
 
                           <button
@@ -413,6 +597,146 @@ function AdminEvents() {
             >
               סגירה
             </button>
+          </div>
+        </div>
+      )}
+
+      {editingEvent && (
+        <div
+          className="admin-events-modal-overlay"
+          onClick={closeEditModal}
+        >
+          <div
+            className="admin-events-edit-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-event-edit-title"
+          >
+            <div className="admin-events-details-heading">
+              <div>
+                <h2 id="admin-event-edit-title">עריכת אירוע</h2>
+                <p>עדכון פרטי האירוע במערכת</p>
+              </div>
+
+              <button
+                className="admin-events-close-button"
+                onClick={closeEditModal}
+                disabled={updating}
+                aria-label="סגירה"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="admin-events-edit-form">
+              <label htmlFor="edit-event-title">כותרת האירוע</label>
+              <input
+                id="edit-event-title"
+                type="text"
+                value={editForm.title}
+                maxLength={100}
+                onChange={(e) =>
+                  handleEditChange("title", e.target.value)
+                }
+              />
+
+              <label htmlFor="edit-event-category">קטגוריה</label>
+              <select
+                id="edit-event-category"
+                value={editForm.categoryId}
+                onChange={(e) =>
+                  handleEditChange("categoryId", e.target.value)
+                }
+              >
+                <option value="">בחרי קטגוריה</option>
+                {categories.map((category) => (
+                  <option
+                    key={category.categoryId}
+                    value={category.categoryId}
+                  >
+                    {category.categoryName}
+                  </option>
+                ))}
+              </select>
+
+              <label htmlFor="edit-event-status">סטטוס</label>
+              <select
+                id="edit-event-status"
+                value={editForm.status}
+                onChange={(e) =>
+                  handleEditChange("status", e.target.value)
+                }
+              >
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              <label htmlFor="edit-event-severity">חומרה</label>
+              <select
+                id="edit-event-severity"
+                value={editForm.severity}
+                onChange={(e) =>
+                  handleEditChange("severity", e.target.value)
+                }
+              >
+                {severityOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              <label htmlFor="edit-event-minutes">
+                זמן טיפול משוער (בדקות)
+              </label>
+              <input
+                id="edit-event-minutes"
+                type="number"
+                min="1"
+                step="1"
+                value={editForm.estimatedResolutionMinutes}
+                onChange={(e) =>
+                  handleEditChange(
+                    "estimatedResolutionMinutes",
+                    e.target.value
+                  )
+                }
+              />
+            </div>
+
+            {editError && (
+              <div className="admin-events-modal-error">
+                {editError}
+              </div>
+            )}
+
+            <div className="admin-events-modal-actions">
+              <button
+                className="admin-events-modal-cancel"
+                onClick={closeEditModal}
+                disabled={updating}
+              >
+                ביטול
+              </button>
+
+              <button
+                className="admin-events-edit-save"
+                onClick={handleUpdate}
+                disabled={updating || categories.length === 0}
+              >
+                {updating ? "שומר..." : "שמירת שינויים"}
+              </button>
+            </div>
+
+            {categories.length === 0 && (
+              <p className="admin-events-edit-hint">
+                הקטגוריות עדיין נטענות או שלא נמצאו קטגוריות במערכת
+              </p>
+            )}
           </div>
         </div>
       )}

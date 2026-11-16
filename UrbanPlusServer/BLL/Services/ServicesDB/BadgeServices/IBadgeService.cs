@@ -1,7 +1,5 @@
-﻿using DTO.BadgeDTO;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+using DTO.BadgeDTO;
 
 namespace BLL.Services.ServicesDB.BadgeServices
 {
@@ -10,6 +8,7 @@ namespace BLL.Services.ServicesDB.BadgeServices
         List<ShowBadgeDTO> GetAllBadges();
         ShowBadgeDTO GetBadgeById(int id);
         ShowBadgeDTO CreateBadge(CreateBadgeDTO dto);
+        ShowBadgeDTO UpdateBadge(int id, UpdateBadgeDTO dto);
         bool DeleteBadge(int id);
     }
 }

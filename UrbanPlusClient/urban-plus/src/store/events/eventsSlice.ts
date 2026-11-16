@@ -11,6 +11,7 @@ import {
   createVote,
   deleteVote,
   deleteMainEvent,
+  updateMainEvent,
 } from "./eventsThunks";
 
 const eventsSlice = createSlice({
@@ -197,6 +198,36 @@ const eventsSlice = createSlice({
       .addCase(deleteVote.rejected, (state, action) => {
         state.deletingVote = false;
         state.error = action.payload ?? "Failed to delete vote";
+      })
+
+      // =====================================
+      //       עדכון אירוע – מנהל
+      // =====================================
+
+      .addCase(updateMainEvent.pending, (state) => {
+        state.updatingMainEvent = true;
+        state.error = null;
+      })
+      .addCase(updateMainEvent.fulfilled, (state, action) => {
+        state.updatingMainEvent = false;
+
+        const event = state.mainEvents.find(
+          (item) =>
+            item.mainEventsId === action.payload.mainEventId
+        );
+
+        if (event) {
+          event.categoryId = action.payload.categoryId;
+          event.title = action.payload.title;
+          event.status = action.payload.status;
+          event.severity = action.payload.severity;
+          event.estimatedResolutionMinutes =
+            action.payload.estimatedResolutionMinutes;
+        }
+      })
+      .addCase(updateMainEvent.rejected, (state, action) => {
+        state.updatingMainEvent = false;
+        state.error = action.payload ?? "Failed to update event";
       })
 
       // =====================================

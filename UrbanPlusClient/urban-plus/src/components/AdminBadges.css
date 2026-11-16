@@ -1,11 +1,14 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap');
+
 .admin-badges-page {
-  direction: rtl;
   min-height: 100vh;
-  padding: 30px;
-  background: #f7f8f3;
-  font-family: "Heebo", sans-serif;
-  color: #263b32;
+  direction: rtl;
+  background: #fafaf5;
+  color: #303b32;
+  font-family: 'Heebo', sans-serif;
+  padding: 35px 5%;
+  box-sizing: border-box;
 }
 
 .admin-badges-embedded {
@@ -15,54 +18,60 @@
 }
 
 .admin-badges-content {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
 }
+
+/* כרטיס סיכום */
 
 .admin-badges-summary {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
   width: fit-content;
   min-width: 210px;
-  padding: 20px 28px;
+  padding: 18px 25px;
   margin-bottom: 25px;
-  background: #fff;
-  border: 1px solid #e8eee7;
+  background: white;
+  border: 1px solid #edf0eb;
   border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(40, 70, 50, 0.05);
+  box-shadow: 0 4px 15px rgba(49, 94, 67, 0.05);
 }
 
 .admin-badges-summary-icon {
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  background: #eff7f0;
   border-radius: 14px;
-  background: #edf4e9;
-  font-size: 27px;
+  font-size: 23px;
 }
 
 .admin-badges-summary span {
   display: block;
-  margin-bottom: 4px;
-  color: #718078;
-  font-size: 14px;
+  color: #89928b;
+  font-size: 13px;
 }
 
 .admin-badges-summary strong {
-  font-size: 27px;
-  color: #315b43;
+  color: #315e43;
+  font-size: 25px;
+  font-weight: 800;
 }
 
+/* כרטיס ראשי */
+
 .admin-badges-card {
+  background: white;
+  border: 1px solid #edf0eb;
+  border-radius: 20px;
   padding: 25px;
-  background: #fff;
-  border: 1px solid #e8eee7;
-  border-radius: 18px;
-  box-shadow: 0 5px 20px rgba(40, 70, 50, 0.05);
+  box-shadow: 0 5px 22px rgba(49, 94, 67, 0.05);
 }
+
+/* סרגל עליון */
 
 .admin-badges-toolbar {
   display: flex;
@@ -73,31 +82,45 @@
 }
 
 .admin-badges-toolbar h2 {
-  margin: 0 0 6px;
-  color: #294b38;
-  font-size: 21px;
+  margin: 0;
+  color: #315e43;
+  font-size: 20px;
+  font-weight: 800;
 }
 
 .admin-badges-toolbar p {
-  margin: 0;
-  color: #89948d;
-  font-size: 14px;
+  margin: 4px 0 0;
+  color: #929a93;
+  font-size: 13px;
+}
+
+.admin-badges-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .admin-badges-search {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 320px;
+  width: 300px;
+  max-width: 100%;
   padding: 0 14px;
-  border: 1px solid #dce6dc;
-  border-radius: 10px;
-  background: #fbfcfa;
+  background: #fafbf8;
+  border: 1px solid #e5eae4;
+  border-radius: 12px;
+  transition: 0.2s ease;
+}
+
+.admin-badges-search:focus-within {
+  border-color: #70a987;
+  box-shadow: 0 0 0 3px rgba(112, 169, 135, 0.1);
 }
 
 .admin-badges-search span {
-  color: #829287;
-  font-size: 23px;
+  color: #789b83;
+  font-size: 25px;
 }
 
 .admin-badges-search input {
@@ -106,12 +129,41 @@
   border: none;
   outline: none;
   background: transparent;
-  color: #33483a;
+  color: #303b32;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
 }
 
+.admin-badges-search input::placeholder {
+  color: #a6aea7;
+}
+
+/* כפתור הוספה */
+
+.admin-badge-add-button {
+  padding: 11px 17px;
+  border: 1px solid #548d6b;
+  border-radius: 11px;
+  background: #548d6b;
+  color: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-badge-add-button:hover {
+  background: #416f52;
+  border-color: #416f52;
+  transform: translateY(-1px);
+}
+
+/* טבלה */
+
 .admin-badges-table-wrapper {
+  width: 100%;
   overflow-x: auto;
 }
 
@@ -119,31 +171,38 @@
   width: 100%;
   border-collapse: collapse;
   text-align: right;
-}
-
-.admin-badges-table th {
-  padding: 15px 12px;
-  background: #f3f7f1;
-  color: #526b59;
-  font-size: 14px;
-  font-weight: 600;
   white-space: nowrap;
 }
 
-.admin-badges-table th:first-child {
-  border-radius: 0 9px 9px 0;
+.admin-badges-table thead {
+  background: #f5f8f3;
 }
 
-.admin-badges-table th:last-child {
-  border-radius: 9px 0 0 9px;
+.admin-badges-table th {
+  padding: 15px 16px;
+  color: #66816d;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .admin-badges-table td {
-  padding: 15px 12px;
-  border-bottom: 1px solid #edf1ec;
-  color: #536259;
-  font-size: 14px;
+  padding: 16px;
+  border-bottom: 1px solid #f0f2ee;
+  color: #59645c;
+  font-size: 13px;
   vertical-align: middle;
+}
+
+.admin-badges-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.admin-badges-table tbody tr:hover {
+  background: #fafcf9;
+}
+
+.admin-badges-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .admin-badge-image,
@@ -155,7 +214,7 @@
   height: 44px;
   border-radius: 12px;
   object-fit: cover;
-  background: #edf4e9;
+  background: #eff7f0;
 }
 
 .admin-badge-placeholder {
@@ -163,13 +222,17 @@
 }
 
 .admin-badge-name {
-  color: #315b43;
-  font-size: 15px;
+  color: #35483a;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .admin-badge-description {
-  max-width: 350px;
-  line-height: 1.6;
+  max-width: 450px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #7d887f !important;
 }
 
 .admin-badge-actions {
@@ -178,26 +241,56 @@
   gap: 8px;
 }
 
-.admin-badge-delete-button {
-  padding: 8px 15px;
-  border: 1px solid #f0d7d3;
-  border-radius: 8px;
-  background: #fff5f3;
-  color: #bd5148;
+/* כפתור עריכה */
+
+.admin-badge-edit-button {
+  padding: 7px 13px;
+  border: 1px solid #dce9dd;
+  border-radius: 9px;
+  background: white;
+  color: #548d6b;
   font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.2s ease;
+}
+
+.admin-badge-edit-button:hover {
+  background: #eff7f0;
+}
+
+/* כפתור מחיקה */
+
+.admin-badge-delete-button {
+  padding: 7px 13px;
+  border: 1px solid #f0d9d5;
+  border-radius: 9px;
+  background: white;
+  color: #c16d63;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .admin-badge-delete-button:hover {
-  background: #fce8e5;
+  background: #fff2ef;
+  border-color: #e5b7b0;
 }
+
+/* תחתית הטבלה */
 
 .admin-badges-footer {
   padding-top: 18px;
-  color: #89948d;
-  font-size: 13px;
+  border-top: 1px solid #f0f2ee;
+  margin-top: 10px;
+  color: #929a93;
+  font-size: 12px;
 }
+
+/* מצבי טעינה, שגיאה וריק */
 
 .admin-badges-message,
 .admin-badges-empty {
@@ -205,9 +298,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
+  min-height: 230px;
   text-align: center;
-  color: #78867c;
+  color: #89928b;
 }
 
 .admin-badges-empty span {
@@ -216,155 +309,327 @@
 }
 
 .admin-badges-empty h3 {
-  margin: 0 0 7px;
-  color: #42634c;
+  margin: 0;
+  color: #456b53;
+  font-size: 18px;
 }
 
 .admin-badges-empty p {
-  margin: 0;
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.admin-badges-error {
+  padding: 25px;
+  text-align: center;
+  color: #bd665d;
   font-size: 14px;
 }
 
-.admin-badges-loader {
-  width: 34px;
-  height: 34px;
-  border: 3px solid #e5eee3;
-  border-top-color: #57815f;
-  border-radius: 50%;
-  animation: admin-badges-spin 0.8s linear infinite;
+.admin-badges-error button {
+  display: block;
+  margin: 15px auto 0;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 9px;
+  background: #eff7f0;
+  color: #456b53;
+  font-family: inherit;
+  cursor: pointer;
 }
 
-@keyframes admin-badges-spin {
+.admin-badges-loader {
+  width: 35px;
+  height: 35px;
+  border: 3px solid #e7f0e8;
+  border-top-color: #70a987;
+  border-radius: 50%;
+  animation: adminBadgesSpin 0.8s linear infinite;
+}
+
+@keyframes adminBadgesSpin {
   to {
     transform: rotate(360deg);
   }
 }
 
-.admin-badges-error {
-  padding: 20px;
-  border-radius: 10px;
-  background: #fff1ef;
-  color: #b94b42;
-  text-align: center;
-}
-
-.admin-badges-error button {
-  display: block;
-  margin: 12px auto 0;
-  padding: 8px 18px;
-  border: none;
-  border-radius: 8px;
-  background: #bd5148;
-  color: white;
-  font-family: inherit;
-  cursor: pointer;
-}
+/* חלונות מודאליים */
 
 .admin-badges-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 3000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(25, 42, 32, 0.48);
+  background: rgba(30, 43, 34, 0.42);
+  backdrop-filter: blur(3px);
+  overflow-y: auto;
+}
+
+.admin-badges-form-modal,
+.admin-badges-delete-modal {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.16);
+  animation: adminBadgesModalAppear 0.2s ease;
+}
+
+.admin-badges-form-modal {
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
 }
 
 .admin-badges-delete-modal {
-  width: 100%;
   max-width: 420px;
   padding: 30px;
-  border-radius: 18px;
-  background: #fff;
-  text-align: center;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
 }
+
+@keyframes adminBadgesModalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* כותרת מודאל הוספה ועריכה */
+
+.admin-badges-form-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.admin-badges-form-header .admin-badges-modal-icon {
+  background: #eff7f0;
+  color: #548d6b;
+}
+
+.admin-badges-form-header h2 {
+  margin: 0;
+  color: #315e43;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.admin-badges-form-header p {
+  margin: 5px 0 0;
+  color: #929a93;
+  font-size: 13px;
+}
+
+/* שדות טופס */
+
+.admin-badges-form-field {
+  margin-bottom: 18px;
+}
+
+.admin-badges-form-field label {
+  display: block;
+  margin-bottom: 8px;
+  color: #405c49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-badges-form-field input:not([type="file"]),
+.admin-badges-form-field textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin-bottom: 5px;
+  border: 1px solid #e2e9e1;
+  border-radius: 11px;
+  outline: none;
+  background: #fafbf8;
+  color: #303b32;
+  font-family: inherit;
+  font-size: 13px;
+  transition: 0.2s ease;
+}
+
+.admin-badges-form-field input:not([type="file"]) {
+  height: 45px;
+}
+
+.admin-badges-form-field textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.admin-badges-form-field input:focus,
+.admin-badges-form-field textarea:focus {
+  border-color: #70a987;
+  box-shadow: 0 0 0 3px rgba(112, 169, 135, 0.1);
+}
+
+.admin-badges-form-field input::placeholder,
+.admin-badges-form-field textarea::placeholder {
+  color: #a6aea7;
+}
+
+/* העלאת תמונה */
+
+.admin-badges-form-field input[type="file"] {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin-bottom: 5px;
+  border: 1px dashed #cbdacb;
+  border-radius: 11px;
+  background: #fafbf8;
+  color: #718075;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.admin-badges-selected-image {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #e2e9e1;
+  border-radius: 11px;
+  background: #fafbf8;
+  color: #718075;
+  font-size: 12px;
+}
+
+.admin-badges-selected-image img {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #eff7f0;
+}
+
+/* הודעת שגיאה במודאל */
+
+.admin-badges-modal-error {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 9px;
+  background: #fff2ef;
+  color: #c16d63;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* כפתורי מודאל */
+
+.admin-badges-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.admin-badges-modal-actions button {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-badges-modal-cancel {
+  border: 1px solid #e2e8e2;
+  background: white;
+  color: #718075;
+}
+
+.admin-badges-modal-cancel:hover:not(:disabled) {
+  background: #f5f8f3;
+}
+
+.admin-badges-save-button {
+  border: 1px solid #548d6b;
+  background: #548d6b;
+  color: white;
+}
+
+.admin-badges-save-button:hover:not(:disabled) {
+  background: #416f52;
+}
+
+.admin-badges-delete-confirm {
+  border: 1px solid #c16d63;
+  background: #c16d63;
+  color: white;
+}
+
+.admin-badges-delete-confirm:hover:not(:disabled) {
+  background: #a9554c;
+}
+
+.admin-badges-modal-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* מודאל מחיקה */
 
 .admin-badges-modal-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 45px;
+  height: 45px;
   margin: 0 auto 15px;
-  border-radius: 50%;
-  background: #fff0e8;
-  color: #c46b42;
-  font-size: 25px;
-  font-weight: bold;
+  border-radius: 13px;
+  background: #fff1ed;
+  color: #c16d63;
+  font-size: 24px;
+  font-weight: 800;
 }
 
 .admin-badges-delete-modal h2 {
-  margin: 0 0 12px;
-  color: #31513c;
+  margin: 0;
+  color: #315e43;
+  text-align: center;
+  font-size: 21px;
 }
 
-.admin-badges-delete-modal p {
-  color: #718078;
+.admin-badges-delete-modal > p {
+  margin: 12px 0;
+  color: #818a82;
+  text-align: center;
+  font-size: 13px;
   line-height: 1.7;
 }
 
-.admin-badges-delete-modal p strong {
-  color: #365c43;
+.admin-badges-delete-modal > p strong {
+  color: #405c49;
 }
 
-.admin-badges-modal-error {
-  margin: 15px 0;
-  padding: 10px;
-  border-radius: 8px;
-  background: #fff0ee;
-  color: #b94b42;
-  font-size: 13px;
-}
+/* התאמה למסכים קטנים */
 
-.admin-badges-modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 25px;
-}
-
-.admin-badges-modal-actions button {
-  min-width: 115px;
-  padding: 10px 18px;
-  border-radius: 9px;
-  font-family: inherit;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.admin-badges-modal-actions button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.admin-badges-modal-cancel {
-  border: 1px solid #dce5dc;
-  background: #fff;
-  color: #617267;
-}
-
-.admin-badges-delete-confirm {
-  border: none;
-  background: #c65b50;
-  color: #fff;
-}
-
-.admin-badges-delete-confirm:hover {
-  background: #ad493f;
-}
-
-@media (max-width: 768px) {
+@media (max-width: 750px) {
   .admin-badges-page {
-    padding: 15px;
-  }
-
-  .admin-badges-card {
-    padding: 16px;
+    padding: 22px 15px;
   }
 
   .admin-badges-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-badges-toolbar-actions {
     align-items: stretch;
     flex-direction: column;
   }
@@ -373,11 +638,25 @@
     width: auto;
   }
 
-  .admin-badges-table {
-    min-width: 650px;
+  .admin-badge-add-button {
+    width: 100%;
   }
 
+  .admin-badges-card {
+    padding: 17px 12px;
+  }
+
+  .admin-badges-table th,
+  .admin-badges-table td {
+    padding: 12px 10px;
+  }
+
+  .admin-badges-form-modal,
   .admin-badges-delete-modal {
-    padding: 22px;
+    padding: 23px 19px;
+  }
+
+  .admin-badges-modal-actions {
+    flex-direction: column;
   }
 }

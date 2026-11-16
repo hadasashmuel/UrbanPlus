@@ -1,4 +1,3 @@
-
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { Report } from "./reportsState";
 
@@ -153,8 +152,9 @@ export const createReport = createAsyncThunk<
       formData.append("Longitude", String(reportData.longitude));
       formData.append("InputAddress", reportData.inputAddress);
 
-      reportData.images.forEach((image, index) => {
-        formData.append(`ImageList[${index}]`, image);
+      // שליחת כל התמונות תחת אותו מפתח
+      reportData.images.forEach((image) => {
+        formData.append("ImageList", image);
       });
 
       const response = await fetch(REPORT_API_URL, {

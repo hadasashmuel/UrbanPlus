@@ -23,7 +23,6 @@ namespace UrbanPlusServer.Controllers
         public ActionResult<List<ShowBadgeDTO>> GetAllBadges()
         {
             var badges = _badgeService.GetAllBadges();
-
             return Ok(badges);
         }
 
@@ -32,13 +31,13 @@ namespace UrbanPlusServer.Controllers
         public ActionResult<ShowBadgeDTO> GetBadgeById(int id)
         {
             var badge = _badgeService.GetBadgeById(id);
-
             return Ok(badge);
         }
 
         // POST: api/Badge
         [HttpPost]
-        public ActionResult<ShowBadgeDTO> CreateBadge( [FromBody] CreateBadgeDTO dto)
+        public ActionResult<ShowBadgeDTO> CreateBadge(
+            [FromForm] CreateBadgeDTO dto)
         {
             var createdBadge = _badgeService.CreateBadge(dto);
 
@@ -48,11 +47,25 @@ namespace UrbanPlusServer.Controllers
                 createdBadge);
         }
 
+        // PUT: api/Badge/5
+        [HttpPut("{id}")]
+        public ActionResult<ShowBadgeDTO> UpdateBadge(
+            int id,
+            [FromForm] UpdateBadgeDTO dto)
+        {
+            var updatedBadge = _badgeService.UpdateBadge(id, dto);
+
+            return Ok(updatedBadge);
+        }
+
         // DELETE: api/Badge/5
         [HttpDelete("{id}")]
         public IActionResult DeleteBadge(int id)
         {
-            _badgeService.DeleteBadge(id);
+            var deleted = _badgeService.DeleteBadge(id);
+
+            if (!deleted)
+                return NotFound();
 
             return NoContent();
         }
