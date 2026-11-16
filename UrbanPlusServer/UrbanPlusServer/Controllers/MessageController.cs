@@ -1,10 +1,9 @@
 ﻿
 using BLL.Services.ServicesDB.MessageServices;
+using BLL.Services.ServiceSupport.EventChatServices;
 using DTO.MessageDTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using UrbanPlusServer.Hubs;
 
 namespace UrbanPlusServer.Controllers
 {
@@ -14,49 +13,41 @@ namespace UrbanPlusServer.Controllers
     public class MessageController : ControllerBase
     {
         private readonly IMessageService _messageService;
-        private readonly IHubContext<EventChatHub> _hubContext;
+        private readonly IEventChatNotifier _eventChatNotifier;
 
         public MessageController(
             IMessageService messageService,
-            IHubContext<EventChatHub> hubContext)
+            IEventChatNotifier eventChatNotifier)
         {
             _messageService = messageService;
-            _hubContext = hubContext;
+            _eventChatNotifier = eventChatNotifier;
         }
 
-        // GET: api/Message
         [AllowAnonymous]
         [HttpGet]
         public ActionResult<List<ShowMessageDTO>> GetAllMessages()
         {
             var messages = _messageService.GetAllMessages();
-
             return Ok(messages);
         }
 
-        // GET: api/Message/5
         [HttpGet("{id}")]
         public ActionResult<ShowMessageDTO> GetMessageById(int id)
         {
             var message = _messageService.GetMessageById(id);
-
             return Ok(message);
         }
 
-        // POST: api/Message
         [HttpPost]
         public async Task<ActionResult<ShowMessageDTO>> CreateMessage(
             [FromBody] CreateMessageDTO dto)
         {
             int userId = User.GetUserId();
 
-            // שמירת ההודעה במסד הנתונים
-            var createdMessage = _messageService.CreateMessage(dto, userId);
+            var createdMessage =
+                _messageService.CreateMessage(dto, userId);
 
-            // שידור ההודעה לכל המשתמשים בקבוצת האירוע
-            await _hubContext.Clients
-                .Group($"event_{createdMessage.MainEventId}")
-                .SendAsync("ReceiveMessage", createdMessage);
+            await _eventChatNotifier.BroadcastMessageAsync(createdMessage);
 
             return CreatedAtAction(
                 nameof(GetMessageById),
@@ -64,22 +55,18 @@ namespace UrbanPlusServer.Controllers
                 createdMessage);
         }
 
-        // GET: api/Message/event/5
         [HttpGet("event/{mainEventId}")]
         public ActionResult<List<ShowMessageDTO>> GetMessagesByEvent(
             int mainEventId)
         {
             var messages = _messageService.GetMessagesByEvent(mainEventId);
-
             return Ok(messages);
         }
 
-        // DELETE: api/Message/5
         [HttpDelete("{id}")]
         public IActionResult DeleteMessage(int id)
         {
             _messageService.DeleteMessage(id, User.GetUserId());
-
             return NoContent();
         }
     }

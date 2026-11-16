@@ -1,3 +1,4 @@
+
 // BLL
 using BLL;
 using BLL.Services.ServicesDB.AIChatServices;
@@ -16,6 +17,7 @@ using BLL.Services.ServicesDB.UserServices;
 using BLL.Services.ServicesDB.VoteServices;
 
 using BLL.Services.ServiceSupport.EventAggregationServices;
+using BLL.Services.ServiceSupport.EventChatServices;
 using BLL.Services.ServiceSupport.ImageServices;
 using BLL.Services.ServiceSupport.TokenServices;
 using BLL.Services.ServiceSupport.EmailServices;
@@ -178,6 +180,7 @@ builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IMainEventService, MainEventService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IEventChatNotifier, EventChatNotifier>();
 
 // Notification Services
 builder.Services.AddScoped<INotificationService, NotificationService>();
@@ -300,7 +303,8 @@ builder.Services
                 var path = context.HttpContext.Request.Path;
 
                 if (!string.IsNullOrEmpty(accessToken) &&
-                  (path.StartsWithSegments("/hubs/notifications") || path.StartsWithSegments("/hubs/event-chat")))
+                  (path.StartsWithSegments("/hubs/notifications") ||
+                   path.StartsWithSegments("/hubs/event-chat")))
                 {
                     context.Token = accessToken;
                 }

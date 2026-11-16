@@ -11,6 +11,22 @@ import {
 import type { Badge } from "../store/badges/badgesState";
 import "./AdminBadges.css";
 
+const API_BASE = "https://localhost:7019";
+
+const getImageSrc = (imageUrl: string): string => {
+  if (!imageUrl) return "";
+
+  if (
+    imageUrl.startsWith("http://") ||
+    imageUrl.startsWith("https://") ||
+    imageUrl.startsWith("data:")
+  ) {
+    return imageUrl;
+  }
+
+  return `${API_BASE}/images/${imageUrl.replace(/^\/+/, "")}`;
+};
+
 function AdminBadges() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -147,7 +163,10 @@ function AdminBadges() {
       return;
     }
 
-    if (formImage && !["image/jpeg", "image/png", "image/webp"].includes(formImage.type)) {
+    if (
+      formImage &&
+      !["image/jpeg", "image/png", "image/webp"].includes(formImage.type)
+    ) {
       setFormError("ניתן להעלות תמונה מסוג JPG, PNG או WEBP בלבד");
       return;
     }
@@ -183,7 +202,6 @@ function AdminBadges() {
         ).unwrap();
       }
 
-      // סגירת החלונית לאחר הצלחה
       setShowFormModal(false);
       setEditingBadge(null);
       setFormName("");
@@ -298,7 +316,7 @@ function AdminBadges() {
                         {badge.iconUrl ? (
                           <img
                             className="admin-badge-image"
-                            src={badge.iconUrl}
+                            src={getImageSrc(badge.iconUrl)}
                             alt={badge.badgeName}
                           />
                         ) : (
@@ -427,7 +445,7 @@ function AdminBadges() {
                 {!formImage && formMode === "edit" && editingBadge?.iconUrl && (
                   <div className="admin-badges-selected-image">
                     <img
-                      src={editingBadge.iconUrl}
+                      src={getImageSrc(editingBadge.iconUrl)}
                       alt={editingBadge.badgeName}
                     />
                     <span>התמונה הנוכחית</span>
@@ -468,7 +486,7 @@ function AdminBadges() {
         </div>
       )}
 
-      {/* חלונית מחיקה - ללא שינוי */}
+      {/* חלונית מחיקה */}
       {showDeleteModal && selectedBadge && (
         <div
           className="admin-badges-modal-overlay"

@@ -1,12 +1,14 @@
 ﻿
 using AutoMapper;
-using Azure.Core;
 using BLL.Services.ServiceSupport.ImageServices;
-using BLL.Services.ServicesDB.UserBadgeServices;
 using BLL.Services.ServiceSupport.EventAggregationServices;
+using BLL.Services.ServiceSupport.EventChatServices;
+using BLL.Services.ServicesDB.UserBadgeServices;
+using BLL.Services.ServicesDB.MessageServices;
 using DAL.Entities;
 using DAL.Repositories.ReportRepositories;
 using DTO.ReportDTO;
+using DTO.MessageDTO;
 
 namespace BLL.Services.ServicesDB.ReportServices
 {
@@ -17,19 +19,25 @@ namespace BLL.Services.ServicesDB.ReportServices
         private readonly IUserBadgeService _userBadgeService;
         private readonly IMapper _mapper;
         private readonly IEventAggregationService _eventAggregationService;
+        private readonly IMessageService _messageService;
+        private readonly IEventChatNotifier _eventChatNotifier;
 
         public ReportService(
             IReportRepository reportRepository,
             IMapper mapper,
             IImageService imageService,
             IEventAggregationService eventAggregationService,
-            IUserBadgeService userBadgeService)
+            IUserBadgeService userBadgeService,
+            IMessageService messageService,
+            IEventChatNotifier eventChatNotifier)
         {
             _reportRepository = reportRepository;
             _mapper = mapper;
             _imageService = imageService;
             _eventAggregationService = eventAggregationService;
             _userBadgeService = userBadgeService;
+            _messageService = messageService;
+            _eventChatNotifier = eventChatNotifier;
         }
 
         public List<ShowReportDTO> GetAllReports()
@@ -48,7 +56,8 @@ namespace BLL.Services.ServicesDB.ReportServices
             return _mapper.Map<ShowReportDTO>(report);
         }
 
-        public ShowReportDTO CreateReport(CreateReportDTO dto, int userId)
+        public async Task<ShowReportDTO> CreateReport(
+            CreateReportDTO dto, int userId)
         {
             var report = _mapper.Map<Reports>(dto);
 
@@ -56,6 +65,7 @@ namespace BLL.Services.ServicesDB.ReportServices
             report.CreatedAt = DateTime.UtcNow;
 
             var savedImages = new List<string>();
+            bool reportSaved = false;
 
             try
             {
@@ -87,9 +97,49 @@ namespace BLL.Services.ServicesDB.ReportServices
 
                 // שמירת הדיווח
                 var createdReport = _reportRepository.AddReport(report);
+                reportSaved = true;
 
                 // בדיקת זכאות לתגים
                 _userBadgeService.CheckAndAwardBadges(userId);
+
+                // יצירת הודעה אוטומטית בצ'אט האירוע
+                try
+                {
+                    string description = report.Description ?? string.Empty;
+
+                    string messageContent = description.Length > 100
+                        ? description.Substring(0, 100)
+                        : description;
+
+                    if (!string.IsNullOrWhiteSpace(messageContent))
+                    {
+                        var messageDto = new CreateMessageDTO
+                        {
+                            MainEventId = mainEvent.MainEventsId,
+                            Content = messageContent
+                        };
+
+                        var createdMessage =
+                            _messageService.CreateMessage(messageDto, userId);
+
+                        // שליחת ההודעה בזמן אמת דרך SignalR
+                        try
+                        {
+                            await _eventChatNotifier.BroadcastMessageAsync(
+                                createdMessage);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(
+                                "Failed to broadcast report message: " + ex);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(
+                        "Failed to create report chat message: " + ex);
+                }
 
                 try
                 {
@@ -104,10 +154,13 @@ namespace BLL.Services.ServicesDB.ReportServices
             }
             catch
             {
-                // מחיקת תמונות במקרה של כישלון
-                foreach (var imageUrl in savedImages)
+                // מחיקת תמונות רק אם הדיווח לא נשמר
+                if (!reportSaved)
                 {
-                    _imageService.Delete(imageUrl);
+                    foreach (var imageUrl in savedImages)
+                    {
+                        _imageService.Delete(imageUrl);
+                    }
                 }
 
                 throw;

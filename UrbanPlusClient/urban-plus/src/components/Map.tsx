@@ -769,7 +769,7 @@ function Map() {
                       style={voteStyle(userVote?.typeVote === 0)}
                       title="לייק"
                     >
-                      👍 לייק
+                      👍 קיים
                     </button>
 
                     <button
@@ -778,7 +778,7 @@ function Map() {
                       style={voteStyle(userVote?.typeVote === 1)}
                       title="דיסלייק"
                     >
-                      👎 דיסלייק
+                      👎 לא קיים
                     </button>
                   </>
                 )}

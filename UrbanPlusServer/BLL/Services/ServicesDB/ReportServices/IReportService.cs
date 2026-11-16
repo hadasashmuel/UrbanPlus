@@ -1,4 +1,5 @@
-﻿using DTO.ReportDTO;
+﻿
+using DTO.ReportDTO;
 
 namespace BLL.Services.ServicesDB.ReportServices
 {
@@ -6,9 +7,8 @@ namespace BLL.Services.ServicesDB.ReportServices
     {
         List<ShowReportDTO> GetAllReports();
         ShowReportDTO GetReportById(int id);
-        ShowReportDTO CreateReport(CreateReportDTO dto, int userId);
+        Task<ShowReportDTO> CreateReport(CreateReportDTO dto, int userId);
         bool DeleteReport(int reportId);
-
         List<ShowReportDTO> GetReportsByUser(int userId);
     }
 }

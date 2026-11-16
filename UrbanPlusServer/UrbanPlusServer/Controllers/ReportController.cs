@@ -51,13 +51,21 @@ namespace UrbanPlusServer.Controllers
         // POST: api/Report
         [HttpPost]
         [Consumes("multipart/form-data")]
-        public ActionResult<ShowReportDTO> CreateReport([FromForm] CreateReportDTO dto)
+        public async Task<ActionResult<ShowReportDTO>> CreateReport(
+            [FromForm] CreateReportDTO dto)
         {
             Console.WriteLine("Files in request: " + Request.Form.Files.Count);
-            Console.WriteLine("ImageList: " + (dto.ImageList == null ? "null" : dto.ImageList.Count.ToString()));
+
+            Console.WriteLine(
+                "ImageList: " +
+                (dto.ImageList == null
+                    ? "null"
+                    : dto.ImageList.Count.ToString()));
+
             int userId = User.GetUserId();
 
-            var createdReport = _reportService.CreateReport(dto, userId);
+            var createdReport =
+                await _reportService.CreateReport(dto, userId);
 
             return CreatedAtAction(
                 nameof(GetReportById),

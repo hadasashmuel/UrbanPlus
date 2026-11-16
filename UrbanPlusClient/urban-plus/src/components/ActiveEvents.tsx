@@ -356,7 +356,7 @@ function ActiveEvents() {
                           disabled={creatingVote || deletingVote}
                           style={voteStyle(userVote?.typeVote === 0)}
                         >
-                          👍 לייק
+                          👍   קיים 
                         </button>
 
                         <button
@@ -364,7 +364,7 @@ function ActiveEvents() {
                           disabled={creatingVote || deletingVote}
                           style={voteStyle(userVote?.typeVote === 1)}
                         >
-                          👎 דיסלייק
+                          👎 לא קיים 
                         </button>
                       </>
                     )}
