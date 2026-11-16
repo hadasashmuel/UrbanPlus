@@ -13,12 +13,12 @@ namespace UrbanPlusServer.Controllers
     {
         private readonly INotificationService _notificationService;
 
-        public NotificationController(INotificationService notificationService)
+        public NotificationController(
+            INotificationService notificationService)
         {
             _notificationService = notificationService;
         }
 
-        // GET: api/Notification
         [Authorize(Roles = "1")]
         [HttpGet]
         public ActionResult<List<ShowNotificationDTO>> GetAllNotifications()
@@ -28,29 +28,28 @@ namespace UrbanPlusServer.Controllers
             return Ok(notifications);
         }
 
-        // GET: api/Notification/mine
         [HttpGet("mine")]
         public ActionResult<List<ShowNotificationDTO>> GetMyNotifications()
         {
             int userId = User.GetUserId();
 
-            var notifications =  _notificationService.GetNotificationsByUserId(userId);
+            var notifications =
+                _notificationService.GetNotificationsByUserId(userId);
 
             return Ok(notifications);
         }
 
-        // GET: api/Notification/mine/unread
         [HttpGet("mine/unread")]
         public ActionResult<List<ShowNotificationDTO>> GetMyUnreadNotifications()
         {
             int userId = User.GetUserId();
 
-            var notifications = _notificationService.GetUnreadNotificationsByUserId(userId);
+            var notifications =
+                _notificationService.GetUnreadNotificationsByUserId(userId);
 
             return Ok(notifications);
         }
 
-        // PUT: api/Notification/10/read
         [HttpPut("{id}/read")]
         public IActionResult MarkNotificationAsRead(int id)
         {
@@ -60,13 +59,15 @@ namespace UrbanPlusServer.Controllers
 
             return NoContent();
         }
+
         [HttpPost("nearby")]
-        public IActionResult CreateNearbyNotifications([ FromBody] UserLocationDTO location)
+        public async Task<IActionResult> CreateNearbyNotifications(
+            [FromBody] UserLocationDTO location)
         {
             int userId = User.GetUserId();
 
             int notificationsCreated =
-                _notificationService.CreateNearbyNotifications(
+                await _notificationService.CreateNearbyNotifications(
                     userId,
                     location);
 
@@ -76,7 +77,7 @@ namespace UrbanPlusServer.Controllers
                 NotificationsCreated = notificationsCreated
             });
         }
-        // DELETE: api/Notification/10
+
         [HttpDelete("{id}")]
         public IActionResult DeleteNotification(int id)
         {

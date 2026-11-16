@@ -1,15 +1,10 @@
 
-import { useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
-
-import { useAppDispatch, useAppSelector } from "./store/hooks";
-import { startNotificationConnection } from "./store/notifications/notificationsConnection";
-
 
 import Home from "./components/Home";
 import Login from "./components/Login";
@@ -30,39 +25,6 @@ import AdminNotifications from "./components/AdminNotifications";
 import "./App.css";
 
 function App() {
-  const dispatch = useAppDispatch();
-  const token = useAppSelector((state) => state.users.token);
-
-  // חיבור ל-SignalR עבור התראות בזמן אמת
-  useEffect(() => {
-    if (!token) {
-      return;
-    }
-
-    let cancelled = false;
-
-    let connection:
-      | Awaited<ReturnType<typeof startNotificationConnection>>
-      | null = null;
-
-    startNotificationConnection(token, dispatch)
-      .then((newConnection) => {
-        if (cancelled) {
-          newConnection.stop();
-        } else {
-          connection = newConnection;
-        }
-      })
-      .catch((error) => {
-        console.error("SignalR connection failed:", error);
-      });
-
-    return () => {
-      cancelled = true;
-      connection?.stop();
-    };
-  }, [token, dispatch]);
-
   return (
     <BrowserRouter>
       <Routes>
@@ -86,7 +48,6 @@ function App() {
           <Route path="badges" element={<AdminBadges />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="notifications" element={<AdminNotifications />} />
-
         </Route>
 
         <Route

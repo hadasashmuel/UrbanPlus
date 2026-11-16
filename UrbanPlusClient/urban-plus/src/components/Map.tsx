@@ -35,6 +35,10 @@ import {
   createNearbyNotifications,
 } from "../store/notifications/notificationsThunks";
 
+import {
+  startNotificationConnection,
+} from "../store/notifications/notificationsConnection";
+
 import "../App.css";
 
 // =====================================
@@ -181,6 +185,10 @@ function Map() {
 
   const [locationReady, setLocationReady] = useState(false);
 
+  // האם חיבור SignalR מוכן לקבלת התראות
+  const [notificationConnectionReady, setNotificationConnectionReady] =
+    useState(false);
+
   const lastNearbyRequest = useRef<string | null>(null);
 
   const selectedEvent = mainEvents.find(
@@ -198,6 +206,44 @@ function Map() {
         (vote) => vote.mainEventId === selectedEvent.mainEventsId
       )
     : undefined;
+
+  // =====================================
+  //       חיבור SignalR להתראות
+  // =====================================
+
+  useEffect(() => {
+    if (!token) {
+      setNotificationConnectionReady(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    let connection:
+      | Awaited<ReturnType<typeof startNotificationConnection>>
+      | null = null;
+
+    setNotificationConnectionReady(false);
+
+    startNotificationConnection(token, dispatch)
+      .then((newConnection) => {
+        if (cancelled) {
+          newConnection.stop();
+        } else {
+          connection = newConnection;
+          setNotificationConnectionReady(true);
+        }
+      })
+      .catch((error) => {
+        console.error("SignalR connection failed:", error);
+      });
+
+    return () => {
+      cancelled = true;
+      setNotificationConnectionReady(false);
+      connection?.stop();
+    };
+  }, [token, dispatch]);
 
   // =====================================
   //             טעינת נתונים
@@ -281,7 +327,13 @@ function Map() {
   // =====================================
 
   useEffect(() => {
-    if (!token || !locationReady) return;
+    if (
+      !token ||
+      !locationReady ||
+      !notificationConnectionReady
+    ) {
+      return;
+    }
 
     const requestKey = `${token}:${position[0]}:${position[1]}`;
 
@@ -304,7 +356,13 @@ function Map() {
 
         lastNearbyRequest.current = null;
       });
-  }, [dispatch, token, locationReady, position]);
+  }, [
+    dispatch,
+    token,
+    locationReady,
+    position,
+    notificationConnectionReady,
+  ]);
 
   // =====================================
   //             שמירת אירוע

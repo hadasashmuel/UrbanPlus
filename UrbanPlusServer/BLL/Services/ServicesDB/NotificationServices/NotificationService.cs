@@ -1,8 +1,10 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using DAL.Entities;
 using DAL.Repositories.MainEventRepositories;
 using DAL.Repositories.NotificationRepositories;
 using DTO.NotificationDTO;
+using BLL.Services.ServiceSupport.NotificationServices;
 
 namespace BLL.Services.ServicesDB.NotificationServices
 {
@@ -11,13 +13,20 @@ namespace BLL.Services.ServicesDB.NotificationServices
         private readonly INotificationRepository _repository;
         private readonly IMapper _mapper;
         private readonly IMainEventRepository _mainEventRepository;
+        private readonly INotificationRealtimeSender _realtimeSender;
+
         private const double NotificationRadiusKm = 2;
 
-        public NotificationService(INotificationRepository notificationRepository, IMapper mapper, IMainEventRepository mainEventRepository)
+        public NotificationService(
+            INotificationRepository notificationRepository,
+            IMapper mapper,
+            IMainEventRepository mainEventRepository,
+            INotificationRealtimeSender realtimeSender)
         {
             _repository = notificationRepository;
             _mapper = mapper;
             _mainEventRepository = mainEventRepository;
+            _realtimeSender = realtimeSender;
         }
 
         public List<ShowNotificationDTO> GetAllNotifications()
@@ -29,7 +38,7 @@ namespace BLL.Services.ServicesDB.NotificationServices
 
         public List<ShowNotificationDTO> GetNotificationsByUserId(int userId)
         {
-            var notifications =_repository.GetNotificationsByUserId(userId);
+            var notifications = _repository.GetNotificationsByUserId(userId);
 
             return _mapper.Map<List<ShowNotificationDTO>>(notifications);
         }
@@ -45,7 +54,12 @@ namespace BLL.Services.ServicesDB.NotificationServices
         {
             return _repository.MarkNotificationAsRead(id, userId);
         }
-        private static double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+
+        private static double CalculateDistance(
+            double lat1,
+            double lon1,
+            double lat2,
+            double lon2)
         {
             const double earthRadius = 6371000;
 
@@ -64,7 +78,10 @@ namespace BLL.Services.ServicesDB.NotificationServices
 
             return earthRadius * c;
         }
-        public int CreateNearbyNotifications(int userId, UserLocationDTO location)
+
+        public async Task<int> CreateNearbyNotifications(
+            int userId,
+            UserLocationDTO location)
         {
             if (location == null)
                 throw new ArgumentNullException(nameof(location));
@@ -109,13 +126,24 @@ namespace BLL.Services.ServicesDB.NotificationServices
                     CreatedAt = DateTime.UtcNow
                 };
 
+                // שמירת ההתראה במסד הנתונים
                 _repository.AddNotification(notification);
+
+                // המרת ההתראה ל-DTO
+                var notificationDto =
+                    _mapper.Map<ShowNotificationDTO>(notification);
+
+                // שליחת ההתראה בזמן אמת למשתמש
+                await _realtimeSender.SendToUserAsync(
+                    userId,
+                    notificationDto);
 
                 notificationsCreated++;
             }
 
             return notificationsCreated;
         }
+
         public bool DeleteNotification(int id, int userId)
         {
             return _repository.DeleteNotification(id, userId);
