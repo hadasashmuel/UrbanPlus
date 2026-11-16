@@ -21,7 +21,12 @@ namespace BLL
         {
             // Users
             CreateMap<Users, ProfileUserDTO>();
-            CreateMap<Users, ShortProfileUserDTO>();
+
+            CreateMap<Users, ShortProfileUserDTO>()
+                .ForMember(dest => dest.Badges,
+                    opt => opt.MapFrom(src => src.UserBadges))
+                .ForMember(dest => dest.SavedEvents,
+                    opt => opt.MapFrom(src => src.SavedEvents));
 
             CreateMap<CreateUserDTO, Users>()
                 .ForMember(dest => dest.ProfilePicture,

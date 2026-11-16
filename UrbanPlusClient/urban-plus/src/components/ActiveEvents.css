@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
 
 .active-events-page {
@@ -86,7 +87,7 @@
   font-weight: 700;
 }
 
-/* כרטיסי האירועים - יישור לצד ימין */
+/* כרטיסי האירועים */
 .active-events-grid {
   max-width: 1200px;
   margin: 0 auto;
@@ -248,13 +249,40 @@
 .event-modal {
   position: relative;
   background: white;
-  width: 100%;
-  max-width: 520px;
+  width: 95%;
+  max-width: 1100px;
   max-height: 90vh;
   overflow-y: auto;
   border-radius: 20px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-  padding: 25px;
+  padding: 30px;
+}
+
+/* פרטי האירוע מימין והצ'אט משמאל */
+.event-modal-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 30px;
+  direction: rtl;
+  align-items: start;
+}
+
+.event-modal-details {
+  min-width: 0;
+}
+
+.event-modal-chat {
+  min-width: 0;
+  direction: rtl;
+  border-right: 1px solid #e5e7eb;
+  padding-right: 25px;
+}
+
+/* התאמת הצ'אט לחלון החדש */
+.event-modal-chat .event-chat {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .event-modal-close {
@@ -364,6 +392,7 @@
   font-size: 12px;
 }
 
+/* מעקב וביטול מעקב - שניהם בעיצוב קישור */
 .event-modal-follow {
   border-top: 1px solid #e5e7eb;
   padding-top: 18px;
@@ -371,22 +400,27 @@
 }
 
 .event-modal-follow button {
-  background: #456b53;
-  color: white;
+  background: transparent;
+  color: #456b53;
   border: none;
-  border-radius: 12px;
-  padding: 11px 20px;
+  border-radius: 0;
+  padding: 5px 0;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
   cursor: pointer;
+  transition: color 0.2s;
 }
 
 .event-modal-follow button:hover {
-  background: #34543f;
+  background: transparent;
+  color: #263f2e;
 }
 
 .event-modal-follow button:disabled {
+  background: transparent;
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -403,6 +437,7 @@
   text-align: center;
 }
 
+/* התאמה למסכים קטנים */
 @media (max-width: 650px) {
   .active-events-page {
     padding: 25px 5%;
@@ -431,6 +466,20 @@
   }
 
   .event-modal {
+    width: 100%;
     padding: 22px 18px;
+  }
+
+  /* במסכים קטנים הצ'אט מופיע מתחת לפרטים */
+  .event-modal-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .event-modal-chat {
+    border-right: none;
+    border-top: 1px solid #e5e7eb;
+    padding-right: 0;
+    padding-top: 20px;
   }
 }

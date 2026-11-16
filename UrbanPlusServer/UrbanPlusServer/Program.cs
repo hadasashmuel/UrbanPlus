@@ -179,7 +179,6 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 // Notification Services
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationRealtimeSender, NotificationRealtimeSender>();
-
 builder.Services.AddScoped<IReportImageService, ReportImageService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ISaveEventService, SaveEventService>();
@@ -298,7 +297,7 @@ builder.Services
                 var path = context.HttpContext.Request.Path;
 
                 if (!string.IsNullOrEmpty(accessToken) &&
-                    path.StartsWithSegments("/hubs/notifications"))
+                  (path.StartsWithSegments("/hubs/notifications") || path.StartsWithSegments("/hubs/event-chat")))
                 {
                     context.Token = accessToken;
                 }
@@ -348,5 +347,6 @@ app.MapControllers();
 
 // SignalR Hub
 app.MapHub<NotificationHub>("/hubs/notifications");
+app.MapHub<EventChatHub>("/hubs/event-chat");
 
 app.Run();

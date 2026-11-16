@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -11,6 +12,7 @@ import {
   deleteVote,
 } from "../store/events/eventsThunks";
 import type { MainEvent } from "../store/events/eventsState";
+import EventChat from "./EventChat";
 import "./ActiveEvents.css";
 
 function getStatusName(status: number | string) {
@@ -280,7 +282,6 @@ function ActiveEvents() {
         </section>
       )}
 
-      {/* חלון פרטי האירוע */}
       {selectedEvent && (
         <div
           className="event-modal-overlay"
@@ -298,139 +299,161 @@ function ActiveEvents() {
               ×
             </button>
 
-            <div className="event-modal-heading">
-              <span
-                className="event-modal-category"
-                style={{
-                  background: getCategoryColor(selectedEvent.categoryId),
-                }}
-              >
-                {selectedEvent.categoryName || "אירוע"}
-              </span>
+            <div className="event-modal-layout">
 
-              <h2>{selectedEvent.title}</h2>
+              {/* צד ימין - פרטי האירוע */}
+              <div className="event-modal-details">
 
-              <span className="event-modal-status">
-                {getStatusName(selectedEvent.status)}
-              </span>
+                <div className="event-modal-heading">
+                  <span
+                    className="event-modal-category"
+                    style={{
+                      background: getCategoryColor(
+                        selectedEvent.categoryId
+                      ),
+                    }}
+                  >
+                    {selectedEvent.categoryName || "אירוע"}
+                  </span>
 
-              <div className="event-modal-votes">
-                {!token ? (
-                  <span>להתחברות ולהצבעה יש להתחבר למערכת</span>
-                ) : loadingMyVotes ? (
-                  <span>טוען הצבעות...</span>
-                ) : (
-                  <>
+                  <h2>{selectedEvent.title}</h2>
+
+                  <span className="event-modal-status">
+                    {getStatusName(selectedEvent.status)}
+                  </span>
+
+                  <div className="event-modal-votes">
+                    {!token ? (
+                      <span>
+                        להתחברות ולהצבעה יש להתחבר למערכת
+                      </span>
+                    ) : loadingMyVotes ? (
+                      <span>טוען הצבעות...</span>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleVote(0)}
+                          disabled={creatingVote || deletingVote}
+                          style={voteStyle(userVote?.typeVote === 0)}
+                        >
+                          👍 לייק
+                        </button>
+
+                        <button
+                          onClick={() => handleVote(1)}
+                          disabled={creatingVote || deletingVote}
+                          style={voteStyle(userVote?.typeVote === 1)}
+                        >
+                          👎 דיסלייק
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <h3 className="event-modal-section-title">
+                  פרטי האירוע
+                </h3>
+
+                <div className="event-modal-detail" style={detailStyle}>
+                  <strong>כתובת:</strong>{" "}
+                  {selectedEvent.address || "לא צוינה כתובת"}
+                </div>
+
+                <div className="event-modal-detail" style={detailStyle}>
+                  <strong>קטגוריה:</strong>{" "}
+                  {selectedEvent.categoryName || "לא צוינה"}
+                </div>
+
+                <div className="event-modal-detail" style={detailStyle}>
+                  <strong>חומרה:</strong>{" "}
+                  {getSeverityName(selectedEvent.severity)}
+                </div>
+
+                <div className="event-modal-detail" style={detailStyle}>
+                  <strong>תאריך יצירה:</strong>{" "}
+                  {formatDate(selectedEvent.createdAt)}
+                </div>
+
+                <div className="event-modal-detail" style={detailStyle}>
+                  <strong>תחילת טיפול:</strong>{" "}
+                  {formatDate(selectedEvent.startedAt)}
+                </div>
+
+                <div className="event-modal-detail" style={detailStyle}>
+                  <strong>תאריך סיום:</strong>{" "}
+                  {formatDate(selectedEvent.resolvedAt)}
+                </div>
+
+                <div className="event-modal-detail" style={detailStyle}>
+                  <strong>זמן טיפול משוער:</strong>{" "}
+                  {selectedEvent.estimatedResolutionMinutes != null
+                    ? `${selectedEvent.estimatedResolutionMinutes} דקות`
+                    : "לא עודכן"}
+                </div>
+
+                <div className="event-modal-detail" style={detailStyle}>
+                  <strong>זמן טיפול בפועל:</strong>{" "}
+                  {selectedEvent.actualResolutionMinutes != null
+                    ? `${selectedEvent.actualResolutionMinutes} דקות`
+                    : "טרם הסתיים"}
+                </div>
+
+                <div className="event-modal-stats">
+                  <div>
+                    <strong>{selectedEvent.countReports}</strong>
+                    <span>דיווחים</span>
+                  </div>
+
+                  <div>
+                    <strong>{selectedEvent.countVotes}</strong>
+                    <span>הצבעות</span>
+                  </div>
+
+                  <div>
+                    <strong>{selectedEvent.countSavedEvents}</strong>
+                    <span>שמירות</span>
+                  </div>
+                </div>
+
+                <div className="event-modal-follow">
+                  {!token ? (
+                    <p>
+                      כדי לעקוב אחר אירועים יש להתחבר למערכת.
+                    </p>
+                  ) : (
                     <button
-                      onClick={() => handleVote(0)}
-                      disabled={creatingVote || deletingVote}
-                      style={voteStyle(userVote?.typeVote === 0)}
+                      className={
+                        savedEvent ? "event-follow-link" : ""
+                      }
+                      onClick={handleSaveEvent}
+                      disabled={
+                        savingEvent ||
+                        deletingSavedEvent ||
+                        loadingSavedEvents
+                      }
                     >
-                      👍 לייק
+                      {loadingSavedEvents
+                        ? "טוען..."
+                        : savingEvent
+                          ? "מוסיף למעקב..."
+                          : deletingSavedEvent
+                            ? "מבטל מעקב..."
+                            : savedEvent
+                              ? "לבטל מעקב"
+                              : "לעקוב אחר האירוע"}
                     </button>
-
-                    <button
-                      onClick={() => handleVote(1)}
-                      disabled={creatingVote || deletingVote}
-                      style={voteStyle(userVote?.typeVote === 1)}
-                    >
-                      👎 דיסלייק
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <h3 className="event-modal-section-title">פרטי האירוע</h3>
-
-            <div className="event-modal-detail" style={detailStyle}>
-              <strong>כתובת:</strong>{" "}
-              {selectedEvent.address || "לא צוינה כתובת"}
-            </div>
-
-            <div className="event-modal-detail" style={detailStyle}>
-              <strong>קטגוריה:</strong>{" "}
-              {selectedEvent.categoryName || "לא צוינה"}
-            </div>
-
-            <div className="event-modal-detail" style={detailStyle}>
-              <strong>חומרה:</strong>{" "}
-              {getSeverityName(selectedEvent.severity)}
-            </div>
-
-            <div className="event-modal-detail" style={detailStyle}>
-              <strong>תאריך יצירה:</strong>{" "}
-              {formatDate(selectedEvent.createdAt)}
-            </div>
-
-            <div className="event-modal-detail" style={detailStyle}>
-              <strong>תחילת טיפול:</strong>{" "}
-              {formatDate(selectedEvent.startedAt)}
-            </div>
-
-            <div className="event-modal-detail" style={detailStyle}>
-              <strong>תאריך סיום:</strong>{" "}
-              {formatDate(selectedEvent.resolvedAt)}
-            </div>
-
-            <div className="event-modal-detail" style={detailStyle}>
-              <strong>זמן טיפול משוער:</strong>{" "}
-              {selectedEvent.estimatedResolutionMinutes != null
-                ? `${selectedEvent.estimatedResolutionMinutes} דקות`
-                : "לא עודכן"}
-            </div>
-
-            <div className="event-modal-detail" style={detailStyle}>
-              <strong>זמן טיפול בפועל:</strong>{" "}
-              {selectedEvent.actualResolutionMinutes != null
-                ? `${selectedEvent.actualResolutionMinutes} דקות`
-                : "טרם הסתיים"}
-            </div>
-
-            <div className="event-modal-stats">
-              <div>
-                <strong>{selectedEvent.countReports}</strong>
-                <span>דיווחים</span>
+                  )}
+                </div>
               </div>
 
-              <div>
-                <strong>{selectedEvent.countVotes}</strong>
-                <span>הצבעות</span>
+              {/* צד שמאל - צ'אט */}
+              <div className="event-modal-chat">
+                <EventChat
+                  mainEventId={selectedEvent.mainEventsId}
+                />
               </div>
 
-              <div>
-                <strong>{selectedEvent.countSavedEvents}</strong>
-                <span>שמירות</span>
-              </div>
-            </div>
-
-            <div className="event-modal-follow">
-              {!token ? (
-                <p>כדי לעקוב אחר אירועים יש להתחבר למערכת.</p>
-              ) : (
-                <button
-                  onClick={handleSaveEvent}
-                  disabled={
-                    savingEvent ||
-                    deletingSavedEvent ||
-                    loadingSavedEvents
-                  }
-                >
-                  {loadingSavedEvents
-                    ? "טוען..."
-                    : savingEvent
-                      ? "מוסיף למעקב..."
-                      : deletingSavedEvent
-                        ? "מבטל מעקב..."
-                        : savedEvent
-                          ? "לבטל מעקב"
-                          : "לעקוב אחר האירוע"}
-                </button>
-              )}
-            </div>
-
-            <div className="event-modal-messages">
-              {selectedEvent.messages?.length ?? 0} הודעות באירוע
             </div>
           </div>
         </div>

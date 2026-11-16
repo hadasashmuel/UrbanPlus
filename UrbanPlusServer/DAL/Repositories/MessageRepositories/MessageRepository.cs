@@ -45,9 +45,19 @@ namespace DAL.Repositories.MessageRepositories
 
             return true;
         }
-
+        public List<Message> GetMessagesByEvent(int mainEventId)
+        {
+            return _context.Messages
+                .AsNoTracking()
+                .Include(m => m.User)
+                .Where(m =>
+                    m.MainEventId == mainEventId &&
+                    !m.IsDeleted)
+                .OrderBy(m => m.CreatedAt)
+                .ToList();
+        }
         public Message? GetOwned(int id, int userId) =>
-    _context.Messages.FirstOrDefault(m => m.MessageId == id && m.UserId == userId);
+       _context.Messages.FirstOrDefault(m => m.MessageId == id && m.UserId == userId);
 
         public List<Message> GetByUser(int userId) =>
             _context.Messages.Where(r => r.UserId == userId).ToList();

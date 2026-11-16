@@ -49,7 +49,12 @@ namespace BLL.Services.ServicesDB.MessageServices
 
             return _mapper.Map<ShowMessageDTO>(createdMessage);
         }
+        public List<ShowMessageDTO> GetMessagesByEvent(int mainEventId)
+        {
+            var messages = _repository.GetMessagesByEvent(mainEventId);
 
+            return _mapper.Map<List<ShowMessageDTO>>(messages);
+        }
 
         public bool DeleteMessage(int messageId, int userId)
         {

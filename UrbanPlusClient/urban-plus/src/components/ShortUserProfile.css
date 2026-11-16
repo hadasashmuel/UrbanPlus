@@ -1,0 +1,139 @@
+
+.short-profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(25, 35, 28, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  direction: rtl;
+}
+
+.short-profile-modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.18);
+  font-family: inherit;
+  color: #303b32;
+}
+
+.short-profile-close {
+  position: absolute;
+  top: 12px;
+  left: 15px;
+  border: none;
+  background: transparent;
+  color: #68766b;
+  font-size: 27px;
+  cursor: pointer;
+}
+
+.short-profile-header {
+  text-align: center;
+  padding-bottom: 20px;
+}
+
+.short-profile-image,
+.short-profile-placeholder {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5eee6;
+  color: #456b53;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.short-profile-header h3 {
+  margin: 8px 0;
+  font-size: 21px;
+  color: #304b38;
+}
+
+.short-profile-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #89938b;
+}
+
+.short-profile-reliability {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f1f6f1;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.short-profile-reliability strong {
+  color: #456b53;
+  font-size: 22px;
+}
+
+.short-profile-section {
+  border-top: 1px solid #e8eee8;
+  padding-top: 15px;
+  margin-top: 15px;
+}
+
+.short-profile-section h4 {
+  margin: 0 0 12px;
+  color: #405b47;
+  font-size: 15px;
+}
+
+.short-profile-section p {
+  color: #7a857c;
+  font-size: 13px;
+}
+
+.short-profile-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.short-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #f5f7f3;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.short-profile-badge img {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
+
+.short-profile-info,
+.short-profile-error {
+  text-align: center;
+  padding: 25px 10px;
+  font-size: 14px;
+}
+
+.short-profile-info {
+  color: #68766b;
+}
+
+.short-profile-error {
+  color: #dc2626;
+}

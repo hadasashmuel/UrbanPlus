@@ -42,6 +42,7 @@ namespace DAL.Repositories.UserRepositories
             return _context.Users
                 .Include(u => u.UserBadges)
                     .ThenInclude(ub => ub.Badge)
+                .Include(u => u.SavedEvents)
                 .FirstOrDefault(u => u.UserId == userId);
         }
 
