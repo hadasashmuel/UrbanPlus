@@ -24,7 +24,11 @@ jobs:
         run: dotnet build UrbanPlusServer --configuration Release --no-restore
 
       - name: Publish
-        run: dotnet publish UrbanPlusServer/UrbanPlusServer.csproj --configuration Release --output ./publish --runtime win-x86
+        shell: pwsh
+        run: |
+          $apiProj = Get-ChildItem -Path UrbanPlusServer -Recurse -Filter *.csproj | Where-Object { (Get-Content $_.FullName -Raw) -match 'Microsoft\.NET\.Sdk\.Web' } | Select-Object -First 1 -ExpandProperty FullName
+          Write-Host "Publishing: $apiProj"
+          dotnet publish "$apiProj" --configuration Release --output ./publish --runtime win-x86
 
       - name: Deploy Server to MonsterASP.NET via WebDeploy
         uses: rasmusbuchholdt/simply-web-deploy@2.1.0
