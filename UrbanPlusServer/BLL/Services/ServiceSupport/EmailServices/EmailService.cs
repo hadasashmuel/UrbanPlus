@@ -12,7 +12,9 @@ namespace BLL.Services.ServiceSupport.EmailServices
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailService> _logger;
 
-        public EmailService( IConfiguration configuration,  ILogger<EmailService> logger)
+        public EmailService(
+            IConfiguration configuration,
+            ILogger<EmailService> logger)
         {
             _configuration = configuration;
             _logger = logger;
@@ -23,14 +25,14 @@ namespace BLL.Services.ServiceSupport.EmailServices
             try
             {
                 var senderEmail = _configuration["EmailSettings:SenderEmail"];
-
-                var senderName =_configuration["EmailSettings:SenderName"];
-
+                var senderName = _configuration["EmailSettings:SenderName"];
                 var password = _configuration["EmailSettings:AppPassword"];
 
-                if (string.IsNullOrWhiteSpace(senderEmail) || string.IsNullOrWhiteSpace(password))
+                if (string.IsNullOrWhiteSpace(senderEmail) ||
+                    string.IsNullOrWhiteSpace(password))
                 {
-                    throw new InvalidOperationException( "Email settings are missing.");
+                    throw new InvalidOperationException(
+                        "Email settings are missing.");
                 }
 
                 using var message = new MailMessage();
@@ -51,7 +53,7 @@ namespace BLL.Services.ServiceSupport.EmailServices
                     <div style='max-width:600px; margin:auto; background:white; padding:30px; border-radius:15px;'>
                         <h1 style='color:#2563eb; text-align:center;'>ברוכים הבאים ל-Urban+!</h1>
 
-                        <h2>שלום {System.Net.WebUtility.HtmlEncode(firstName)} 👋</h2>
+                        <h2>שלום {WebUtility.HtmlEncode(firstName)} 👋</h2>
 
                         <p style='font-size:17px; line-height:1.8;'>
                             אנחנו שמחים שהצטרפת לקהילת Urban+!
@@ -74,15 +76,7 @@ namespace BLL.Services.ServiceSupport.EmailServices
                     </div>
                 </div>";
 
-                using var smtp = new SmtpClient("smtp.gmail.com", 587)
-                {
-                    Credentials = new NetworkCredential(
-                        senderEmail,
-                        password),
-                    EnableSsl = true
-                };
-
-                smtp.Send(message);
+                SendEmail(message, senderEmail, password);
             }
             catch (Exception ex)
             {
@@ -91,6 +85,100 @@ namespace BLL.Services.ServiceSupport.EmailServices
                     "Failed to send welcome email to {Email}",
                     email);
             }
+        }
+
+        // שליחת מייל למשתמש לאחר מחיקת החשבון
+        public void SendUserDeletedEmail(
+            string email,
+            string firstName,
+            string reason)
+        {
+            try
+            {
+                var senderEmail = _configuration["EmailSettings:SenderEmail"];
+                var senderName = _configuration["EmailSettings:SenderName"];
+                var password = _configuration["EmailSettings:AppPassword"];
+
+                if (string.IsNullOrWhiteSpace(senderEmail) ||
+                    string.IsNullOrWhiteSpace(password))
+                {
+                    throw new InvalidOperationException(
+                        "Email settings are missing.");
+                }
+
+                using var message = new MailMessage();
+
+                message.From = new MailAddress(
+                    senderEmail,
+                    senderName ?? "Urban+",
+                    Encoding.UTF8);
+
+                message.To.Add(email);
+                message.Subject = "עדכון בנוגע לחשבון שלך ב-Urban+";
+                message.SubjectEncoding = Encoding.UTF8;
+                message.BodyEncoding = Encoding.UTF8;
+                message.IsBodyHtml = true;
+
+                message.Body = $@"
+                <div dir='rtl' style='font-family:Arial; background:#f4f6f8; padding:30px;'>
+                    <div style='max-width:600px; margin:auto; background:white; padding:30px; border-radius:15px;'>
+                        
+                        <h1 style='color:#2563eb; text-align:center;'>
+                            Urban+
+                        </h1>
+
+                        <h2>שלום {WebUtility.HtmlEncode(firstName)},</h2>
+
+                        <p style='font-size:17px; line-height:1.8;'>
+                            ברצוננו לעדכן אותך שחשבונך במערכת Urban+ נמחק על ידי מנהל המערכת.
+                        </p>
+
+                        <div style='background:#f4f6f8; padding:15px; border-radius:10px;'>
+                            <strong>סיבת המחיקה:</strong>
+                            <p style='font-size:16px; line-height:1.8;'>
+                                {WebUtility.HtmlEncode(reason)}
+                            </p>
+                        </div>
+
+                        <p style='font-size:16px; line-height:1.8;'>
+                            אם לדעתך מדובר בטעות או שיש לך שאלות נוספות,
+                            ניתן לפנות לצוות Urban+.
+                        </p>
+
+                        <hr />
+
+                        <p style='text-align:center; color:#777;'>
+                            צוות Urban+
+                        </p>
+                    </div>
+                </div>";
+
+                SendEmail(message, senderEmail, password);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to send user deletion email to {Email}",
+                    email);
+            }
+        }
+
+        // פעולת שליחה משותפת
+        private void SendEmail(
+            MailMessage message,
+            string senderEmail,
+            string password)
+        {
+            using var smtp = new SmtpClient("smtp.gmail.com", 587)
+            {
+                Credentials = new NetworkCredential(
+                    senderEmail,
+                    password),
+                EnableSsl = true
+            };
+
+            smtp.Send(message);
         }
     }
 }

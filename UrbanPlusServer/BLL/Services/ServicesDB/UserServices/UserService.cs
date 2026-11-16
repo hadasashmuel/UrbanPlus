@@ -124,6 +124,7 @@ namespace BLL.Services.ServicesDB.UserServices
 
             var profile = _mapper.Map<ProfileUserDTO>(user);
             profile.RoleCode = user.RoleCode;
+
             return profile;
         }
 
@@ -142,7 +143,9 @@ namespace BLL.Services.ServicesDB.UserServices
             return _mapper.Map<ShortProfileUserDTO>(user);
         }
 
-        public ProfileUserDTO UpdateUser(int userId, UpdateUserDTO dto)
+        public ProfileUserDTO UpdateUser(
+            int userId,
+            UpdateUserDTO dto)
         {
             if (userId <= 0)
                 throw new ArgumentException(
@@ -235,9 +238,7 @@ namespace BLL.Services.ServicesDB.UserServices
 
             if (payload.EmailVerified != true ||
                 string.IsNullOrWhiteSpace(payload.Email))
-            {
                 return null;
-            }
 
             var email = payload.Email.Trim().ToLowerInvariant();
 
@@ -248,7 +249,9 @@ namespace BLL.Services.ServicesDB.UserServices
 
             var user = new Users
             {
-                FirstName = payload.GivenName ?? payload.Name ?? "Google User",
+                FirstName = payload.GivenName ??
+                            payload.Name ??
+                            "Google User",
                 LastName = payload.FamilyName ?? "",
                 Email = email,
                 AuthProvider = AuthProvider.Google,
@@ -257,11 +260,12 @@ namespace BLL.Services.ServicesDB.UserServices
                 ScoreReliability = 50
             };
 
-            var randomPassword = Convert.ToBase64String(
-                RandomNumberGenerator.GetBytes(32));
+            var randomPassword =
+                Convert.ToBase64String(
+                    RandomNumberGenerator.GetBytes(32));
 
-            user.passwordHash = _hasher.HashPassword(
-                user, randomPassword);
+            user.passwordHash =
+                _hasher.HashPassword(user, randomPassword);
 
             var createdUser = _userRepository.Add(user);
 
@@ -319,15 +323,49 @@ namespace BLL.Services.ServicesDB.UserServices
                 throw new NotFoundException(
                     $"User with id {userId} was not found.");
 
+            // שמירת פרטי המשתמש לפני המחיקה
+            var userEmail = user.Email;
+            var firstName = user.FirstName;
+            var profilePicture = user.ProfilePicture;
+
+            // מחיקת המשתמש ממסד הנתונים
             var deleted = _userRepository.Delete(userId);
 
-            if (deleted &&
-                !string.IsNullOrWhiteSpace(user.ProfilePicture))
+            if (!deleted)
+                return false;
+
+            // שליחת מייל למשתמש
+            if (!string.IsNullOrWhiteSpace(userEmail))
             {
-                _imageService.Delete(user.ProfilePicture);
+                try
+                {
+                    _emailService.SendUserDeletedEmail(
+                        userEmail,
+                        firstName,
+                        reason.Trim());
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(
+                        $"Failed to send deletion email: {ex.Message}");
+                }
             }
 
-            return deleted;
+            // מחיקת תמונת הפרופיל
+            if (!string.IsNullOrWhiteSpace(profilePicture))
+            {
+                try
+                {
+                    _imageService.Delete(profilePicture);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(
+                        $"Failed to delete profile image: {ex.Message}");
+                }
+            }
+
+            return true;
         }
     }
 }

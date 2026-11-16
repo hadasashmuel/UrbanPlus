@@ -7,5 +7,6 @@ namespace BLL.Services.ServiceSupport.EmailServices
     public interface IEmailService
     {
         void SendWelcomeEmail(string email, string firstName);
+       void SendUserDeletedEmail( string email,  string firstName, string reason);
     }
 }
