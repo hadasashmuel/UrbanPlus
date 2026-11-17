@@ -2,9 +2,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { MainEvent, SavedEvent, Vote } from "./eventsState";
 
-const MAIN_EVENT_API = "https://localhost:7019/api/MainEvent";
-const SAVE_EVENT_API = "https://localhost:7019/api/SaveEvent";
-const VOTE_API = "https://localhost:7019/api/Vote";
+const MAIN_EVENT_API = "https://urbanpluspro.premiumasp.net/api/MainEvent";
+const SAVE_EVENT_API = "https://urbanpluspro.premiumasp.net/api/SaveEvent";
+const VOTE_API = "https://urbanpluspro.premiumasp.net/api/Vote";
 
 interface ThunkConfig {
   state: {
