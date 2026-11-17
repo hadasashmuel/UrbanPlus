@@ -6,7 +6,7 @@ import type {
   AdminUser,
 } from "./usersState";
 
-const API_URL = "https://localhost:7019/api/User";
+const API_URL = "https://urbanpluspro.premiumasp.net/api/User";
 
 // התחברות
 interface LoginUserRequest {
