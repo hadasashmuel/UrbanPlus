@@ -58,14 +58,10 @@ jobs:
           $msdeploy = "C:\Program Files (x86)\IIS\Microsoft Web Deploy V3\msdeploy.exe"
           if (-not (Test-Path $msdeploy)) { throw "msdeploy.exe not found at $msdeploy" }
 
-          # Remove any whitespace or line breaks hidden inside the secrets
-          $site   = $env:DEPLOY_WEBSITE_NAME -replace '\s', ''
-          $server = ($env:DEPLOY_SERVER -replace '\s', '').TrimEnd('/')
-          $user   = $env:DEPLOY_USERNAME -replace '\s', ''
-          $pass   = $env:DEPLOY_PASSWORD.Trim()
-          if ($pass -match '\s') { throw "SERVER_PASSWORD contains a space or line break - re-enter the secret as a single line." }
-          if ($pass -match "'")  { throw "SERVER_PASSWORD contains a single quote (') - msdeploy cannot accept it." }
-          if ($server -notmatch '^https://') { Write-Warning "SERVER_COMPUTER_NAME should look like https://siteXXXX.siteasp.net:8172" }
+          $site       = $env:DEPLOY_WEBSITE_NAME.Trim()
+          $server     = $env:DEPLOY_SERVER.Trim().TrimEnd('/')
+          $user       = $env:DEPLOY_USERNAME.Trim()
+          $pass       = $env:DEPLOY_PASSWORD.Trim()
           $sourcePath = Join-Path $env:GITHUB_WORKSPACE $env:SOURCE_PATH
           $auth = "computerName='$server/MsDeploy.axd?site=$site',userName='$user',password='$pass',authType='Basic'"
 
