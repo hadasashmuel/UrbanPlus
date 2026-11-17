@@ -1,9 +1,9 @@
-
 import { useEffect, useRef, useState } from "react";
 import {
   HubConnectionBuilder,
   HubConnection,
   LogLevel,
+  HttpTransportType,
 } from "@microsoft/signalr";
 import { useAppSelector } from "../store/hooks";
 import ShortUserProfile from "./ShortUserProfile";
@@ -70,6 +70,7 @@ function EventChat({ mainEventId }: EventChatProps) {
     const connection = new HubConnectionBuilder()
       .withUrl(HUB_URL, {
         accessTokenFactory: () => token,
+        transport: HttpTransportType.ServerSentEvents,
       })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
@@ -296,3 +297,4 @@ function EventChat({ mainEventId }: EventChatProps) {
 }
 
 export default EventChat;
+
