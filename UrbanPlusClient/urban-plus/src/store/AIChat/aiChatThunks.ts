@@ -3,7 +3,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { AIChatMessage } from "./aiChatState";
 import { aiChatChunkReceived } from "./aiChatSlice";
 
-const API_URL = "https://localhost:7019/api/AIChat";
+const API_URL = "https://urbanpluspro.premiumasp.net/api/AIChat";
 
 interface SendAIMessageRequest {
   content: string;
