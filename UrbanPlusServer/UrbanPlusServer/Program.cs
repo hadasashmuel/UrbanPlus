@@ -337,11 +337,11 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images"
 });
 
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 app.UseHttpsRedirection();
 
