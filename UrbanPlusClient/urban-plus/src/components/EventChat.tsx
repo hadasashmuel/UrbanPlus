@@ -23,8 +23,9 @@ interface ChatMessage {
   userName: string;
 }
 
-const API_URL = "https://localhost:7019/api/Message";
-const HUB_URL = "https://localhost:7019/hubs/event-chat";
+const SERVER_URL = "https://urbanpluspro.premiumasp.net";
+const API_URL = `${SERVER_URL}/api/Message`;
+const HUB_URL = `${SERVER_URL}/hubs/event-chat`;
 
 function EventChat({ mainEventId }: EventChatProps) {
   const token = useAppSelector((state) => state.users.token);
@@ -40,7 +41,6 @@ function EventChat({ mainEventId }: EventChatProps) {
   const connectionRef = useRef<HubConnection | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // הוספת הודעה בלי ליצור כפילויות
   const addMessage = (message: ChatMessage) => {
     if (message.mainEventId !== mainEventId || message.isDeleted) {
       return;
@@ -77,14 +77,12 @@ function EventChat({ mainEventId }: EventChatProps) {
 
     connectionRef.current = connection;
 
-    // הודעה חדשה שהגיעה דרך SignalR
     connection.on("ReceiveMessage", (message: ChatMessage) => {
       if (isActive) {
         addMessage(message);
       }
     });
 
-    // חיבור מחדש מחייב הצטרפות חוזרת לקבוצה
     connection.onreconnected(async () => {
       try {
         await connection.invoke("JoinEventGroup", mainEventId);
@@ -157,7 +155,6 @@ function EventChat({ mainEventId }: EventChatProps) {
     };
   }, [mainEventId, token]);
 
-  // גלילה להודעה האחרונה
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
