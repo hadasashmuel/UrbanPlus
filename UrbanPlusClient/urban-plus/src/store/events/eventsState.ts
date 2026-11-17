@@ -18,7 +18,15 @@ export interface MainEvent {
   countSavedEvents: number;
   countReports: number;
   imageUrls: string[];
-  messages: unknown[];
+  messages: Message[];
+}
+
+export interface Message {
+  messageId: number;
+  mainEventId: number;
+  userId: number;
+  content: string;
+  createdAt: string;
 }
 
 export interface SavedEvent {
@@ -40,10 +48,12 @@ export interface EventsState {
   mainEvents: MainEvent[];
   savedEvents: SavedEvent[];
   votes: Vote[];
+  eventMessages: Message[];
 
   loadingMainEvents: boolean;
   loadingSavedEvents: boolean;
   loadingMyVotes: boolean;
+  loadingEventMessages: boolean;
 
   savingEvent: boolean;
   deletingSavedEvent: boolean;
@@ -51,7 +61,6 @@ export interface EventsState {
   creatingVote: boolean;
   deletingVote: boolean;
 
-  // ניהול אירועים – מנהל
   deletingMainEvent: boolean;
   updatingMainEvent: boolean;
 
@@ -62,10 +71,12 @@ export const initialState: EventsState = {
   mainEvents: [],
   savedEvents: [],
   votes: [],
+  eventMessages: [],
 
   loadingMainEvents: false,
   loadingSavedEvents: false,
   loadingMyVotes: false,
+  loadingEventMessages: false,
 
   savingEvent: false,
   deletingSavedEvent: false,
@@ -73,7 +84,6 @@ export const initialState: EventsState = {
   creatingVote: false,
   deletingVote: false,
 
-  // ניהול אירועים – מנהל
   deletingMainEvent: false,
   updatingMainEvent: false,
 
