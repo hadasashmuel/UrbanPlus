@@ -40,6 +40,7 @@ import {
 } from "../store/notifications/notificationsConnection";
 
 import "../App.css";
+import "./Map.css";
 
 // =====================================
 //          סמני המפה
@@ -53,13 +54,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// צבע קבוע לכל קטגוריה לפי CategoryId
 const getCategoryColor = (categoryId: number) => {
   const hue = ((categoryId * 137.508) % 360 + 360) % 360;
   return `hsl(${hue}, 75%, 45%)`;
 };
 
-// יצירת סמן צבעוני
 const getEventIcon = (categoryId: number) => {
   const color = getCategoryColor(categoryId);
 
@@ -103,7 +102,6 @@ const getStatusLabel = (status: number | string) => {
   return statuses[String(status)] ?? String(status);
 };
 
-// תרגום חומרה
 const getSeverityLabel = (severity: number | string) => {
   const severities: Record<string, string> = {
     "0": "נמוכה",
@@ -115,7 +113,6 @@ const getSeverityLabel = (severity: number | string) => {
   return severities[String(severity)] ?? String(severity);
 };
 
-// הצגת תאריך
 const formatDate = (date: string | null) => {
   if (!date) return "טרם עודכן";
 
@@ -167,7 +164,6 @@ function Map() {
 
   const token = useAppSelector((state) => state.users.token);
 
-  // התראה חדשה שהתקבלה דרך SignalR
   const realtimeNotification = useAppSelector(
     (state) => state.notifications.realtimeNotification
   );
@@ -182,10 +178,8 @@ function Map() {
 
   const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState("");
-
   const [locationReady, setLocationReady] = useState(false);
 
-  // האם חיבור SignalR מוכן לקבלת התראות
   const [notificationConnectionReady, setNotificationConnectionReady] =
     useState(false);
 
@@ -418,36 +412,8 @@ function Map() {
   };
 
   // =====================================
-  //           עיצוב קישורים
+  //               תצוגה
   // =====================================
-
-  const linkStyle: React.CSSProperties = {
-    background: "transparent",
-    border: "none",
-    padding: 0,
-    color: "#374151",
-    fontSize: "14px",
-    textDecoration: "underline",
-    cursor: "pointer",
-  };
-
-  const detailStyle: React.CSSProperties = {
-    padding: "11px 0",
-    borderBottom: "1px solid #e5e7eb",
-    fontSize: "14px",
-    color: "#374151",
-  };
-
-  const voteStyle = (active: boolean): React.CSSProperties => ({
-    background: "transparent",
-    border: "none",
-    padding: "5px",
-    cursor: "pointer",
-    fontSize: "16px",
-    color: active ? "#2563eb" : "#374151",
-    fontWeight: active ? "bold" : "normal",
-    opacity: creatingVote || deletingVote ? 0.5 : 1,
-  });
 
   return (
     <div
@@ -459,9 +425,7 @@ function Map() {
         padding: 0,
       }}
     >
-      {/* ================================= */}
-      {/*       התראה קופצת בזמן אמת         */}
-      {/* ================================= */}
+      {/* התראה קופצת בזמן אמת */}
 
       {token && realtimeNotification && (
         <div
@@ -544,6 +508,7 @@ function Map() {
       )}
 
       {/* הודעת מיקום */}
+
       {locationError && (
         <div
           style={{
@@ -563,6 +528,7 @@ function Map() {
       )}
 
       {/* שגיאה בטעינת אירועים */}
+
       {error && (
         <div
           style={{
@@ -583,6 +549,7 @@ function Map() {
       )}
 
       {/* טעינת אירועים */}
+
       {loadingMainEvents && (
         <div
           style={{
@@ -652,270 +619,236 @@ function Map() {
 
       {selectedEvent && (
         <div
+          className="event-modal-overlay"
           onClick={() => setSelectedEventId(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 2000,
-            background: "rgba(0,0,0,0.45)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "15px",
-            direction: "rtl",
-          }}
         >
           <div
+            className="event-modal"
             onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "white",
-              width: "100%",
-              maxWidth: "520px",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              borderRadius: "20px",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.25)",
-              padding: "25px",
-              position: "relative",
-            }}
           >
             <button
+              className="event-modal-close"
               onClick={() => setSelectedEventId(null)}
-              style={{
-                position: "absolute",
-                left: "18px",
-                top: "15px",
-                background: "#f3f4f6",
-                border: "none",
-                borderRadius: "50%",
-                width: "35px",
-                height: "35px",
-                fontSize: "21px",
-                cursor: "pointer",
-                color: "#374151",
-              }}
+              aria-label="סגירת חלונית"
             >
               ×
             </button>
 
-            <div
-              style={{
-                borderBottom: "1px solid #e5e7eb",
-                paddingBottom: "18px",
-                marginBottom: "15px",
-              }}
-            >
-              <div
+            {/* כותרת האירוע */}
+
+            <div className="event-modal-header">
+              <span
+                className="event-category-badge"
                 style={{
-                  display: "inline-block",
                   background: getCategoryColor(
                     selectedEvent.categoryId
                   ),
-                  color: "white",
-                  padding: "5px 13px",
-                  borderRadius: "20px",
-                  fontSize: "12px",
-                  marginBottom: "12px",
                 }}
               >
                 {selectedEvent.categoryName || "אירוע"}
-              </div>
-
-              <h2
-                style={{
-                  margin: "0 0 10px",
-                  fontSize: "23px",
-                  color: "#111827",
-                }}
-              >
-                {selectedEvent.title}
-              </h2>
-
-              <span
-                style={{
-                  display: "inline-block",
-                  background: "#dcfce7",
-                  color: "#166534",
-                  padding: "6px 13px",
-                  borderRadius: "20px",
-                  fontSize: "13px",
-                  fontWeight: "bold",
-                }}
-              >
-                {getStatusLabel(selectedEvent.status)}
               </span>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "18px",
-                  marginTop: "16px",
-                }}
-              >
-                {!token ? (
-                  <span style={{ fontSize: "13px", color: "#6b7280" }}>
-                    להתחברות ולהצבעה יש להתחבר למערכת
-                  </span>
-                ) : loadingMyVotes ? (
-                  <span style={{ fontSize: "13px", color: "#6b7280" }}>
-                    טוען...
-                  </span>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => handleVote(0)}
-                      disabled={creatingVote || deletingVote}
-                      style={voteStyle(userVote?.typeVote === 0)}
-                      title="לייק"
-                    >
-                      👍 קיים
-                    </button>
+              <h2>{selectedEvent.title}</h2>
 
-                    <button
-                      onClick={() => handleVote(1)}
-                      disabled={creatingVote || deletingVote}
-                      style={voteStyle(userVote?.typeVote === 1)}
-                      title="דיסלייק"
-                    >
-                      👎 לא קיים
-                    </button>
-                  </>
-                )}
+              <div className="event-header-info">
+                <span className="event-status-badge">
+                  <span className="status-dot" />
+                  {getStatusLabel(selectedEvent.status)}
+                </span>
+
+                <span className="event-severity">
+                  חומרה:{" "}
+                  <strong>
+                    {getSeverityLabel(selectedEvent.severity)}
+                  </strong>
+                </span>
               </div>
             </div>
 
-            <h3 style={{ fontSize: "17px", color: "#111827" }}>
-              פרטי האירוע
-            </h3>
+            {/* כתובת */}
 
-            <div style={detailStyle}>
-              <strong>כתובת:</strong>{" "}
-              {selectedEvent.address || "לא צוינה כתובת"}
-            </div>
+            <div className="event-address">
+              <span className="event-info-icon">📍</span>
 
-            <div style={detailStyle}>
-              <strong>קטגוריה:</strong>{" "}
-              {selectedEvent.categoryName || "לא צוינה"}
-            </div>
-
-            <div style={detailStyle}>
-              <strong>חומרה:</strong>{" "}
-              {getSeverityLabel(selectedEvent.severity)}
-            </div>
-
-            <div style={detailStyle}>
-              <strong>תאריך יצירה:</strong>{" "}
-              {formatDate(selectedEvent.createdAt)}
-            </div>
-
-            <div style={detailStyle}>
-              <strong>תחילת טיפול:</strong>{" "}
-              {formatDate(selectedEvent.startedAt)}
-            </div>
-
-            <div style={detailStyle}>
-              <strong>תאריך סיום:</strong>{" "}
-              {formatDate(selectedEvent.resolvedAt)}
-            </div>
-
-            <div style={detailStyle}>
-              <strong>זמן טיפול משוער:</strong>{" "}
-              {selectedEvent.estimatedResolutionMinutes} דקות
-            </div>
-
-            <div style={detailStyle}>
-              <strong>זמן טיפול בפועל:</strong>{" "}
-              {selectedEvent.actualResolutionMinutes != null
-                ? `${selectedEvent.actualResolutionMinutes} דקות`
-                : "טרם הסתיים"}
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "8px",
-                margin: "20px 0",
-              }}
-            >
-              <div
-                style={{
-                  background: "#f0fdf4",
-                  borderRadius: "12px",
-                  padding: "12px 5px",
-                  textAlign: "center",
-                }}
-              >
-                <div style={{ fontSize: "23px", fontWeight: "bold" }}>
-                  {selectedEvent.countReports}
-                </div>
-                <div style={{ fontSize: "12px", color: "#166534" }}>
-                  דיווחים
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: "#eff6ff",
-                  borderRadius: "12px",
-                  padding: "12px 5px",
-                  textAlign: "center",
-                }}
-              >
-                <div style={{ fontSize: "23px", fontWeight: "bold" }}>
-                  {selectedEvent.countVotes}
-                </div>
-                <div style={{ fontSize: "12px", color: "#1d4ed8" }}>
-                  הצבעות
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: "#faf5ff",
-                  borderRadius: "12px",
-                  padding: "12px 5px",
-                  textAlign: "center",
-                }}
-              >
-                <div style={{ fontSize: "23px", fontWeight: "bold" }}>
-                  {selectedEvent.countSavedEvents}
-                </div>
-                <div style={{ fontSize: "12px", color: "#7e22ce" }}>
-                  שמירות
-                </div>
+              <div>
+                <small>מיקום האירוע</small>
+                <strong>
+                  {selectedEvent.address || "לא צוינה כתובת"}
+                </strong>
               </div>
             </div>
 
-            <div
-              style={{
-                borderTop: "1px solid #e5e7eb",
-                paddingTop: "18px",
-                marginTop: "10px",
-              }}
-            >
+            {/* הצבעות */}
+
+            <div className="event-voting">
+              <h3>האם האירוע עדיין קיים?</h3>
+
               {!token ? (
-                <p style={{ color: "#6b7280", fontSize: "14px" }}>
+                <p className="event-login-message">
+                  להתחברות ולהצבעה יש להתחבר למערכת
+                </p>
+              ) : loadingMyVotes ? (
+                <p className="event-login-message">
+                  טוען הצבעה...
+                </p>
+              ) : (
+                <div className="event-vote-buttons">
+                  <button
+                    className={`event-vote-btn vote-yes ${
+                      userVote?.typeVote === 0 ? "active" : ""
+                    }`}
+                    onClick={() => handleVote(0)}
+                    disabled={creatingVote || deletingVote}
+                  >
+                    👍 קיים
+                  </button>
+
+                  <button
+                    className={`event-vote-btn vote-no ${
+                      userVote?.typeVote === 1 ? "active" : ""
+                    }`}
+                    onClick={() => handleVote(1)}
+                    disabled={creatingVote || deletingVote}
+                  >
+                    👎 לא קיים
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* נתונים מרכזיים */}
+
+            <div className="event-stats">
+              <div className="event-stat-card reports-stat">
+                <span className="event-stat-icon">📋</span>
+                <strong>
+                  {selectedEvent.countReports ?? 0}
+                </strong>
+                <small>דיווחים</small>
+              </div>
+
+              <div className="event-stat-card votes-stat">
+                <span className="event-stat-icon">👍</span>
+                <strong>
+                  {selectedEvent.countVotes ?? 0}
+                </strong>
+                <small>הצבעות</small>
+              </div>
+
+              <div className="event-stat-card saved-stat">
+                <span className="event-stat-icon">🔖</span>
+                <strong>
+                  {selectedEvent.countSavedEvents ?? 0}
+                </strong>
+                <small>עוקבים</small>
+              </div>
+            </div>
+
+            {/* ציר זמן */}
+
+            <div className="event-section">
+              <h3 className="event-section-title">
+                <span>◷</span>
+                התקדמות האירוע
+              </h3>
+
+              <div className="event-timeline">
+                <div className="timeline-item">
+                  <span className="timeline-dot created-dot" />
+
+                  <div>
+                    <strong>האירוע דווח</strong>
+                    <small>
+                      {formatDate(selectedEvent.createdAt)}
+                    </small>
+                  </div>
+                </div>
+
+                <div className="timeline-item">
+                  <span className="timeline-dot treatment-dot" />
+
+                  <div>
+                    <strong>תחילת טיפול</strong>
+                    <small>
+                      {formatDate(selectedEvent.startedAt)}
+                    </small>
+                  </div>
+                </div>
+
+                <div className="timeline-item">
+                  <span className="timeline-dot resolved-dot" />
+
+                  <div>
+                    <strong>סיום טיפול</strong>
+                    <small>
+                      {formatDate(selectedEvent.resolvedAt)}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* פרטים נוספים */}
+
+            <div className="event-section">
+              <h3 className="event-section-title">
+                <span>ℹ</span>
+                פרטים נוספים
+              </h3>
+
+              <div className="event-details-grid">
+                <div className="event-detail-item">
+                  <small>קטגוריה</small>
+                  <strong>
+                    {selectedEvent.categoryName || "לא צוינה"}
+                  </strong>
+                </div>
+
+                <div className="event-detail-item">
+                  <small>רמת חומרה</small>
+                  <strong>
+                    {getSeverityLabel(selectedEvent.severity)}
+                  </strong>
+                </div>
+
+                <div className="event-detail-item">
+                  <small>זמן טיפול משוער</small>
+                  <strong>
+                    {selectedEvent.estimatedResolutionMinutes != null
+                      ? `${selectedEvent.estimatedResolutionMinutes} דקות`
+                      : "לא עודכן"}
+                  </strong>
+                </div>
+
+                <div className="event-detail-item">
+                  <small>זמן טיפול בפועל</small>
+                  <strong>
+                    {selectedEvent.actualResolutionMinutes != null
+                      ? `${selectedEvent.actualResolutionMinutes} דקות`
+                      : "טרם הסתיים"}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            {/* מעקב */}
+
+            <div className="event-follow-section">
+              {!token ? (
+                <p className="event-login-message">
                   כדי לעקוב אחר אירועים יש להתחבר למערכת.
                 </p>
               ) : (
                 <button
+                  className={`event-follow-btn ${
+                    savedEvent ? "following" : ""
+                  }`}
                   onClick={handleSaveEvent}
                   disabled={
                     savingEvent ||
                     deletingSavedEvent ||
                     loadingSavedEvents
                   }
-                  style={{
-                    ...linkStyle,
-                    opacity:
-                      savingEvent ||
-                      deletingSavedEvent ||
-                      loadingSavedEvents
-                        ? 0.5
-                        : 1,
-                  }}
                 >
                   {loadingSavedEvents
                     ? "טוען..."
@@ -924,21 +857,16 @@ function Map() {
                       : deletingSavedEvent
                         ? "מבטל מעקב..."
                         : savedEvent
-                          ? "לבטל מעקב"
-                          : "במעקב"}
+                          ? "✓ במעקב – לחצי לביטול"
+                          : "＋ עקוב אחר האירוע"}
                 </button>
               )}
             </div>
 
-            <div
-              style={{
-                marginTop: "20px",
-                color: "#6b7280",
-                fontSize: "13px",
-                textAlign: "center",
-              }}
-            >
-              {selectedEvent.messages?.length ?? 0} הודעות באירוע
+            {/* הודעות */}
+
+            <div className="event-messages-count">
+              💬 {selectedEvent.messages?.length ?? 0} הודעות באירוע
             </div>
           </div>
         </div>

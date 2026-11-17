@@ -68,17 +68,54 @@ namespace BLL.Services.ServicesDB.MainEventServices
                 throw new NotFoundException(
                     $"Main event with id {id} was not found.");
 
-            var categoryName = _repository.GetCategoryName(dto.CategoryId);
+            var categoryName =
+                _repository.GetCategoryName(dto.CategoryId);
 
             if (categoryName == null)
                 throw new ArgumentException(
                     "The selected category does not exist.");
 
+            // שומרים את הסטטוס הקודם לפני העדכון
+            var previousStatus = mainEvent.Status;
+            var newStatus = dto.Status;
+
+            // מעבר לטיפול: שמירת זמן התחלת הטיפול
+            if (newStatus == EventStatus.InTreatment &&
+                previousStatus != EventStatus.InTreatment &&
+                !mainEvent.StartedAt.HasValue)
+            {
+                mainEvent.StartedAt = DateTime.UtcNow;
+            }
+
+            // מעבר לטופל: שמירת זמן סיום וחישוב משך הטיפול
+            if (newStatus == EventStatus.Treated &&
+                previousStatus != EventStatus.Treated)
+            {
+                var resolvedAt = DateTime.UtcNow;
+
+                // אם לא נשמר זמן התחלה, נשתמש בזמן יצירת האירוע
+                var startedAt =
+                    mainEvent.StartedAt ?? mainEvent.CreatedAt;
+
+                mainEvent.StartedAt ??= startedAt;
+                mainEvent.ResolvedAt = resolvedAt;
+
+                if (resolvedAt >= startedAt)
+                {
+                    mainEvent.ActualResolutionMinutes =
+                        Math.Max(
+                            1,
+                            (int)Math.Ceiling(
+                                (resolvedAt - startedAt).TotalMinutes));
+                }
+            }
+
             // מעדכנים רק את השדות שהמנהל רשאי לשנות
             mainEvent.CategoryId = dto.CategoryId;
             mainEvent.Title = dto.Title.Trim();
-            mainEvent.Status = dto.Status;
+            mainEvent.Status = newStatus;
             mainEvent.Severity = dto.Severity;
+
             mainEvent.EstimatedResolutionMinutes =
                 dto.EstimatedResolutionMinutes;
 

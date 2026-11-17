@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
@@ -32,6 +33,7 @@ function Login() {
 
       console.log("פרטי המשתמש שהתקבלו:", user);
       console.log("תפקיד המשתמש:", user.roleCode);
+      console.log("תמונת פרופיל:", user.profilePicture);
 
       if (user.roleCode === 1) {
         navigate("/admin");
@@ -50,7 +52,7 @@ function Login() {
     try {
       const result = await dispatch(
         loginUser({
-          email,
+          email: email.trim(),
           password,
           authProvider: 2,
         })

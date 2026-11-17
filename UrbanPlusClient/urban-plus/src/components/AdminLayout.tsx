@@ -41,6 +41,7 @@ function AdminLayout() {
     { path: "/admin/categories", label: "ניהול קטגוריות", icon: "▤" },
     { path: "/admin/badges", label: "תגי משתמשים", icon: "🏅" },
     { path: "/admin/notifications", label: "ניהול התראות", icon: "🔔" },
+    { path: "/admin/statistics", label: "סטטיסטיקות דיווחים", icon: "📊" },
   ];
 
   return (

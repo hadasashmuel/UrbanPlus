@@ -1,4 +1,5 @@
-﻿using BLL.Services.ServiceSupport.EventAggregationServices;
+﻿
+using BLL.Services.ServiceSupport.EventAggregationServices;
 using DAL.Entities;
 using DAL.Repositories.MainEventRepositories;
 using System.Text.RegularExpressions;
@@ -9,21 +10,21 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
     {
         private readonly IMainEventRepository _mainEventRepository;
 
-        // רדיוס מקסימלי: אירוע רחוק מזה נפסל לגמרי
         private const double MaxDistanceMeters = 150;
-
-        // חלון הזמן לחיפוש אירועים קיימים
         private const int TimeWindowHours = 48;
 
-        // המיקום הוא הגורם המרכזי, הטקסט רק משפר דירוג
         private const double LocationWeight = 0.8;
         private const double TextWeight = 0.2;
-
-        // סף מינימלי נמוך: מונע איחוד של דיווחים רחוקים וגם לא דומים בכלל
-        // (עם הערכים האלה: בלי דמיון טקסט, איחוד עד כ-94 מטר)
         private const double MinScore = 0.3;
 
-        public EventAggregationService(IMainEventRepository mainEventRepository)
+        // מספר אירועים מינימלי לחיזוי לפי חומרה
+        private const int MinHistoryForSeverity = 3;
+
+        // תקופת השפעה של נתונים עדכניים
+        private const double RecencyPeriodDays = 90;
+
+        public EventAggregationService(
+            IMainEventRepository mainEventRepository)
         {
             _mainEventRepository = mainEventRepository;
         }
@@ -33,7 +34,6 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
             if (report == null)
                 throw new ArgumentNullException(nameof(report));
 
-            // 1. אירועים באותה קטגוריה ב-48 השעות האחרונות
             var since = DateTime.UtcNow.AddHours(-TimeWindowHours);
 
             var candidates =
@@ -43,11 +43,11 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
             MainEvents? bestMatch = null;
             double bestScore = double.MinValue;
 
-            string reportText = $"{report.Title} {report.Description}";
+            string reportText =
+                $"{report.Title} {report.Description}";
 
             foreach (var candidate in candidates)
             {
-                // 2. מרחק GPS
                 double distance = CalculateDistance(
                     report.Latitude,
                     report.Longitude,
@@ -57,8 +57,6 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
                 if (distance > MaxDistanceMeters)
                     continue;
 
-                // 3. דמיון טקסט מול הדיווח הכי דומה באירוע
-                //    (ולא מול שרשור של כל הדיווחים, שמקטין את הדמיון ככל שהאירוע גדל)
                 double textSimilarity = candidate.Reports.Any()
                     ? candidate.Reports.Max(r =>
                         CalculateTextSimilarity(
@@ -66,7 +64,6 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
                             $"{r.Title} {r.Description}"))
                     : 0;
 
-                // 4. ציון התאמה
                 double locationScore =
                     1 - (distance / MaxDistanceMeters);
 
@@ -81,7 +78,6 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
                 }
             }
 
-            // 5. שיוך לאירוע המתאים ביותר, או יצירת אירוע חדש
             if (bestMatch != null && bestScore >= MinScore)
                 return bestMatch;
 
@@ -97,6 +93,15 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
             string eventTitle =
                 $"{categoryName ?? "אירוע"} - {report.InputAddress}";
 
+            // חומרת ברירת המחדל של אירוע חדש
+            var severity = Severity.Medium;
+
+            // חישוב זמן טיפול משוער לפי היסטוריית אירועים
+            int estimatedMinutes =
+                CalculateEstimatedResolutionMinutes(
+                    report.CategoryId,
+                    severity);
+
             return _mainEventRepository.AddMainEvent(new MainEvents
             {
                 CategoryId = report.CategoryId,
@@ -105,10 +110,101 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
                 Latitude = report.Latitude,
                 Longitude = report.Longitude,
                 Address = Truncate(report.InputAddress, 100),
-                Severity = Severity.Medium,
-                EstimatedResolutionMinutes = 0,
+                Severity = severity,
+                EstimatedResolutionMinutes = estimatedMinutes,
                 CreatedAt = report.CreatedAt
             });
+        }
+
+        // ==========================================
+        // אלגוריתם חיזוי זמן טיפול
+        // ==========================================
+
+        private int CalculateEstimatedResolutionMinutes(
+            int categoryId,
+            Severity severity)
+        {
+            var history =
+                _mainEventRepository.GetHistoricalTreatedEvents(
+                    categoryId);
+
+            // מסננים נתונים לא תקינים
+            history = history
+                .Where(e =>
+                    e.ActualResolutionMinutes.HasValue &&
+                    e.ActualResolutionMinutes.Value > 0)
+                .ToList();
+
+            // אין היסטוריה? משתמשים בברירת מחדל
+            if (history.Count == 0)
+                return GetDefaultResolutionMinutes(severity);
+
+            // בודקים אם קיימת מספיק היסטוריה באותה חומרה
+            var sameSeverity = history
+                .Where(e => e.Severity == severity)
+                .ToList();
+
+            // אם יש מספיק אירועים באותה חומרה,
+            // נשתמש בהם בלבד
+            var relevantEvents =
+                sameSeverity.Count >= MinHistoryForSeverity
+                    ? sameSeverity
+                    : history;
+
+            double weightedTotal = 0;
+            double totalWeight = 0;
+
+            foreach (var historicalEvent in relevantEvents)
+            {
+                double actualMinutes =
+                    historicalEvent.ActualResolutionMinutes!.Value;
+
+                // אירועים מאותה חומרה מקבלים משקל מלא
+                double severityWeight =
+                    historicalEvent.Severity == severity
+                        ? 1.0
+                        : 0.5;
+
+                // אירועים חדשים יותר מקבלים משקל גבוה יותר
+                double daysAgo = historicalEvent.ResolvedAt.HasValue
+                    ? Math.Max(
+                        0,
+                        (DateTime.UtcNow -
+                         historicalEvent.ResolvedAt.Value).TotalDays)
+                    : 365;
+
+                double recencyWeight =
+                    1.0 / (1.0 + daysAgo / RecencyPeriodDays);
+
+                double weight =
+                    severityWeight * recencyWeight;
+
+                weightedTotal += actualMinutes * weight;
+                totalWeight += weight;
+            }
+
+            if (totalWeight <= 0)
+                return GetDefaultResolutionMinutes(severity);
+
+            int estimatedMinutes =
+                (int)Math.Round(weightedTotal / totalWeight);
+
+            // לא מחזירים זמן אפס או שלילי
+            return Math.Max(1, estimatedMinutes);
+        }
+
+        // ברירת מחדל כשאין היסטוריה בכלל
+        private static int GetDefaultResolutionMinutes(
+            Severity severity)
+        {
+            return severity switch
+            {
+                Severity.Low => 60,
+                Severity.Medium => 120,
+                Severity.High => 240,
+                Severity.Critical => 360,
+                _ => 120
+            };
         }
 
         private static double CalculateDistance(

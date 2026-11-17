@@ -8,6 +8,22 @@ import {
 } from "../store/users/usersThunks";
 import "./AdminUsers.css";
 
+const API_BASE = "https://localhost:7019";
+
+const getImageSrc = (imageUrl: string): string => {
+  if (!imageUrl) return "";
+
+  if (
+    imageUrl.startsWith("http://") ||
+    imageUrl.startsWith("https://") ||
+    imageUrl.startsWith("data:")
+  ) {
+    return imageUrl;
+  }
+
+  return `${API_BASE}/images/${imageUrl.replace(/^\/+/, "")}`;
+};
+
 function AdminUsers() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -176,9 +192,12 @@ function AdminUsers() {
                         <div className="admin-user-info">
                           {user.profilePicture ? (
                             <img
-                              src={user.profilePicture}
-                              alt=""
+                              src={getImageSrc(user.profilePicture)}
+                              alt="תמונת משתמש"
                               className="admin-user-avatar"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
                             />
                           ) : (
                             <div className="admin-user-avatar admin-user-placeholder">

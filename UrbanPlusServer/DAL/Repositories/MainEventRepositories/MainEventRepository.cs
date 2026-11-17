@@ -124,6 +124,19 @@ namespace DAL.Repositories.MainEventRepositories
                     e.Status == EventStatus.InTreatment)
                 .ToList();
         }
+        public List<MainEvents> GetHistoricalTreatedEvents(int categoryId)
+        {
+            return _context.MainEvents
+                .AsNoTracking()
+                .Where(e =>
+                    e.CategoryId == categoryId &&
+                    e.Status == EventStatus.Treated &&
+                    e.ActualResolutionMinutes.HasValue &&
+                    e.ActualResolutionMinutes.Value > 0)
+                .OrderByDescending(e => e.ResolvedAt)
+                .Take(100)
+                .ToList();
+        }
         public bool DeleteMainEvent(int id)
         {
             var mainEvent = _context.MainEvents .FirstOrDefault(e => e.MainEventsId == id);

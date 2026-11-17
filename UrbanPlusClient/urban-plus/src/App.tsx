@@ -20,6 +20,7 @@ import AdminEvents from "./components/AdminEvents";
 import AdminCategories from "./components/AdminCategories";
 import AdminBadges from "./components/AdminBadges";
 import AdminReports from "./components/AdminReports";
+import AdminStatistics from "./components/AdminStatistics";
 import AdminNotifications from "./components/AdminNotifications";
 
 import "./App.css";
@@ -47,6 +48,7 @@ function App() {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="badges" element={<AdminBadges />} />
           <Route path="reports" element={<AdminReports />} />
+          <Route path="statistics" element={<AdminStatistics />} />
           <Route path="notifications" element={<AdminNotifications />} />
         </Route>
 
