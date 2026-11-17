@@ -2,7 +2,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { Category } from "./categoriesState";
 
-const API_URL = "https://localhost:7019/api/Category";
+const API_URL = "https://urbanpluspro.premiumasp.net/api/Category";
 
 // שליפת כל הקטגוריות
 export const fetchCategories = createAsyncThunk<
