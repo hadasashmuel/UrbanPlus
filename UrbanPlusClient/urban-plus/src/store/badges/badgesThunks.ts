@@ -2,7 +2,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { Badge } from "./badgesState";
 
-const API_URL = "https://localhost:7019/api/Badge";
+const API_URL = "https://urbanpluspro.premiumasp.net/api/Badge";
 
 // שליפת כל התגים
 export const fetchBadges = createAsyncThunk<
