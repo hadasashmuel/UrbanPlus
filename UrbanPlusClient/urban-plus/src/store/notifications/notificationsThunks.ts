@@ -2,7 +2,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { NotificationItem } from "./notificationsState";
 
-const API_URL = "https://localhost:7019/api/Notification";
+const API_URL = "https://urbanpluspro.premiumasp.net/api/Notification";
 
 // שליפת ההתראות של המשתמש המחובר
 export const fetchMyNotifications = createAsyncThunk<
