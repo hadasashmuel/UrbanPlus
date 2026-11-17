@@ -1,10 +1,16 @@
 
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { MainEvent, SavedEvent, Vote } from "./eventsState";
+import type {
+  MainEvent,
+  SavedEvent,
+  Vote,
+  Message,
+} from "./eventsState";
 
 const MAIN_EVENT_API = "https://urbanpluspro.premiumasp.net/api/MainEvent";
 const SAVE_EVENT_API = "https://urbanpluspro.premiumasp.net/api/SaveEvent";
 const VOTE_API = "https://urbanpluspro.premiumasp.net/api/Vote";
+const MESSAGE_API = "https://urbanpluspro.premiumasp.net/api/Message";
 
 interface ThunkConfig {
   state: {
@@ -37,6 +43,10 @@ export interface UpdateMainEventRequest {
   estimatedResolutionMinutes: number;
 }
 
+// =====================================
+//              אירועים
+// =====================================
+
 // שליפת כל האירועים
 export const fetchMainEvents = createAsyncThunk<
   MainEvent[],
@@ -60,6 +70,52 @@ export const fetchMainEvents = createAsyncThunk<
     }
   }
 );
+
+// =====================================
+//          הודעות באירועים
+// =====================================
+
+// שליפת הודעות לפי מזהה אירוע
+export const fetchEventMessages = createAsyncThunk<
+  Message[],
+  number,
+  ThunkConfig
+>(
+  "events/fetchEventMessages",
+  async (mainEventId, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().users.token;
+
+      if (!token) {
+        return rejectWithValue("אין משתמש מחובר");
+      }
+
+      const response = await fetch(
+        `${MESSAGE_API}/event/${mainEventId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        return rejectWithValue(
+          (await response.text()) || "Failed to load event messages"
+        );
+      }
+
+      return await response.json();
+    } catch {
+      return rejectWithValue("Could not connect to server");
+    }
+  }
+);
+
+// =====================================
+//          אירועים שמורים
+// =====================================
 
 // שליפת האירועים שהמשתמש שמר
 export const fetchSavedEvents = createAsyncThunk<
@@ -329,7 +385,6 @@ export const updateMainEvent = createAsyncThunk<
         );
       }
 
-      // רענון הרשימה כדי לקבל גם את שם הקטגוריה המעודכן
       dispatch(fetchMainEvents());
 
       return eventData;
