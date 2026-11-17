@@ -9,7 +9,8 @@ import type { AppDispatch } from "../store";
 import { addRealtimeNotification } from "./notificationsSlice";
 import type { NotificationItem } from "./notificationsState";
 
-const HUB_URL = "https://localhost:7019/hubs/notifications";
+const HUB_URL =
+  "https://urbanpluspro.premiumasp.net/hubs/notifications";
 
 export const startNotificationConnection = async (
   token: string,
