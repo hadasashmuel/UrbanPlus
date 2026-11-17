@@ -1,0 +1,98 @@
+name: Publish Server
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - UrbanPlusServer/**
+      - .github/workflows/publish-server.yml
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: windows-latest # msdeploy.exe is available on Windows runners
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Find API project
+        id: proj
+        shell: pwsh
+        run: |
+          $apiProj = Get-ChildItem -Path UrbanPlusServer -Recurse -Filter *.csproj |
+            Where-Object { (Get-Content $_.FullName -Raw) -match 'Microsoft\.NET\.Sdk\.Web' } |
+            Select-Object -First 1 -ExpandProperty FullName
+          if (-not $apiProj) { throw "No web project (Microsoft.NET.Sdk.Web) found under UrbanPlusServer" }
+          Write-Host "API project: $apiProj"
+          "path=$apiProj" >> $env:GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: dotnet restore "${{ steps.proj.outputs.path }}" --runtime win-x86
+
+      - name: Publish
+        run: dotnet publish "${{ steps.proj.outputs.path }}" --configuration Release --no-restore --runtime win-x86 --self-contained false --output publish/server
+
+      - name: Validate publish output
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "publish/server/web.config")) {
+            throw "Publish output not found: publish/server/web.config"
+          }
+
+      - name: Deploy to MonsterASP.NET via WebDeploy
+        shell: pwsh
+        env:
+          DEPLOY_WEBSITE_NAME: ${{ secrets.WEBSITE_NAME }}
+          DEPLOY_SERVER: ${{ secrets.SERVER_COMPUTER_NAME }}
+          DEPLOY_USERNAME: ${{ secrets.SERVER_USERNAME }}
+          DEPLOY_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+          SOURCE_PATH: publish/server
+        run: |
+          $msdeploy = "C:\Program Files (x86)\IIS\Microsoft Web Deploy V3\msdeploy.exe"
+          if (-not (Test-Path $msdeploy)) { throw "msdeploy.exe not found at $msdeploy" }
+
+          $site       = $env:DEPLOY_WEBSITE_NAME.Trim()
+          $server     = $env:DEPLOY_SERVER.Trim().TrimEnd('/')
+          $user       = $env:DEPLOY_USERNAME.Trim()
+          $pass       = $env:DEPLOY_PASSWORD.Trim()
+          $sourcePath = Join-Path $env:GITHUB_WORKSPACE $env:SOURCE_PATH
+          $auth = "computerName='$server/MsDeploy.axd?site=$site',userName='$user',password='$pass',authType='Basic'"
+
+          function Invoke-Recycle([string]$mode) {
+            & $msdeploy -verb:sync -allowUntrusted -source:recycleApp "-dest:recycleApp='$site',recycleMode='$mode',$auth"
+            if ($LASTEXITCODE -ne 0) { Write-Warning "Recycle $mode failed with exit code $LASTEXITCODE (continuing)." }
+          }
+
+          function Invoke-Publish {
+            & $msdeploy -verb:sync -allowUntrusted -enableRule:DoNotDeleteRule `
+              "-source:contentPath='$sourcePath'" `
+              "-dest:contentPath='$site',$auth"
+            if ($LASTEXITCODE -ne 0) { throw "msdeploy publish failed with exit code $LASTEXITCODE" }
+          }
+
+          $maxAttempts = 3
+          for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+            Write-Host "Deploy attempt $attempt of $maxAttempts..."
+            Invoke-Recycle "StopAppPool"
+            try {
+              Invoke-Publish
+              Write-Host "Deploy succeeded."
+              break
+            }
+            catch {
+              Write-Warning "Attempt $attempt failed: $($_.Exception.Message)"
+              if ($attempt -eq $maxAttempts) { throw }
+              Start-Sleep -Seconds 30
+            }
+            finally {
+              # Always bring the site back up, even if the deploy failed
+              Invoke-Recycle "StartAppPool"
+            }
+          }
