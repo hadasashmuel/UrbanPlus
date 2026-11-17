@@ -1,44 +1,16 @@
-name: Build, publish and deploy to MonsterASP.NET
+name: Build and deploy client to MonsterASP.NET
 
+# צד השרת נפרס אוטומטית דרך ה-webhook של MonsterASP.
+# ה-workflow הזה מטפל רק בצד הלקוח, ורץ רק כשיש שינוי בתיקיית הלקוח.
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'UrbanPlusClient/**'
   workflow_dispatch:
 
 jobs:
-  # --- 1. צד שרת (.NET 10) ---
-  build_and_deploy_server:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Install dependencies
-        run: dotnet restore UrbanPlusServer
-
-      - name: Build
-        run: dotnet build UrbanPlusServer --configuration Release --no-restore
-
-      - name: Publish
-        shell: pwsh
-        run: |
-          $apiProj = Get-ChildItem -Path UrbanPlusServer -Recurse -Filter *.csproj | Where-Object { (Get-Content $_.FullName -Raw) -match 'Microsoft\.NET\.Sdk\.Web' } | Select-Object -First 1 -ExpandProperty FullName
-          Write-Host "Publishing: $apiProj"
-          dotnet publish "$apiProj" --configuration Release --output ./publish --runtime win-x86
-
-      - name: Deploy Server to MonsterASP.NET via WebDeploy
-        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
-        with:
-          website-name: ${{ secrets.WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
-          server-username: ${{ secrets.SERVER_USERNAME }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
-
-  # --- 2. צד לקוח (React + Vite) ---
+  # --- צד לקוח (React + Vite) ---
   build_and_deploy_client:
     runs-on: windows-latest
     defaults:
@@ -62,7 +34,7 @@ jobs:
           VITE_API_URL: https://urbanpluspro.premiumasp.net
         run: npm run build
 
-      - name: Deploy Client to MonsterASP.NET via FTPS
+      - name: Deploy Client to MonsterASP.NET via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.CLIENT_FTP_HOST }}
