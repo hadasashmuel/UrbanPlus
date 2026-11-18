@@ -97,14 +97,20 @@ namespace BLL.Services.ServicesDB.MainEventServices
                 previousStatus != EventStatus.InTreatment &&
                 !mainEvent.StartedAt.HasValue)
             {
-                mainEvent.StartedAt = DateTime.UtcNow;
+                mainEvent.StartedAt = mainEvent.StartedAt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(
+    DateTime.UtcNow,
+    "Israel Standard Time"
+);
             }
 
             // מעבר לטופל
             if (newStatus == EventStatus.Treated &&
                 previousStatus != EventStatus.Treated)
             {
-                var resolvedAt = DateTime.UtcNow;
+                var resolvedAt = mainEvent.StartedAt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(
+    DateTime.UtcNow,
+    "Israel Standard Time"
+);
 
                 var startedAt =
                     mainEvent.StartedAt ?? mainEvent.CreatedAt;
