@@ -62,7 +62,7 @@ namespace BLL.Services.ServicesDB.ReportServices
             var report = _mapper.Map<Reports>(dto);
 
             report.UserId = userId;
-            report.CreatedAt = DateTime.UtcNow;
+            report.CreatedAt = DateTime.Now;
 
             var savedImages = new List<string>();
             bool reportSaved = false;
