@@ -1,4 +1,3 @@
-﻿
 using AutoMapper;
 using DAL.Entities;
 using DAL.Repositories.ReportAssignmentRepositories;
@@ -121,15 +120,27 @@ namespace BLL.Services.ServicesDB.ReportAssignmentServices
                 throw new Exception(
                     "Service provider is not assigned to any work type in this report category");
 
-            // Create the assignment
-            var assignment = _mapper.Map<ReportAssignments>(dto);
+            // Find all reports belonging to the same event
+            var reportsToAssign = report.MainEventId.HasValue
+                ? _reportRepository.GetAllReports()
+                    .Where(r => r.MainEventId == report.MainEventId)
+                    .ToList()
+                : new List<Reports> { report };
 
-            assignment.ManagerId = managerId;
+            // Create assignments for all related reports
+            var assignments = reportsToAssign.Select(r =>
+                new ReportAssignments
+                {
+                    ReportId = r.ReportId,
+                    ProviderId = dto.ProviderId,
+                    ManagerId = managerId,
+                    AssignedAt = DateTime.UtcNow,
+                    IsCurrent = true
+                }).ToList();
 
-            var createdAssignment = _reportAssignmentRepository
-                .AssignProvider(assignment);
+            _reportAssignmentRepository.AssignProviderToReports(assignments);
 
-            // Reload the assignment so that its related names are available for mapping
+            // Reload the original report assignment
             var result = _reportAssignmentRepository
                 .GetCurrentAssignmentByReportId(dto.ReportId);
 
