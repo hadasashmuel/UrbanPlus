@@ -62,7 +62,10 @@ namespace BLL.Services.ServicesDB.ReportServices
             var report = _mapper.Map<Reports>(dto);
 
             report.UserId = userId;
-            report.CreatedAt = DateTime.Now;
+            report.CreatedAt = report.CreatedAt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(
+    DateTime.UtcNow,
+    "Israel Standard Time"
+);
 
             var savedImages = new List<string>();
             bool reportSaved = false;
