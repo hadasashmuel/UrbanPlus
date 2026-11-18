@@ -226,11 +226,11 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
         {
             return severity switch
             {
-                Severity.Low => 60,
+                Severity.Low => 360,
                 Severity.Medium => 120,
-                Severity.High => 240,
-                Severity.Critical => 360,
-                _ => 60
+                Severity.High => 60,
+                Severity.Critical => 30,
+                _ => 120
             };
         }
 
