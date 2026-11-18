@@ -1,4 +1,3 @@
-﻿
 using AutoMapper;
 using BLL.Exceptions;
 using BLL.Services.ServicesDB.NotificationServices;
@@ -92,25 +91,25 @@ namespace BLL.Services.ServicesDB.MainEventServices
             // בדיקה האם הסטטוס השתנה
             bool statusChanged = previousStatus != newStatus;
 
+            // קבלת השעה הנוכחית לפי שעון ישראל
+            var israelTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(
+                DateTime.UtcNow,
+                "Israel Standard Time"
+            );
+
             // מעבר לטיפול
             if (newStatus == EventStatus.InTreatment &&
                 previousStatus != EventStatus.InTreatment &&
                 !mainEvent.StartedAt.HasValue)
             {
-                mainEvent.StartedAt = mainEvent.StartedAt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(
-    DateTime.UtcNow,
-    "Israel Standard Time"
-);
+                mainEvent.StartedAt = israelTime;
             }
 
             // מעבר לטופל
             if (newStatus == EventStatus.Treated &&
                 previousStatus != EventStatus.Treated)
             {
-                var resolvedAt = mainEvent.StartedAt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(
-    DateTime.UtcNow,
-    "Israel Standard Time"
-);
+                var resolvedAt = israelTime;
 
                 var startedAt =
                     mainEvent.StartedAt ?? mainEvent.CreatedAt;
