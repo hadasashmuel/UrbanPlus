@@ -1,4 +1,5 @@
-﻿using DAL.Entities;
+
+using DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories.ReportAssignmentRepositories
@@ -45,22 +46,78 @@ namespace DAL.Repositories.ReportAssignmentRepositories
 
         public ReportAssignments AssignProvider(ReportAssignments assignment)
         {
-            var currentAssignment = _context.ReportAssignments
-                .FirstOrDefault(a =>
-                    a.ReportId == assignment.ReportId && a.IsCurrent);
+            using var transaction = _context.Database.BeginTransaction();
 
-            if (currentAssignment != null)
+            try
             {
-                currentAssignment.IsCurrent = false;
+                // Close previous current assignments
+                var previousAssignments = _context.ReportAssignments
+                    .Where(a => a.ReportId == assignment.ReportId
+                             && a.IsCurrent)
+                    .ToList();
+
+                foreach (var previous in previousAssignments)
+                {
+                    previous.IsCurrent = false;
+                }
+
+                assignment.AssignedAt = DateTime.UtcNow;
+                assignment.IsCurrent = true;
+
+                _context.ReportAssignments.Add(assignment);
+                _context.SaveChanges();
+
+                transaction.Commit();
+
+                return assignment;
             }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
 
-            assignment.AssignedAt = DateTime.UtcNow;
-            assignment.IsCurrent = true;
+        public List<ReportAssignments> AssignProviderToReports(
+            List<ReportAssignments> assignments)
+        {
+            using var transaction = _context.Database.BeginTransaction();
 
-            _context.ReportAssignments.Add(assignment);
-            _context.SaveChanges();
+            try
+            {
+                var reportIds = assignments
+                    .Select(a => a.ReportId)
+                    .ToList();
 
-            return assignment;
+                var previousAssignments = _context.ReportAssignments
+                    .Where(a => reportIds.Contains(a.ReportId)
+                             && a.IsCurrent)
+                    .ToList();
+
+                foreach (var previous in previousAssignments)
+                {
+                    previous.IsCurrent = false;
+                }
+
+                foreach (var assignment in assignments)
+                {
+                    assignment.AssignedAt = DateTime.UtcNow;
+                    assignment.IsCurrent = true;
+
+                    _context.ReportAssignments.Add(assignment);
+                }
+
+                _context.SaveChanges();
+
+                transaction.Commit();
+
+                return assignments;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
     }
 }
