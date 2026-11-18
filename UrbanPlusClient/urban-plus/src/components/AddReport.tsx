@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchCategories } from "../store/categories/categoriesThunks";
@@ -21,6 +21,12 @@ function AddReport({ onClose }: AddReportProps) {
     (state) => state.reports
   );
 
+  const {
+    latitude: savedLatitude,
+    longitude: savedLongitude,
+    isLocationReady,
+  } = useAppSelector((state) => state.location);
+
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -33,66 +39,74 @@ function AddReport({ onClose }: AddReportProps) {
 
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationAction, setLocationAction] = useState<
-    "gps" | "address" | null
+    "saved" | "address" | null
   >(null);
   const [locationError, setLocationError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
+
+  const addressTouched = useRef(false);
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  // איתור מיקום נוכחי באמצעות GPS והמרתו לכתובת
-  const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError("הדפדפן אינו תומך באיתור מיקום");
+  // קבלת מיקום שמור מ-Redux והמרתו לכתובת
+  useEffect(() => {
+    if (
+      !isLocationReady ||
+      savedLatitude === null ||
+      savedLongitude === null
+    ) {
       return;
     }
 
+    let active = true;
+
+    setLatitude(savedLatitude);
+    setLongitude(savedLongitude);
     setLocationLoading(true);
-    setLocationAction("gps");
+    setLocationAction("saved");
     setLocationError("");
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
+    const getAddressFromCoordinates = async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${savedLatitude}&lon=${savedLongitude}&accept-language=he`
+        );
 
-        setLatitude(lat);
-        setLongitude(lng);
+        if (!response.ok) {
+          throw new Error("לא ניתן לקבל כתובת");
+        }
 
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=he`
-          );
+        const data = await response.json();
+        const address = data.address;
 
-          if (!response.ok) {
-            throw new Error("לא ניתן לקבל כתובת");
-          }
+        const street =
+          address?.road ||
+          address?.pedestrian ||
+          address?.footway ||
+          "";
 
-          const data = await response.json();
-          const address = data.address;
+        const houseNumber = address?.house_number || "";
 
-          const street =
-            address.road ||
-            address.pedestrian ||
-            address.footway ||
-            "";
+        const city =
+          address?.city ||
+          address?.town ||
+          address?.village ||
+          address?.municipality ||
+          "";
 
-          const houseNumber = address.house_number || "";
-          const city =
-            address.city ||
-            address.town ||
-            address.village ||
-            address.municipality ||
-            "";
+        const fullAddress = [
+          street && `${street} ${houseNumber}`.trim(),
+          city,
+        ]
+          .filter(Boolean)
+          .join(", ");
 
-          const fullAddress = [
-            street && `${street} ${houseNumber}`.trim(),
-            city,
-          ]
-            .filter(Boolean)
-            .join(", ");
+        if (!active) return;
 
+        if (!addressTouched.current) {
           if (fullAddress) {
             setInputAddress(fullAddress);
           } else if (data.display_name) {
@@ -102,32 +116,34 @@ function AddReport({ onClose }: AddReportProps) {
               "המיקום אותר, אך לא הצלחנו לזהות כתובת. אפשר להזין אותה ידנית."
             );
           }
-        } catch {
+        }
+      } catch {
+        if (!active) return;
+
+        if (!addressTouched.current) {
           setLocationError(
             "המיקום אותר, אך לא הצלחנו למלא כתובת אוטומטית. אפשר להזין אותה ידנית."
           );
-        } finally {
+        }
+      } finally {
+        if (active) {
           setLocationLoading(false);
+          setLocationAction(null);
         }
-      },
-      (error) => {
-        setLocationLoading(false);
-
-        if (error.code === 1) {
-          setLocationError("לא ניתנה הרשאה לאיתור המיקום");
-        } else {
-          setLocationError("לא הצלחנו לאתר את המיקום שלך");
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
       }
-    );
-  };
+    };
 
-  // שינוי כתובת ידנית מבטל קואורדינטות קודמות
+    getAddressFromCoordinates();
+
+    return () => {
+      active = false;
+    };
+  }, [isLocationReady, savedLatitude, savedLongitude]);
+
+  // שינוי כתובת ידנית
   const handleAddressChange = (value: string) => {
+    addressTouched.current = true;
+
     setInputAddress(value);
     setLatitude(null);
     setLongitude(null);
@@ -179,22 +195,27 @@ function AddReport({ onClose }: AddReportProps) {
       setLocationError("");
     } catch (err) {
       console.error("Address conversion error:", err);
+
       setLatitude(null);
       setLongitude(null);
+
       setLocationError(
         "לא הצלחנו להמיר את הכתובת למיקום. נסו שוב."
       );
     } finally {
       setLocationLoading(false);
+      setLocationAction(null);
     }
   };
 
+  // בחירת תמונות
   const handleImagesChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setImages(Array.from(event.target.files));
     }
   };
 
+  // מעבר לשלב הבא
   const handleNext = () => {
     if (step === 1) {
       if (!inputAddress.trim()) {
@@ -204,39 +225,72 @@ function AddReport({ onClose }: AddReportProps) {
 
       if (latitude === null || longitude === null) {
         setLocationError(
-          "יש לאתר את המיקום באמצעות GPS או להמיר את הכתובת לקואורדינטות"
+          "יש לאתר את מיקום המפגע באמצעות המרת הכתובת למיקום"
         );
         return;
       }
     }
 
     if (step === 2) {
-      if (
-        !title.trim() ||
-        title.trim().length < 2 ||
-        !description.trim() ||
-        description.trim().length < 5 ||
-        categoryId === ""
-      ) {
+      if (!title.trim() || title.trim().length < 2) {
+        setSubmitError("יש להזין כותרת תקינה באורך של לפחות 2 תווים");
         return;
       }
+
+      if (!description.trim() || description.trim().length < 5) {
+        setSubmitError("יש להזין תיאור באורך של לפחות 5 תווים");
+        return;
+      }
+
+      if (categoryId === "") {
+        setSubmitError("יש לבחור קטגוריה לדיווח");
+        return;
+      }
+
+      setSubmitError("");
     }
 
     setStep((current) => Math.min(current + 1, 3));
   };
 
   const handleBack = () => {
+    setSubmitError("");
     setStep((current) => Math.max(current - 1, 1));
   };
 
+  // שליחת דיווח
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    setSubmitError("");
+
+    if (!inputAddress.trim()) {
+      setSubmitError("יש להזין כתובת למפגע");
+      return;
+    }
+
     if (
-      categoryId === "" ||
       latitude === null ||
-      longitude === null
+      longitude === null ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude)
     ) {
+      setSubmitError("לא זוהה מיקום תקין. יש לבדוק את כתובת המפגע");
+      return;
+    }
+
+    if (!title.trim() || title.trim().length < 2) {
+      setSubmitError("יש להזין כותרת תקינה באורך של לפחות 2 תווים");
+      return;
+    }
+
+    if (!description.trim() || description.trim().length < 5) {
+      setSubmitError("יש להזין תיאור באורך של לפחות 5 תווים");
+      return;
+    }
+
+    if (categoryId === "") {
+      setSubmitError("יש לבחור קטגוריה לדיווח");
       return;
     }
 
@@ -244,8 +298,8 @@ function AddReport({ onClose }: AddReportProps) {
       await dispatch(
         createReport({
           categoryId,
-          title,
-          description,
+          title: title.trim(),
+          description: description.trim(),
           latitude,
           longitude,
           inputAddress,
@@ -253,10 +307,30 @@ function AddReport({ onClose }: AddReportProps) {
         })
       ).unwrap();
 
-      alert("הדיווח נשלח בהצלחה!");
-      onClose();
+      setSubmitError("");
+      setSuccessMessage(
+        "הדיווח נשלח בהצלחה! תודה שעזרתם לנו לשמור על הסביבה."
+      );
     } catch (err) {
       console.error("Create report error:", err);
+
+      let message = "אירעה שגיאה בשליחת הדיווח. נסו שוב מאוחר יותר.";
+
+      if (typeof err === "string" && err.trim()) {
+        message = err;
+      } else if (err && typeof err === "object") {
+        const serverError = err as {
+          message?: string;
+          title?: string;
+        };
+
+        message =
+          serverError.message ||
+          serverError.title ||
+          message;
+      }
+
+      setSubmitError(message);
     }
   };
 
@@ -267,22 +341,24 @@ function AddReport({ onClose }: AddReportProps) {
   return (
     <div
       className="report-modal-overlay"
-      onClick={onClose}
+      onClick={successMessage ? undefined : onClose}
     >
       <section
         className="add-report-card"
         dir="rtl"
         onClick={(event) => event.stopPropagation()}
       >
-        <button
-          type="button"
-          className="report-modal-close"
-          onClick={onClose}
-          aria-label="סגירת חלון"
-          disabled={loading}
-        >
-          ×
-        </button>
+        {!successMessage && (
+          <button
+            type="button"
+            className="report-modal-close"
+            onClick={onClose}
+            aria-label="סגירת חלון"
+            disabled={loading}
+          >
+            ×
+          </button>
+        )}
 
         <div className="add-report-heading">
           <span className="add-report-icon">📍</span>
@@ -292,244 +368,286 @@ function AddReport({ onClose }: AddReportProps) {
           </p>
         </div>
 
-        <div className="report-steps">
-          {[1, 2, 3].map((number) => (
-            <div
-              key={number}
-              className={`report-step ${
-                step >= number ? "active" : ""
-              }`}
-            >
-              <span className="report-step-number">
-                {step > number ? "✓" : number}
-              </span>
+        {!successMessage && (
+          <>
+            <div className="report-steps">
+              {[1, 2, 3].map((number) => (
+                <div
+                  key={number}
+                  className={`report-step ${
+                    step >= number ? "active" : ""
+                  }`}
+                >
+                  <span className="report-step-number">
+                    {step > number ? "✓" : number}
+                  </span>
 
-              <span className="report-step-label">
-                {number === 1
-                  ? "מיקום"
-                  : number === 2
-                  ? "פרטי הדיווח"
-                  : "אישור"}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          {step === 1 && (
-            <div className="report-form-step">
-              <h2>איפה נמצא המפגע?</h2>
-              <p>בחרו כיצד תרצו להזין את מיקום המפגע</p>
-
-              <button
-                type="button"
-                className="location-button"
-                onClick={handleGetLocation}
-                disabled={locationLoading}
-              >
-                {locationLoading && locationAction === "gps"
-                  ? "מאתר מיקום וכתובת..."
-                  : "📍 השתמש במיקום הנוכחי שלי"}
-              </button>
-
-              <button
-                type="button"
-                className="location-button"
-                onClick={handleConvertAddress}
-                disabled={locationLoading || !inputAddress.trim()}
-              >
-                {locationLoading && locationAction === "address"
-                  ? "ממיר כתובת לקואורדינטות..."
-                  : "📍 המר כתובת למיקום"}
-              </button>
-
-              {latitude !== null && longitude !== null && (
-                <div className="location-success">
-                  ✓ המיקום זוהה בהצלחה
-                  <small>
-                    קו רוחב: {latitude.toFixed(6)}
-                    <br />
-                    קו אורך: {longitude.toFixed(6)}
-                  </small>
+                  <span className="report-step-label">
+                    {number === 1
+                      ? "מיקום"
+                      : number === 2
+                      ? "פרטי הדיווח"
+                      : "אישור"}
+                  </span>
                 </div>
-              )}
-
-              {locationError && (
-                <p className="report-error">{locationError}</p>
-              )}
-
-              <div className="add-report-field">
-                <label htmlFor="report-address">
-                  כתובת המפגע
-                </label>
-
-                <input
-                  id="report-address"
-                  type="text"
-                  value={inputAddress}
-                  onChange={(event) =>
-                    handleAddressChange(event.target.value)
-                  }
-                  placeholder="הזינו כתובת..."
-                  required
-                />
-              </div>
+              ))}
             </div>
-          )}
 
-          {step === 2 && (
-            <div className="report-form-step">
-              <h2>ספרו לנו מה קרה</h2>
-              <p>הוסיפו פרטים שיעזרו לנו לטפל במפגע</p>
+            <form onSubmit={handleSubmit} noValidate>
+              {step === 1 && (
+                <div className="report-form-step">
+                  <h2>איפה נמצא המפגע?</h2>
+                  <p>המיקום שלך נטען מהנתונים שנשמרו בעמוד המפה.</p>
 
-              <div className="add-report-field">
-                <label htmlFor="report-title">כותרת הדיווח</label>
-                <input
-                  id="report-title"
-                  type="text"
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="לדוגמה: פנס רחוב לא עובד"
-                  required
-                  minLength={2}
-                  maxLength={100}
-                />
-              </div>
+                  {isLocationReady &&
+                  savedLatitude !== null &&
+                  savedLongitude !== null ? (
+                    <div className="location-permission-hint">
+                      המיקום הנוכחי שלך זוהה במערכת.
+                      אפשר להשתמש בו או להזין כתובת אחרת.
+                    </div>
+                  ) : (
+                    <div className="location-permission-hint">
+                      לא נמצא מיקום שמור. אפשר להזין את כתובת המפגע
+                      ולהמיר אותה למיקום.
+                    </div>
+                  )}
 
-              <div className="add-report-field">
-                <label>קטגוריית הדיווח</label>
+                  {locationLoading && locationAction === "saved" && (
+                    <p className="report-hint">
+                      מזהה את הכתובת לפי המיקום שנשמר...
+                    </p>
+                  )}
 
-                {categoriesLoading ? (
-                  <p>טוען קטגוריות...</p>
-                ) : (
-                  <div className="report-category-grid">
-                    {categories.map((category) => (
-                      <button
-                        key={category.categoryId}
-                        type="button"
-                        className={`report-category ${
-                          categoryId === category.categoryId
-                            ? "selected"
-                            : ""
-                        }`}
-                        onClick={() =>
-                          setCategoryId(category.categoryId)
-                        }
-                      >
-                        {category.categoryName}
-                      </button>
-                    ))}
+                  <button
+                    type="button"
+                    className="location-button"
+                    onClick={handleConvertAddress}
+                    disabled={locationLoading || !inputAddress.trim()}
+                  >
+                    {locationLoading && locationAction === "address"
+                      ? "ממיר כתובת למיקום..."
+                      : "📍 המר כתובת למיקום"}
+                  </button>
+
+                  {locationError && (
+                    <p className="report-error" role="alert">
+                      ⚠️ {locationError}
+                    </p>
+                  )}
+
+                  <div className="add-report-field">
+                    <label htmlFor="report-address">
+                      כתובת המפגע
+                    </label>
+
+                    <input
+                      id="report-address"
+                      type="text"
+                      value={inputAddress}
+                      onChange={(event) =>
+                        handleAddressChange(event.target.value)
+                      }
+                      placeholder="הזינו כתובת..."
+                    />
                   </div>
+
+                  {latitude !== null && longitude !== null && (
+                    <div className="location-toast" role="status">
+                      <span>✓</span>
+                      המיקום זוהה בהצלחה
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {step === 2 && (
+                <div className="report-form-step">
+                  <h2>ספרו לנו מה קרה</h2>
+                  <p>הוסיפו פרטים שיעזרו לנו לטפל במפגע</p>
+
+                  <div className="add-report-field">
+                    <label htmlFor="report-title">כותרת הדיווח</label>
+                    <input
+                      id="report-title"
+                      type="text"
+                      value={title}
+                      onChange={(event) => {
+                        setTitle(event.target.value);
+                        setSubmitError("");
+                      }}
+                      placeholder="לדוגמה: פנס רחוב לא עובד"
+                      minLength={2}
+                      maxLength={100}
+                    />
+                  </div>
+
+                  <div className="add-report-field">
+                    <label>קטגוריית הדיווח</label>
+
+                    {categoriesLoading ? (
+                      <p>טוען קטגוריות...</p>
+                    ) : (
+                      <div className="report-category-grid">
+                        {categories.map((category) => (
+                          <button
+                            key={category.categoryId}
+                            type="button"
+                            className={`report-category ${
+                              categoryId === category.categoryId
+                                ? "selected"
+                                : ""
+                            }`}
+                            onClick={() => {
+                              setCategoryId(category.categoryId);
+                              setSubmitError("");
+                            }}
+                          >
+                            {category.categoryName}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="add-report-field">
+                    <label htmlFor="report-description">
+                      תיאור הדיווח
+                    </label>
+                    <textarea
+                      id="report-description"
+                      value={description}
+                      onChange={(event) => {
+                        setDescription(event.target.value);
+                        setSubmitError("");
+                      }}
+                      placeholder="תארו את המפגע..."
+                      minLength={5}
+                      maxLength={1000}
+                    />
+                  </div>
+
+                  <div className="add-report-field">
+                    <label htmlFor="report-images">
+                      צירוף תמונות
+                    </label>
+                    <input
+                      id="report-images"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImagesChange}
+                    />
+
+                    {images.length > 0 && (
+                      <p className="report-hint">
+                        נבחרו {images.length} תמונות
+                      </p>
+                    )}
+                  </div>
+
+                  {submitError && (
+                    <p className="report-error" role="alert">
+                      ⚠️ {submitError}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="report-form-step">
+                  <h2>בדקו שהכול נכון</h2>
+
+                  <div className="report-summary">
+                    <div className="report-summary-item">
+                      <strong>כתובת:</strong>
+                      <span>{inputAddress}</span>
+                    </div>
+
+                    <div className="report-summary-item">
+                      <strong>כותרת:</strong>
+                      <span>{title}</span>
+                    </div>
+
+                    <div className="report-summary-item">
+                      <strong>קטגוריה:</strong>
+                      <span>{selectedCategory?.categoryName}</span>
+                    </div>
+
+                    <div className="report-summary-item">
+                      <strong>תיאור:</strong>
+                      <span>{description}</span>
+                    </div>
+
+                    <div className="report-summary-item">
+                      <strong>תמונות:</strong>
+                      <span>{images.length} תמונות</span>
+                    </div>
+                  </div>
+
+                  {(submitError || error) && (
+                    <p className="report-error" role="alert">
+                      ⚠️ {submitError || error}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {step !== 2 && step !== 3 && error && (
+                <p className="report-error" role="alert">
+                  ⚠️ {error}
+                </p>
+              )}
+
+              <div className="report-form-actions">
+                {step > 1 && (
+                  <button
+                    type="button"
+                    className="report-back-button"
+                    onClick={handleBack}
+                    disabled={loading}
+                  >
+                    חזרה
+                  </button>
+                )}
+
+                {step < 3 ? (
+                  <button
+                    type="button"
+                    className="add-report-submit"
+                    onClick={handleNext}
+                    disabled={loading || locationLoading}
+                  >
+                    המשך
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="add-report-submit"
+                    disabled={loading}
+                  >
+                    {loading ? "שולח דיווח..." : "שליחת דיווח"}
+                  </button>
                 )}
               </div>
+            </form>
+          </>
+        )}
 
-              <div className="add-report-field">
-                <label htmlFor="report-description">
-                  תיאור הדיווח
-                </label>
-                <textarea
-                  id="report-description"
-                  value={description}
-                  onChange={(event) =>
-                    setDescription(event.target.value)
-                  }
-                  placeholder="תארו את המפגע..."
-                  required
-                  minLength={5}
-                  maxLength={1000}
-                />
-              </div>
-
-              <div className="add-report-field">
-                <label htmlFor="report-images">
-                  צירוף תמונות
-                </label>
-                <input
-                  id="report-images"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImagesChange}
-                />
-
-                {images.length > 0 && (
-                  <p className="report-hint">
-                    נבחרו {images.length} תמונות
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="report-form-step">
-              <h2>בדקו שהכול נכון</h2>
-
-              <div className="report-summary">
-                <div className="report-summary-item">
-                  <strong>כתובת:</strong>
-                  <span>{inputAddress}</span>
-                </div>
-
-                <div className="report-summary-item">
-                  <strong>כותרת:</strong>
-                  <span>{title}</span>
-                </div>
-
-                <div className="report-summary-item">
-                  <strong>קטגוריה:</strong>
-                  <span>{selectedCategory?.categoryName}</span>
-                </div>
-
-                <div className="report-summary-item">
-                  <strong>תיאור:</strong>
-                  <span>{description}</span>
-                </div>
-
-                <div className="report-summary-item">
-                  <strong>תמונות:</strong>
-                  <span>{images.length} תמונות</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <p className="report-error">{error}</p>
-          )}
-
-          <div className="report-form-actions">
-            {step > 1 && (
-              <button
-                type="button"
-                className="report-back-button"
-                onClick={handleBack}
-                disabled={loading}
-              >
-                חזרה
-              </button>
-            )}
-
-            {step < 3 ? (
-              <button
-                type="button"
-                className="add-report-submit"
-                onClick={handleNext}
-                disabled={loading || locationLoading}
-              >
-                המשך
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className="add-report-submit"
-                disabled={loading}
-              >
-                {loading ? "שולח דיווח..." : "שליחת דיווח"}
-              </button>
-            )}
+        {successMessage && (
+          <div className="report-success-message" role="status">
+            <span className="report-success-icon">✓</span>
+            <h2>הדיווח התקבל!</h2>
+            <p>{successMessage}</p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="report-success-close"
+            >
+              סגירה
+            </button>
           </div>
-        </form>
+        )}
       </section>
     </div>
   );

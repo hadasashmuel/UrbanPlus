@@ -22,7 +22,10 @@ import AdminBadges from "./components/AdminBadges";
 import AdminReports from "./components/AdminReports";
 import AdminStatistics from "./components/AdminStatistics";
 import AdminNotifications from "./components/AdminNotifications";
-
+import AdminServiceProviders from "./components/AdminServiceProviders";
+import AdminWorkTypes from "./components/AdminWorkTypes";
+import AdminProviderWorkTypes from "./components/AdminProviderWorkTypes";
+import AdminReportAssignments from "./components/AdminReportAssignments";
 import "./App.css";
 
 function App() {
@@ -50,8 +53,27 @@ function App() {
           <Route path="reports" element={<AdminReports />} />
           <Route path="statistics" element={<AdminStatistics />} />
           <Route path="notifications" element={<AdminNotifications />} />
+
+          <Route
+            path="service-providers"
+            element={<AdminServiceProviders />}
+          />
+
+          <Route
+            path="work-types"
+            element={<AdminWorkTypes />}
+          />
+          <Route
+           path="provider-work-types"
+           element={<AdminProviderWorkTypes />}
+           />
+           <Route
+            path="report-assignments"
+           element={<AdminReportAssignments />}
+           />
         </Route>
 
+        {/* נתיב לא מוכר */}
         <Route
           path="*"
           element={<Navigate to="/" replace />}

@@ -73,6 +73,12 @@ function AdminDashboard() {
       path: "/admin/categories",
     },
     {
+      title: "ניהול סוגי עבודה",
+      description: "הוספה ועריכה של סוגי עבודה ושיוכם לקטגוריות",
+      icon: "🛠️",
+      path: "/admin/work-types",
+    },
+    {
       title: "תגי משתמשים",
       description: "ניהול תגי משתמשים והענקתם",
       icon: "🏅",
@@ -83,6 +89,24 @@ function AdminDashboard() {
       description: "שליחת התראות למשתמשים במערכת",
       icon: "🔔",
       path: "/admin/notifications",
+    },
+    {
+      title: "ניהול ספקי שירות",
+      description: "צפייה וניהול של ספקי השירות העירוניים",
+      icon: "🏢",
+      path: "/admin/service-providers",
+    },
+    {
+      title: "שיוך סוגי עבודה",
+      description: "שיוך סוגי עבודה לספקי השירות העירוניים",
+      icon: "🔗",
+      path: "/admin/provider-work-types",
+    },
+    {
+      title: "שיוך ספקים לדיווחים",
+      description: "הקצאת דיווחים לספקי השירות העירוניים ומעקב אחר השיוכים",
+      icon: "📑",
+      path: "/admin/report-assignments",
     },
   ];
 

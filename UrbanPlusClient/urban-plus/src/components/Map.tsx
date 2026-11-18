@@ -17,6 +17,8 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 
+import { setUserLocation } from "../store/location/locationSlice";
+
 import {
   fetchMainEvents,
   fetchSavedEvents,
@@ -292,6 +294,15 @@ function Map() {
         const longitude = pos.coords.longitude;
 
         setPosition([latitude, longitude]);
+
+        // שמירת מיקום המשתמש ב-Redux
+        dispatch(
+          setUserLocation({
+            latitude,
+            longitude,
+          })
+        );
+
         setLocationReady(true);
         setLoading(false);
         setLocationError("");
@@ -314,7 +325,7 @@ function Map() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [dispatch]);
 
   // =====================================
   //       שליחת מיקום ליצירת התראות
@@ -634,8 +645,6 @@ function Map() {
               ×
             </button>
 
-            {/* כותרת האירוע */}
-
             <div className="event-modal-header">
               <span
                 className="event-category-badge"
@@ -665,8 +674,6 @@ function Map() {
               </div>
             </div>
 
-            {/* כתובת */}
-
             <div className="event-address">
               <span className="event-info-icon">📍</span>
 
@@ -677,8 +684,6 @@ function Map() {
                 </strong>
               </div>
             </div>
-
-            {/* הצבעות */}
 
             <div className="event-voting">
               <h3>האם האירוע עדיין קיים?</h3>
@@ -716,8 +721,6 @@ function Map() {
               )}
             </div>
 
-            {/* נתונים מרכזיים */}
-
             <div className="event-stats">
               <div className="event-stat-card reports-stat">
                 <span className="event-stat-icon">📋</span>
@@ -743,8 +746,6 @@ function Map() {
                 <small>עוקבים</small>
               </div>
             </div>
-
-            {/* ציר זמן */}
 
             <div className="event-section">
               <h3 className="event-section-title">
@@ -788,8 +789,6 @@ function Map() {
               </div>
             </div>
 
-            {/* פרטים נוספים */}
-
             <div className="event-section">
               <h3 className="event-section-title">
                 <span>ℹ</span>
@@ -831,8 +830,6 @@ function Map() {
               </div>
             </div>
 
-            {/* מעקב */}
-
             <div className="event-follow-section">
               {!token ? (
                 <p className="event-login-message">
@@ -862,8 +859,6 @@ function Map() {
                 </button>
               )}
             </div>
-
-            {/* הודעות */}
 
             <div className="event-messages-count">
               💬 {selectedEvent.messages?.length ?? 0} הודעות באירוע

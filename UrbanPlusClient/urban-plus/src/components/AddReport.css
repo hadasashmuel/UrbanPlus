@@ -235,34 +235,35 @@
   cursor: wait;
 }
 
-.location-success {
-  padding: 15px;
-  margin-bottom: 18px;
-  border-radius: 13px;
-  background: #edf8ef;
-  border: 1px solid #d8eddb;
-  color: #398052;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.location-success small {
-  display: block;
-  margin-top: 6px;
-  font-weight: normal;
-}
-
+/* הודעות שגיאה אדומות */
 .report-error {
-  color: #b94d42;
-  background: #fff2ef;
-  border: 1px solid #f8ded8;
-  padding: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b42323;
+  background: #fff0f0;
+  border: 1px solid #f3caca;
+  padding: 13px 16px;
   border-radius: 12px;
   margin: 14px 0;
   font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+  animation: errorAppear 0.25s ease;
 }
 
-/* קטגוריות הדיווחים - עיצוב קומפקטי */
+@keyframes errorAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* קטגוריות הדיווחים */
 .report-category-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -379,6 +380,118 @@
   font-size: 13px;
 }
 
+/* הסבר לפני בקשת הרשאת מיקום */
+.location-permission-hint {
+  padding: 12px 15px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: #f1f7f5;
+  border: 1px solid #dcece5;
+  color: #52766d;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* הודעת הצלחה קטנה בתחתית המסך */
+.location-toast {
+  position: fixed;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: max-content;
+  max-width: calc(100% - 30px);
+  box-sizing: border-box;
+  padding: 11px 20px;
+  border-radius: 30px;
+  background: #e8f7ee;
+  border: 1px solid #bce5cb;
+  color: #21834b;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
+  animation: locationToastAppear 0.3s ease;
+}
+
+.location-toast span {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+@keyframes locationToastAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 15px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* הודעת הצלחה לאחר שליחת הדיווח */
+.report-success-message {
+  padding: 30px 20px;
+  margin-top: 25px;
+  border-radius: 17px;
+  background: #fff2f2;
+  border: 1px solid #f3caca;
+  color: #b42323;
+  text-align: center;
+}
+
+.report-success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  background: #fce0e0;
+  color: #b42323;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.report-success-message h2 {
+  margin: 0 0 12px;
+  color: #b42323;
+  font-size: 23px;
+}
+
+.report-success-message p {
+  margin: 0;
+  color: #9f3030;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.report-success-close {
+  margin-top: 23px;
+  padding: 12px 35px;
+  border: none;
+  border-radius: 12px;
+  background: #b42323;
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.report-success-close:hover {
+  background: #921b1b;
+  transform: translateY(-2px);
+}
+
 @media (max-width: 600px) {
   .report-modal-overlay {
     padding: 10px;
@@ -408,5 +521,11 @@
     min-height: 58px;
     font-size: 12px;
     padding: 8px;
+  }
+
+  .location-toast {
+    bottom: 15px;
+    font-size: 13px;
+    padding: 10px 16px;
   }
 }

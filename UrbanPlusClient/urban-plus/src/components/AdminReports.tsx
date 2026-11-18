@@ -124,7 +124,7 @@ function AdminReports() {
 
     if (imageUrl.startsWith("http")) return imageUrl;
 
-    return `https://localhost:7019/${imageUrl.replace(/^\/+/, "")}`;
+    return `https://urbanpluspro.premiumasp.net/${imageUrl.replace(/^\/+/, "")}`;
   };
 
   if (!token) {

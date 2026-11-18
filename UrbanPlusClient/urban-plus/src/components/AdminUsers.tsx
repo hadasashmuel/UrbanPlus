@@ -8,7 +8,7 @@ import {
 } from "../store/users/usersThunks";
 import "./AdminUsers.css";
 
-const API_BASE = "https://localhost:7019";
+const API_BASE = "https://urbanpluspro.premiumasp.net";
 
 const getImageSrc = (imageUrl: string): string => {
   if (!imageUrl) return "";
@@ -40,6 +40,7 @@ function AdminUsers() {
   const [reason, setReason] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -75,6 +76,8 @@ function AdminUsers() {
   };
 
   const closeDeleteModal = () => {
+    if (isDeleting) return;
+
     setShowDeleteModal(false);
     setSelectedUserId(null);
     setReason("");
@@ -82,7 +85,7 @@ function AdminUsers() {
   };
 
   const handleDelete = async () => {
-    if (selectedUserId === null) return;
+    if (selectedUserId === null || isDeleting) return;
 
     const trimmedReason = reason.trim();
 
@@ -91,19 +94,34 @@ function AdminUsers() {
       return;
     }
 
-    const result = await dispatch(
-      deleteAdminUser({
-        userId: selectedUserId,
-        reason: trimmedReason,
-      })
-    );
+    setIsDeleting(true);
+    setDeleteError("");
 
-    if (deleteAdminUser.fulfilled.match(result)) {
-      closeDeleteModal();
-    } else {
-      setDeleteError(
-        result.payload ?? "מחיקת המשתמש נכשלה"
+    try {
+      const result = await dispatch(
+        deleteAdminUser({
+          userId: selectedUserId,
+          reason: trimmedReason,
+        })
       );
+
+      if (deleteAdminUser.fulfilled.match(result)) {
+        setShowDeleteModal(false);
+        setSelectedUserId(null);
+        setReason("");
+        setDeleteError("");
+
+        // שליפה מחדש של הרשימה לאחר מחיקה מוצלחת
+        await dispatch(fetchAdminUsers());
+      } else {
+        setDeleteError(
+          result.payload ?? "מחיקת המשתמש נכשלה"
+        );
+      }
+    } catch {
+      setDeleteError("אירעה שגיאה במהלך מחיקת המשתמש");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -311,6 +329,7 @@ function AdminUsers() {
               }}
               placeholder="הזיני את הסיבה למחיקת המשתמש..."
               rows={3}
+              disabled={isDeleting}
             />
 
             {deleteError && (
@@ -323,6 +342,7 @@ function AdminUsers() {
               <button
                 className="admin-modal-cancel"
                 onClick={closeDeleteModal}
+                disabled={isDeleting}
               >
                 ביטול
               </button>
@@ -330,9 +350,9 @@ function AdminUsers() {
               <button
                 className="admin-modal-confirm"
                 onClick={handleDelete}
-                disabled={reason.trim().length < 3}
+                disabled={reason.trim().length < 3 || isDeleting}
               >
-                אישור מחיקה
+                {isDeleting ? "מוחק..." : "אישור מחיקה"}
               </button>
             </div>
           </div>

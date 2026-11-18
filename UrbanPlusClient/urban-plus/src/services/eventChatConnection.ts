@@ -5,7 +5,7 @@ import {
   LogLevel,
 } from "@microsoft/signalr";
 
-const HUB_URL = "https://localhost:7019/hubs/event-chat";
+const HUB_URL = "https://urbanpluspro.premiumasp.net/hubs/event-chat";
 
 export function createEventChatConnection(token: string): HubConnection {
   return new HubConnectionBuilder()

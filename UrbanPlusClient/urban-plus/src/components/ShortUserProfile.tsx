@@ -32,7 +32,7 @@ interface ShortUserProfileProps {
   onClose: () => void;
 }
 
-const API_URL = "https://localhost:7019/api/User";
+const API_URL = "https://urbanpluspro.premiumasp.net/api/User";
 
 function ShortUserProfile({
   userId,

@@ -385,6 +385,7 @@ export const updateMainEvent = createAsyncThunk<
         );
       }
 
+      // רענון הרשימה כדי לקבל גם את שם הקטגוריה המעודכן
       dispatch(fetchMainEvents());
 
       return eventData;

@@ -11,7 +11,7 @@ import {
 import type { Badge } from "../store/badges/badgesState";
 import "./AdminBadges.css";
 
-const API_BASE = "https://localhost:7019";
+const API_BASE = "https://urbanpluspro.premiumasp.net";
 
 const getImageSrc = (imageUrl: string): string => {
   if (!imageUrl) return "";

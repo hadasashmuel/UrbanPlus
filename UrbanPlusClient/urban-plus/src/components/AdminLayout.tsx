@@ -39,9 +39,13 @@ function AdminLayout() {
     { path: "/admin/events", label: "ניהול אירועים", icon: "📋" },
     { path: "/admin/reports", label: "ניהול דיווחים", icon: "⚑" },
     { path: "/admin/categories", label: "ניהול קטגוריות", icon: "▤" },
+    { path: "/admin/work-types", label: "ניהול סוגי עבודה", icon: "🛠️" },
     { path: "/admin/badges", label: "תגי משתמשים", icon: "🏅" },
     { path: "/admin/notifications", label: "ניהול התראות", icon: "🔔" },
     { path: "/admin/statistics", label: "סטטיסטיקות דיווחים", icon: "📊" },
+    { path: "/admin/service-providers",label: "ניהול ספקי שירות",icon: "🏢",},
+    { path: "/admin/provider-work-types",label: "שיוך סוגי עבודה", icon: "🔗",},
+    { path: "/admin/report-assignments", label: "שיוך ספקים לדיווחים",icon: "📑",},
   ];
 
   return (

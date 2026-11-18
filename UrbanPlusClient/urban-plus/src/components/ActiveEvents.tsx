@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
+
 import {
   fetchMainEvents,
   fetchSavedEvents,
@@ -11,16 +12,23 @@ import {
   createVote,
   deleteVote,
 } from "../store/events/eventsThunks";
+
+import {
+  fetchProvidersForEvent,
+} from "../store/serviceProviders/serviceProvidersThunks";
+
+import {
+  clearEventProviders,
+} from "../store/serviceProviders/serviceProvidersSlice";
+
 import type { MainEvent } from "../store/events/eventsState";
 import EventChat from "./EventChat";
 import "./ActiveEvents.css";
 
-const IMAGE_BASE_URL = "https://localhost:7019";
+const IMAGE_BASE_URL = "https://urbanpluspro.premiumasp.net";
 
 function getReportImageUrl(imageUrl: string) {
-  if (/^https?:\/\//i.test(imageUrl)) {
-    return imageUrl;
-  }
+  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
 
   if (imageUrl.startsWith("/")) {
     return `${IMAGE_BASE_URL}${imageUrl}`;
@@ -49,9 +57,7 @@ function getStatusName(status: number | string) {
 function isActiveEvent(event: MainEvent) {
   const status = String(event.status);
 
-  return ["0", "1", "2", "New", "Verified", "InTreatment"].includes(
-    status
-  );
+  return ["0", "1", "2", "New", "Verified", "InTreatment"].includes(status);
 }
 
 function getSeverityName(severity: number | string) {
@@ -98,13 +104,18 @@ function ActiveEvents() {
     error,
   } = useAppSelector((state) => state.events);
 
+  // ספקים המתאימים לאירוע בלבד
+  const {
+    eventServiceProviders,
+    loadingEventProviders,
+    eventProvidersError,
+  } = useAppSelector((state) => state.serviceProviders);
+
   const token = useAppSelector((state) => state.users.token);
 
-  const [selectedEventId, setSelectedEventId] = useState<number | null>(
-    null
-  );
-
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [showProvidersModal, setShowProvidersModal] = useState(false);
 
   const activeEvents = mainEvents.filter(isActiveEvent);
 
@@ -177,6 +188,39 @@ function ActiveEvents() {
     } catch (error) {
       console.error("שגיאה בהחלפת הצבעה:", error);
     }
+  };
+
+  // פתיחת רשימת הספקים המתאימים לאירוע הנבחר
+  const handleOpenProviders = () => {
+    if (!selectedEvent || !token) return;
+
+    setShowProvidersModal(true);
+
+    dispatch(
+      fetchProvidersForEvent(selectedEvent.mainEventsId)
+    );
+  };
+
+  // סגירת חלונית הספקים וניקוי הנתונים שלה
+  const handleCloseProviders = () => {
+    setShowProvidersModal(false);
+    dispatch(clearEventProviders());
+  };
+
+  // סגירת חלונית האירוע
+  const handleCloseEvent = () => {
+    setSelectedEventId(null);
+    setExpandedImage(null);
+    setShowProvidersModal(false);
+    dispatch(clearEventProviders());
+  };
+
+  const handleRetryProviders = () => {
+    if (!selectedEvent) return;
+
+    dispatch(
+      fetchProvidersForEvent(selectedEvent.mainEventsId)
+    );
   };
 
   const detailStyle: React.CSSProperties = {
@@ -301,10 +345,7 @@ function ActiveEvents() {
       {selectedEvent && (
         <div
           className="event-modal-overlay"
-          onClick={() => {
-            setSelectedEventId(null);
-            setExpandedImage(null);
-          }}
+          onClick={handleCloseEvent}
         >
           <div
             className="event-modal"
@@ -312,10 +353,7 @@ function ActiveEvents() {
           >
             <button
               className="event-modal-close"
-              onClick={() => {
-                setSelectedEventId(null);
-                setExpandedImage(null);
-              }}
+              onClick={handleCloseEvent}
               aria-label="סגירת חלון"
             >
               ×
@@ -356,7 +394,7 @@ function ActiveEvents() {
                           disabled={creatingVote || deletingVote}
                           style={voteStyle(userVote?.typeVote === 0)}
                         >
-                          👍   קיים 
+                          👍 קיים
                         </button>
 
                         <button
@@ -364,7 +402,7 @@ function ActiveEvents() {
                           disabled={creatingVote || deletingVote}
                           style={voteStyle(userVote?.typeVote === 1)}
                         >
-                          👎 לא קיים 
+                          👎 לא קיים
                         </button>
                       </>
                     )}
@@ -417,6 +455,59 @@ function ActiveEvents() {
                   {selectedEvent.actualResolutionMinutes != null
                     ? `${selectedEvent.actualResolutionMinutes} דקות`
                     : "טרם הסתיים"}
+                </div>
+
+                {/* פנייה עצמאית לספקים */}
+                <div
+                  style={{
+                    marginTop: "22px",
+                    padding: "18px",
+                    borderRadius: "14px",
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
+                    textAlign: "center",
+                  }}
+                >
+                  <h3 style={{ margin: "0 0 8px", color: "#1e40af" }}>
+                    צריכים עזרה בטיפול במפגע?
+                  </h3>
+
+                  <p
+                    style={{
+                      margin: "0 0 14px",
+                      fontSize: "14px",
+                      color: "#475569",
+                    }}
+                  >
+                    תוכלו למצוא כאן ספקי שירות המתאימים לסוג האירוע
+                    ולפנות אליהם ישירות.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenProviders}
+                    disabled={!token}
+                    style={{
+                      background: "#2563eb",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "10px",
+                      padding: "12px 24px",
+                      fontSize: "15px",
+                      fontWeight: "bold",
+                      cursor: token ? "pointer" : "not-allowed",
+                      opacity: token ? 1 : 0.6,
+                      width: "100%",
+                    }}
+                  >
+                    📞 רוצים עזרה?
+                  </button>
+
+                  {!token && (
+                    <p style={{ color: "#64748b", fontSize: "13px", marginBottom: 0 }}>
+                      יש להתחבר למערכת כדי לצפות בפרטי הספקים.
+                    </p>
+                  )}
                 </div>
 
                 {/* תמונות מהדיווחים המשויכים לאירוע */}
@@ -537,6 +628,265 @@ function ActiveEvents() {
                 />
               </div>
             </div>
+
+            {/* חלונית ספקים מתאימים */}
+            {showProvidersModal && (
+              <div
+                onClick={handleCloseProviders}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 9000,
+                  background: "rgba(15, 23, 42, 0.65)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px",
+                }}
+              >
+                <div
+                  dir="rtl"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    background: "white",
+                    width: "100%",
+                    maxWidth: "620px",
+                    maxHeight: "85vh",
+                    overflowY: "auto",
+                    borderRadius: "20px",
+                    padding: "25px",
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <h2 style={{ margin: 0, color: "#1e293b" }}>
+                      ספקים המתאימים לאירוע
+                    </h2>
+
+                    <button
+                      type="button"
+                      onClick={handleCloseProviders}
+                      aria-label="סגירת רשימת ספקים"
+                      style={{
+                        border: "none",
+                        background: "#f1f5f9",
+                        borderRadius: "50%",
+                        width: "36px",
+                        height: "36px",
+                        fontSize: "23px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <p
+                    style={{
+                      color: "#64748b",
+                      fontSize: "14px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    הספקים המוצגים כאן מתאימים לקטגוריה של האירוע:
+                    {" "}
+                    <strong>{selectedEvent.categoryName}</strong>
+                  </p>
+
+                  {!token ? (
+                    <div
+                      style={{
+                        padding: "20px",
+                        textAlign: "center",
+                        background: "#fff7ed",
+                        borderRadius: "12px",
+                        color: "#9a3412",
+                      }}
+                    >
+                      כדי לצפות בפרטי הספקים יש להתחבר למערכת.
+                    </div>
+                  ) : loadingEventProviders ? (
+                    <div style={{ textAlign: "center", padding: "30px" }}>
+                      <div style={{ fontSize: "30px", marginBottom: "10px" }}>
+                        🔍
+                      </div>
+                      מחפשים ספקים המתאימים לאירוע...
+                    </div>
+                  ) : eventProvidersError ? (
+                    <div
+                      style={{
+                        padding: "20px",
+                        textAlign: "center",
+                        background: "#fef2f2",
+                        borderRadius: "12px",
+                        color: "#b91c1c",
+                      }}
+                    >
+                      {eventProvidersError}
+
+                      <button
+                        type="button"
+                        onClick={handleRetryProviders}
+                        style={{
+                          display: "block",
+                          margin: "15px auto 0",
+                          padding: "9px 18px",
+                          border: "none",
+                          borderRadius: "8px",
+                          background: "#2563eb",
+                          color: "white",
+                          cursor: "pointer",
+                        }}
+                      >
+                        ניסיון חוזר
+                      </button>
+                    </div>
+                  ) : eventServiceProviders.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "25px",
+                        textAlign: "center",
+                        background: "#f8fafc",
+                        borderRadius: "12px",
+                        color: "#64748b",
+                      }}
+                    >
+                      <div style={{ fontSize: "32px", marginBottom: "10px" }}>
+                        🔍
+                      </div>
+
+                      <strong>לא נמצאו ספקים מתאימים כרגע</strong>
+
+                      <p style={{ fontSize: "13px", marginBottom: 0 }}>
+                        כשיתווספו ספקים המשויכים לקטגוריה הזו,
+                        הם יוצגו כאן.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          color: "#64748b",
+                          fontSize: "13px",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        נמצאו {eventServiceProviders.length} ספקים מתאימים
+                      </div>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gap: "12px",
+                        }}
+                      >
+                        {eventServiceProviders.map((provider) => (
+                          <div
+                            key={provider.providerId}
+                            style={{
+                              border: "1px solid #e2e8f0",
+                              borderRadius: "14px",
+                              padding: "16px",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              gap: "12px",
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <div>
+                              <h3
+                                style={{
+                                  margin: "0 0 6px",
+                                  color: "#1e293b",
+                                  fontSize: "16px",
+                                }}
+                              >
+                                {provider.fullName}
+                              </h3>
+
+                              <div
+                                style={{
+                                  color: "#64748b",
+                                  fontSize: "13px",
+                                }}
+                              >
+                                {provider.department || "ספק שירות"}
+                              </div>
+
+                              {provider.email && (
+                                <div
+                                  style={{
+                                    color: "#64748b",
+                                    fontSize: "13px",
+                                    marginTop: "4px",
+                                  }}
+                                >
+                                  ✉️ {provider.email}
+                                </div>
+                              )}
+                            </div>
+
+                            {provider.phone ? (
+                              <a
+                                href={`tel:${provider.phone}`}
+                                style={{
+                                  textDecoration: "none",
+                                  background: "#ecfdf5",
+                                  color: "#047857",
+                                  border: "1px solid #a7f3d0",
+                                  padding: "10px 16px",
+                                  borderRadius: "10px",
+                                  fontWeight: "bold",
+                                  fontSize: "14px",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                📞 {provider.phone}
+                              </a>
+                            ) : (
+                              <span
+                                style={{
+                                  color: "#94a3b8",
+                                  fontSize: "13px",
+                                }}
+                              >
+                                לא הוזן מספר טלפון
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleCloseProviders}
+                    style={{
+                      width: "100%",
+                      marginTop: "20px",
+                      padding: "12px",
+                      border: "none",
+                      borderRadius: "10px",
+                      background: "#e2e8f0",
+                      color: "#334155",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                    }}
+                  >
+                    סגירה
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* תצוגת תמונה מוגדלת */}
             {expandedImage && (

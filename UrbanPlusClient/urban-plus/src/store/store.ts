@@ -7,6 +7,11 @@ import aiChatReducer from "./AIChat/aiChatSlice";
 import eventsReducer from "./events/eventsSlice";
 import badgesReducer from "./badges/badgesSlice";
 import notificationsReducer from "./notifications/notificationsSlice";
+import serviceProvidersReducer from "./serviceProviders/serviceProvidersSlice";
+import workTypesReducer from "./workTypes/workTypesSlice";
+import providerWorkTypesReducer from "./providerWorkTypes/providerWorkTypesSlice";
+import reportAssignmentsReducer from "./reportAssignments/reportAssignmentsSlice";
+import locationReducer from "./location/locationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +22,11 @@ export const store = configureStore({
     events: eventsReducer,
     badges: badgesReducer,
     notifications: notificationsReducer,
+    serviceProviders: serviceProvidersReducer,
+    workTypes: workTypesReducer,
+    providerWorkTypes: providerWorkTypesReducer,
+    reportAssignments: reportAssignmentsReducer,
+    location: locationReducer,
   },
 });
 
