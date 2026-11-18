@@ -143,7 +143,58 @@ namespace BLL.Services.ServicesDB.NotificationServices
 
             return notificationsCreated;
         }
+        public async Task<int> CreateEventStatusNotifications(
+    int mainEventId,
+    string eventTitle,
+    string newStatus,
+    IEnumerable<int> userIds)
+        {
+            if (userIds == null)
+                throw new ArgumentNullException(nameof(userIds));
 
+            int notificationsCreated = 0;
+
+            // מניעת שליחת התראות כפולות לאותו משתמש
+            var uniqueUserIds = userIds.Distinct();
+
+            foreach (var userId in uniqueUserIds)
+            {
+                var notification = new Notifications
+                {
+                    UserId = userId,
+                    MainEventId = mainEventId,
+                    Type = NotificationType.EventUpdated,
+                    Content = $"הסטטוס של האירוע '{eventTitle}' השתנה ל: {newStatus}",
+                    DistanceFromEvent = 0,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                // שמירת ההתראה במסד הנתונים
+                _repository.AddNotification(notification);
+
+                // יצירת DTO ושליחה בזמן אמת
+                var notificationDto = new ShowNotificationDTO
+                {
+                    NotificationId = notification.NotificationId,
+                    UserId = notification.UserId,
+                    MainEventId = notification.MainEventId,
+                    Type = notification.Type,
+                    Content = notification.Content,
+                    DistanceFromEvent = notification.DistanceFromEvent,
+                    IsRead = notification.IsRead,
+                    TitleMainEvent = eventTitle
+                };
+
+                await _realtimeSender.SendToUserAsync(
+                    userId,
+                    notificationDto);
+
+                notificationsCreated++;
+            }
+
+            return notificationsCreated;
+        }
         public bool DeleteNotification(int id, int userId)
         {
             return _repository.DeleteNotification(id, userId);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace DAL.Entities
 {
@@ -35,9 +34,12 @@ namespace DAL.Entities
         public DateTime CreatedAt { get; set; }
 
         public List<ReportImages> Images { get; set; } = new();
+
         public Users? User { get; set; }
         public MainEvents? MainEvent { get; set; }
         public Categories? Category { get; set; }
 
+        // היסטוריית השיוכים לספקי שירות
+        public List<ReportAssignments> Assignments { get; set; } = new();
     }
 }

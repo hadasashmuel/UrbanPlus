@@ -27,6 +27,11 @@ namespace DAL.Entities
         public DbSet<UserBadges> UserBadges { get; set; }
         public DbSet<Votes> Votes { get; set; }
 
+        public DbSet<ServiceProviders> ServiceProviders { get; set; }
+        public DbSet<WorkTypes> WorkTypes { get; set; }
+        public DbSet<ProviderWorkTypes> ProviderWorkTypes { get; set; }
+        public DbSet<ReportAssignments> ReportAssignments { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,6 +65,41 @@ namespace DAL.Entities
                         "CK_Notifications_DistanceFromEvent_NonNegative",
                         "[DistanceFromEvent] >= 0");
                 });
+
+            // מניעת שיוך כפול של אותו ספק לאותו סוג עבודה
+            modelBuilder.Entity<ProviderWorkTypes>()
+                .HasIndex(p => new { p.ProviderId, p.WorkTypeId })
+                .IsUnique();
+
+            // הגדרת קשרי ReportAssignments
+            // מניעת מחיקה אוטומטית של רשומות היסטוריית השיוכים
+            modelBuilder.Entity<ReportAssignments>()
+                .HasOne(a => a.Report)
+                .WithMany(r => r.Assignments)
+                .HasForeignKey(a => a.ReportId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ReportAssignments>()
+                .HasOne(a => a.ServiceProvider)
+                .WithMany(p => p.Assignments)
+                .HasForeignKey(a => a.ProviderId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ReportAssignments>()
+                .HasOne(a => a.Manager)
+                .WithMany(u => u.ManagedAssignments)
+                .HasForeignKey(a => a.ManagerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ProviderWorkTypes>()
+             .HasOne(p => p.ServiceProvider)
+             .WithMany(p => p.ProviderWorkTypes)
+            .HasForeignKey(p => p.ProviderId);
+
+            modelBuilder.Entity<ProviderWorkTypes>()
+                .HasOne(p => p.WorkType)
+                .WithMany(w => w.ProviderWorkTypes)
+                .HasForeignKey(p => p.WorkTypeId);
         }
     }
 

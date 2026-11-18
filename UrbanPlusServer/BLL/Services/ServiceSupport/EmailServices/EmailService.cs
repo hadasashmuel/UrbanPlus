@@ -180,5 +180,93 @@ namespace BLL.Services.ServiceSupport.EmailServices
 
             smtp.Send(message);
         }
+
+        public async Task SendEventStatusEmailAsync(
+            string email,
+            string firstName,
+            string eventTitle,
+            string newStatus)
+        {
+            try
+            {
+                var senderEmail = _configuration["EmailSettings:SenderEmail"];
+                var senderName = _configuration["EmailSettings:SenderName"];
+                var password = _configuration["EmailSettings:AppPassword"];
+
+                if (string.IsNullOrWhiteSpace(senderEmail) ||
+                    string.IsNullOrWhiteSpace(password))
+                {
+                    throw new InvalidOperationException(
+                        "Email settings are missing.");
+                }
+
+                using var message = new MailMessage();
+
+                message.From = new MailAddress(
+                    senderEmail,
+                    senderName ?? "Urban+",
+                    Encoding.UTF8);
+
+                message.To.Add(email);
+                message.Subject = "עדכון לגבי המפגע שדיווחת עליו - Urban+";
+                message.SubjectEncoding = Encoding.UTF8;
+                message.BodyEncoding = Encoding.UTF8;
+                message.IsBodyHtml = true;
+
+                message.Body = $@"
+        <div dir='rtl' style='font-family:Arial; background:#f4f6f8; padding:30px;'>
+            <div style='max-width:600px; margin:auto; background:white; padding:30px; border-radius:15px;'>
+
+                <h1 style='color:#2563eb; text-align:center;'>Urban+</h1>
+
+                <h2>שלום {WebUtility.HtmlEncode(firstName)},</h2>
+
+                <p style='font-size:17px; line-height:1.8;'>
+                    רצינו לעדכן אותך שהסטטוס של האירוע שדיווחת עליו השתנה.
+                </p>
+
+                <div style='background:#f4f6f8; padding:20px; border-radius:10px;'>
+                    <p>
+                        <strong>האירוע:</strong>
+                        {WebUtility.HtmlEncode(eventTitle)}
+                    </p>
+
+                    <p>
+                        <strong>סטטוס חדש:</strong>
+                        {WebUtility.HtmlEncode(newStatus)}
+                    </p>
+                </div>
+
+                <p style='font-size:16px; line-height:1.8;'>
+                    תודה שעזרת לנו לשפר את הסביבה!
+                </p>
+
+                <hr />
+
+                <p style='text-align:center; color:#777;'>
+                    צוות Urban+
+                </p>
+            </div>
+        </div>";
+
+                using var smtp = new SmtpClient("smtp.gmail.com", 587)
+                {
+                    Credentials = new NetworkCredential(
+                        senderEmail,
+                        password),
+                    EnableSsl = true
+                };
+
+                await smtp.SendMailAsync(message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to send event status email to {Email}",
+                    email);
+            }
+        }
+
     }
 }

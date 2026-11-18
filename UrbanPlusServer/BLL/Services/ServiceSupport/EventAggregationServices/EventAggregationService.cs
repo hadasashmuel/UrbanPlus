@@ -18,7 +18,7 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
         private const double MinScore = 0.3;
 
         // מספר אירועים מינימלי לחיזוי לפי חומרה
-        private const int MinHistoryForSeverity = 3;
+        private const int MinHistoryForSeverity = 1;
 
         // תקופת השפעה של נתונים עדכניים
         private const double RecencyPeriodDays = 90;
@@ -93,8 +93,9 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
             string eventTitle =
                 $"{categoryName ?? "אירוע"} - {report.InputAddress}";
 
-            // חומרת ברירת המחדל של אירוע חדש
-            var severity = Severity.Medium;
+            // קביעת חומרה אוטומטית לפי הקטגוריה
+            var severity =
+                GetSeverityByCategory(report.CategoryId);
 
             // חישוב זמן טיפול משוער לפי היסטוריית אירועים
             int estimatedMinutes =
@@ -117,6 +118,32 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
         }
 
         // ==========================================
+        // קביעת חומרה לפי קטגוריה
+        // ==========================================
+
+        private static Severity GetSeverityByCategory(int categoryId)
+        {
+            return categoryId switch
+            {
+                1 => Severity.High,     // בור בכביש
+                2 => Severity.Low,      // תאורה מקולקלת
+                3 => Severity.Low,      // פח אשפה
+                4 => Severity.Low,      // מדרכה שבורה
+                5 => Severity.High,     // עץ מסוכן
+                6 => Severity.High,     // פיצוץ בצנרת
+                7 => Severity.High,     // מפגעי תנועה
+                8 => Severity.Low,      // גרפיטי והשחתה
+                9 => Severity.High,     // מפגעי בנייה
+                10 => Severity.Low,     // מפגעים תברואתיים
+                11 => Severity.High,    // מפגעים בכביש
+                12 => Severity.Low,     // מתקנים ציבוריים
+                13 => Severity.Critical,// שריפה
+
+                _ => Severity.Low
+            };
+        }
+
+        // ==========================================
         // אלגוריתם חיזוי זמן טיפול
         // ==========================================
 
@@ -128,24 +155,22 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
                 _mainEventRepository.GetHistoricalTreatedEvents(
                     categoryId);
 
-            // מסננים נתונים לא תקינים
             history = history
                 .Where(e =>
                     e.ActualResolutionMinutes.HasValue &&
                     e.ActualResolutionMinutes.Value > 0)
                 .ToList();
 
-            // אין היסטוריה? משתמשים בברירת מחדל
+            // אין היסטוריה - משתמשים בברירת מחדל
             if (history.Count == 0)
                 return GetDefaultResolutionMinutes(severity);
 
-            // בודקים אם קיימת מספיק היסטוריה באותה חומרה
             var sameSeverity = history
                 .Where(e => e.Severity == severity)
                 .ToList();
 
-            // אם יש מספיק אירועים באותה חומרה,
-            // נשתמש בהם בלבד
+            // אם יש היסטוריה באותה חומרה,
+            // משתמשים בה בלבד
             var relevantEvents =
                 sameSeverity.Count >= MinHistoryForSeverity
                     ? sameSeverity
@@ -159,13 +184,13 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
                 double actualMinutes =
                     historicalEvent.ActualResolutionMinutes!.Value;
 
-                // אירועים מאותה חומרה מקבלים משקל מלא
+                // אותה חומרה מקבלת משקל מלא
                 double severityWeight =
                     historicalEvent.Severity == severity
                         ? 1.0
                         : 0.5;
 
-                // אירועים חדשים יותר מקבלים משקל גבוה יותר
+                // אירועים חדשים מקבלים משקל גבוה יותר
                 double daysAgo = historicalEvent.ResolvedAt.HasValue
                     ? Math.Max(
                         0,
@@ -189,11 +214,13 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
             int estimatedMinutes =
                 (int)Math.Round(weightedTotal / totalWeight);
 
-            // לא מחזירים זמן אפס או שלילי
             return Math.Max(1, estimatedMinutes);
         }
 
-        // ברירת מחדל כשאין היסטוריה בכלל
+        // ==========================================
+        // זמני ברירת מחדל לפי חומרה
+        // ==========================================
+
         private static int GetDefaultResolutionMinutes(
             Severity severity)
         {
@@ -203,9 +230,13 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
                 Severity.Medium => 120,
                 Severity.High => 240,
                 Severity.Critical => 360,
-                _ => 120
+                _ => 60
             };
         }
+
+        // ==========================================
+        // חישוב מרחק גיאוגרפי
+        // ==========================================
 
         private static double CalculateDistance(
             double lat1, double lon1,
@@ -234,6 +265,10 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
         {
             return degrees * Math.PI / 180;
         }
+
+        // ==========================================
+        // בדיקת דמיון טקסטואלי
+        // ==========================================
 
         private static double CalculateTextSimilarity(
             string? text1, string? text2)
@@ -267,6 +302,10 @@ namespace BLL.Services.ServicesDB.EventAggregationServices
                 .Where(word => word.Length > 1)
                 .ToHashSet();
         }
+
+        // ==========================================
+        // קיצור טקסט
+        // ==========================================
 
         private static string? Truncate(
             string? value, int maxLength)

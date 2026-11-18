@@ -36,6 +36,8 @@ namespace DAL.Repositories.MainEventRepositories
                 .Include(e => e.SavedEvents)
                 .Include(e => e.Reports)
                     .ThenInclude(r => r.Images)
+                .Include(e => e.Reports)
+                    .ThenInclude(r => r.User)
                 .Include(e => e.Messages)
                 .AsSplitQuery()
                 .FirstOrDefault(e => e.MainEventsId == id);

@@ -15,6 +15,10 @@ using BLL.Services.ServicesDB.SaveEventServices;
 using BLL.Services.ServicesDB.UserBadgeServices;
 using BLL.Services.ServicesDB.UserServices;
 using BLL.Services.ServicesDB.VoteServices;
+using BLL.Services.ServicesDB.ServiceProviderServices;
+using BLL.Services.ServicesDB.WorkTypeServices;
+using BLL.Services.ServicesDB.ProviderWorkTypeServices;
+using BLL.Services.ServicesDB.ReportAssignmentServices;
 
 using BLL.Services.ServiceSupport.EventAggregationServices;
 using BLL.Services.ServiceSupport.EventChatServices;
@@ -37,6 +41,10 @@ using DAL.Repositories.SaveEventRepositories;
 using DAL.Repositories.UserBadgeRepositories;
 using DAL.Repositories.UserRepositories;
 using DAL.Repositories.VoteRepositories;
+using DAL.Repositories.ServiceProviderRepositories;
+using DAL.Repositories.WorkTypeRepositories;
+using DAL.Repositories.ProviderWorkTypeRepositories;
+using DAL.Repositories.ReportAssignmentRepositories;
 
 // Microsoft
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -172,6 +180,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVoteRepository, VoteRepository>();
 builder.Services.AddScoped<IAIChatRepository, AIChatRepository>();
 
+// New repositories
+builder.Services.AddScoped<IServiceProviderRepository, ServiceProviderRepository>();
+builder.Services.AddScoped<IWorkTypeRepository, WorkTypeRepository>();
+builder.Services.AddScoped<IProviderWorkTypeRepository, ProviderWorkTypeRepository>();
+builder.Services.AddScoped<IReportAssignmentRepository, ReportAssignmentRepository>();
+
 // ====================
 // Services (BLL)
 // ====================
@@ -195,6 +209,12 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAIChatService, AIChatService>();
 builder.Services.AddScoped<IEventAggregationService, EventAggregationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// New services
+builder.Services.AddScoped<IServiceProviderService, ServiceProviderService>();
+builder.Services.AddScoped<IWorkTypeService, WorkTypeService>();
+builder.Services.AddScoped<IProviderWorkTypeService, ProviderWorkTypeService>();
+builder.Services.AddScoped<IReportAssignmentService, ReportAssignmentService>();
 
 builder.Services.AddScoped<AIChatTools>();
 
@@ -337,13 +357,11 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/images"
 });
 
-//if (app.Environment.IsDevelopment())
-//{
+
     app.UseSwagger();
     app.UseSwaggerUI();
-//}
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseCors("ReactClient");
 

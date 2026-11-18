@@ -1,4 +1,5 @@
 ﻿
+using BLL.Exceptions;
 using BLL.Services.ServicesDB.UserServices;
 using DTO.UserDTO;
 using Microsoft.AspNetCore.Authorization;
@@ -122,13 +123,23 @@ namespace UrbanPlusServer.Controllers
             int userId,
             [FromBody] DeleteUserDTO dto)
         {
-            var deleted = _userService.DeleteUser(
-                userId, dto.Reason);
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Reason))
+                return BadRequest("Deletion reason is required.");
 
-            if (!deleted)
-                return NotFound("User could not be deleted.");
+            try
+            {
+                var deleted = _userService.DeleteUser(
+                    userId, dto.Reason);
 
-            return Ok("User deleted successfully.");
+                if (!deleted)
+                    return NotFound("User could not be deleted.");
+
+                return Ok("User deleted successfully.");
+            }
+            catch (NotFoundException)
+            {
+                return NotFound("User was already deleted or does not exist.");
+            }
         }
     }
 }

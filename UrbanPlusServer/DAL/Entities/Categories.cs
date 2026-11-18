@@ -18,6 +18,6 @@ namespace DAL.Entities
 
         public virtual List<Reports> Reports { get; set; }
         public virtual List<MainEvents> MainEvents { get; set; }
-
+        public virtual List<WorkTypes> WorkTypes { get; set; } 
     }
 }

@@ -12,6 +12,10 @@ using DTO.SaveEventDTO;
 using DTO.UserBadgeDTO;
 using DTO.UserDTO;
 using DTO.VoteDTO;
+using DTO.ServiceProviderDTO;
+using DTO.WorkTypeDTO;
+using DTO.ProviderWorkTypeDTO;
+using DTO.ReportAssignmentDTO;
 
 namespace BLL
 {
@@ -175,6 +179,60 @@ namespace BLL
                         src.Badge != null
                             ? src.Badge.IconUrl
                             : null));
+
+            // Service Providers
+            CreateMap<ServiceProviders, ShowServiceProviderDTO>();
+            CreateMap<CreateServiceProviderDTO, ServiceProviders>();
+            CreateMap<UpdateServiceProviderDTO, ServiceProviders>()
+                .ForMember(dest => dest.ProviderWorkTypes,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.Assignments,
+                    opt => opt.Ignore());
+
+            // Work Types
+            CreateMap<WorkTypes, ShowWorkTypeDTO>()
+                .ForMember(dest => dest.CategoryName,
+                    opt => opt.MapFrom(src =>
+                        src.Category != null
+                            ? src.Category.CategoryName
+                            : null));
+
+            CreateMap<CreateWorkTypeDTO, WorkTypes>();
+            CreateMap<UpdateWorkTypeDTO, WorkTypes>()
+                .ForMember(dest => dest.Category,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.ProviderWorkTypes,
+                    opt => opt.Ignore());
+
+            // Provider Work Types
+            CreateMap<ProviderWorkTypes, ShowProviderWorkTypeDTO>()
+                .ForMember(dest => dest.ProviderName,
+                    opt => opt.MapFrom(src =>
+                        src.ServiceProvider != null
+                            ? src.ServiceProvider.FullName
+                            : null))
+                .ForMember(dest => dest.NameWorkTypes,
+                    opt => opt.MapFrom(src =>
+                        src.WorkType != null
+                            ? src.WorkType.NameWorkTypes
+                            : null));
+
+            CreateMap<CreateProviderWorkTypeDTO, ProviderWorkTypes>();
+
+            // Report Assignments
+            CreateMap<ReportAssignments, ShowReportAssignmentDTO>()
+                .ForMember(dest => dest.ProviderName,
+                    opt => opt.MapFrom(src =>
+                        src.ServiceProvider != null
+                            ? src.ServiceProvider.FullName
+                            : null))
+                .ForMember(dest => dest.ManagerName,
+                    opt => opt.MapFrom(src =>
+                        src.Manager != null
+                            ? src.Manager.FirstName + " " + src.Manager.LastName
+                            : null));
+
+            CreateMap<CreateReportAssignmentDTO, ReportAssignments>();
         }
     }
 }

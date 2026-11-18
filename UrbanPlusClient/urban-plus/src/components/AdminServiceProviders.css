@@ -1,0 +1,382 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap');
+
+/* =========================
+   עמוד ראשי
+========================= */
+
+.service-providers-page {
+  min-height: 100vh;
+  direction: rtl;
+  background: #fafaf5;
+  color: #303b32;
+  font-family: 'Heebo', sans-serif;
+  padding: 35px 5%;
+  box-sizing: border-box;
+}
+
+.service-providers-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 35px;
+}
+
+.service-providers-header h1 {
+  margin: 0;
+  color: #315e43;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.service-providers-header p {
+  margin: 5px 0 0;
+  color: #89928b;
+  font-size: 14px;
+}
+
+.service-providers-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+  padding: 10px 18px;
+  background: #eff7f0;
+  border: 1px solid #dceade;
+  border-radius: 12px;
+  color: #548d6b;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.service-providers-actions {
+  margin-bottom: 25px;
+}
+
+.add-provider-button {
+  padding: 11px 21px;
+  border: 1px solid #548d6b;
+  border-radius: 11px;
+  background: #548d6b;
+  color: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.add-provider-button:hover {
+  background: #315e43;
+  border-color: #315e43;
+  transform: translateY(-2px);
+}
+
+/* =========================
+   טופס הוספה ועריכה
+========================= */
+
+.provider-form {
+  max-width: 650px;
+  padding: 27px;
+  margin: 0 0 30px;
+  background: white;
+  border: 1px solid #edf0eb;
+  border-radius: 20px;
+  box-shadow: 0 5px 22px rgba(49, 94, 67, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.provider-form h2 {
+  margin: 0 0 15px;
+  color: #315e43;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.provider-form label {
+  margin-top: 7px;
+  color: #456b53;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.provider-form input {
+  width: 100%;
+  height: 44px;
+  padding: 0 13px;
+  box-sizing: border-box;
+  border: 1px solid #e5eae4;
+  border-radius: 10px;
+  outline: none;
+  background: #fafbf8;
+  color: #303b32;
+  font-family: inherit;
+  font-size: 13px;
+  transition: 0.2s ease;
+}
+
+.provider-form input:focus {
+  border-color: #70a987;
+  box-shadow: 0 0 0 3px rgba(112, 169, 135, 0.1);
+}
+
+.provider-form input::placeholder {
+  color: #a6aea7;
+}
+
+.provider-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.provider-form-actions button {
+  padding: 11px 20px;
+  border: 1px solid #548d6b;
+  border-radius: 10px;
+  background: #548d6b;
+  color: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.provider-form-actions button:hover:not(:disabled) {
+  background: #315e43;
+}
+
+.provider-form-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.provider-form-actions .cancel-button {
+  border-color: #e2e8e2;
+  background: white;
+  color: #718075;
+}
+
+.provider-form-actions .cancel-button:hover {
+  background: #f5f8f3;
+  color: #456b53;
+}
+
+/* =========================
+   רשימת ספקים
+========================= */
+
+.service-providers-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.service-provider-card {
+  padding: 23px;
+  background: white;
+  border: 1px solid #edf0eb;
+  border-radius: 18px;
+  box-shadow: 0 5px 22px rgba(49, 94, 67, 0.05);
+  transition: 0.2s ease;
+}
+
+.service-provider-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 25px rgba(49, 94, 67, 0.09);
+}
+
+.provider-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 19px;
+}
+
+.provider-card-header h3 {
+  margin: 0;
+  color: #315e43;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.service-provider-card p {
+  margin: 11px 0;
+  color: #788079;
+  font-size: 13px;
+}
+
+.service-provider-card p strong {
+  color: #456b53;
+  font-weight: 700;
+}
+
+/* =========================
+   סטטוס ספק
+========================= */
+
+.provider-card-header span {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.service-provider-card span.active {
+  background: #eff7f0;
+  color: #548d6b;
+}
+
+.service-provider-card span.inactive {
+  background: #fff1ed;
+  color: #c16d63;
+}
+
+/* =========================
+   כפתורי פעולות
+========================= */
+
+.provider-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 17px;
+  border-top: 1px solid #f0f2ee;
+}
+
+.provider-card-actions button {
+  flex: 1;
+  padding: 9px 13px;
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.edit-provider-button {
+  border: 1px solid #d9dfda;
+  background: white;
+  color: #548d6b;
+}
+
+.edit-provider-button:hover {
+  background: #eff7f0;
+  border-color: #70a987;
+}
+
+.deactivate-provider-button {
+  border: 1px solid #f0d9d5;
+  background: white;
+  color: #c16d63;
+}
+
+.deactivate-provider-button:hover {
+  background: #fff2ef;
+  border-color: #e5b7b0;
+}
+
+.activate-provider-button {
+  border: 1px solid #cde5d1;
+  background: #eff7f0;
+  color: #548d6b;
+}
+
+.activate-provider-button:hover {
+  background: #dceede;
+}
+
+/* =========================
+   הודעות
+========================= */
+
+.provider-message {
+  padding: 13px 17px;
+  margin: 0 0 20px;
+  border: 1px solid #dceade;
+  border-radius: 11px;
+  background: #eff7f0;
+  color: #456b53;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.service-providers-error {
+  padding: 18px;
+  border-radius: 11px;
+  background: #fff4f1;
+  color: #bd665d;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* =========================
+   טעינה ורשימה ריקה
+========================= */
+
+.service-providers-list > p {
+  grid-column: 1 / -1;
+  padding: 55px 20px;
+  border: 1px solid #edf0eb;
+  border-radius: 16px;
+  background: white;
+  color: #89928b;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* =========================
+   התאמה למסכים קטנים
+========================= */
+
+@media (max-width: 750px) {
+  .service-providers-page {
+    padding: 22px 15px;
+  }
+
+  .service-providers-header {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 25px;
+  }
+
+  .service-providers-header h1 {
+    font-size: 25px;
+  }
+
+  .service-providers-list {
+    grid-template-columns: 1fr;
+  }
+
+  .provider-form {
+    padding: 20px;
+  }
+
+  .provider-form-actions {
+    flex-direction: column;
+  }
+
+  .provider-form-actions button {
+    width: 100%;
+  }
+}
+
+/* =========================
+   התאמה למעטפת הניהול
+========================= */
+
+.service-providers-page {
+  min-height: auto;
+}

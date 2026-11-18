@@ -36,7 +36,11 @@ namespace DAL.Repositories.ReportRepositories
             _context.Reports.Add(report);
             _context.SaveChanges();
 
-            return report;
+            return _context.Reports
+                .AsNoTracking()
+                .Include(r => r.Category)
+                .Include(r => r.Images)
+                .First(r => r.ReportId == report.ReportId);
         }
 
         public bool DeleteReport(int id)

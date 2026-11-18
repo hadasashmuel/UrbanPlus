@@ -1,4 +1,5 @@
 ﻿
+
 using DTO.MainEventDTO;
 
 namespace BLL.Services.ServicesDB.MainEventServices
@@ -9,7 +10,7 @@ namespace BLL.Services.ServicesDB.MainEventServices
 
         ShowMainEventDTO? GetMainEventById(int id);
 
-        bool UpdateMainEvent(int id, UpdateMainEventDTO dto);
+        Task<bool> UpdateMainEvent(int id, UpdateMainEventDTO dto);
 
         bool DeleteMainEvent(int id, string reason);
     }

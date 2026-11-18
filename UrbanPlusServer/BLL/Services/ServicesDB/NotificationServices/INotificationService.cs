@@ -14,7 +14,7 @@ namespace BLL.Services.ServicesDB.NotificationServices
         bool MarkNotificationAsRead(int id, int userId);
 
         Task<int> CreateNearbyNotifications(int userId,   UserLocationDTO location);
-
+        Task<int> CreateEventStatusNotifications( int mainEventId,string eventTitle, string newStatus,IEnumerable<int> userIds);
         bool DeleteNotification(int id, int userId);
     }
 }

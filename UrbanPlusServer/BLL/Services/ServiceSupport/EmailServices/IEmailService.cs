@@ -8,5 +8,6 @@ namespace BLL.Services.ServiceSupport.EmailServices
     {
         void SendWelcomeEmail(string email, string firstName);
        void SendUserDeletedEmail( string email,  string firstName, string reason);
+        Task SendEventStatusEmailAsync(string email,string firstName, string eventTitle, string newStatus);
     }
 }

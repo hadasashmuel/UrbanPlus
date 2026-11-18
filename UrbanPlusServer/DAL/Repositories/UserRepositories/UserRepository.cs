@@ -69,17 +69,34 @@ namespace DAL.Repositories.UserRepositories
 
         public bool Delete(int userId)
         {
-            var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
+            var user = _context.Users
+                .FirstOrDefault(u => u.UserId == userId);
 
             if (user == null)
                 return false;
 
+            // מציאת כל הדיווחים של המשתמש
+            var reports = _context.Reports
+                .Where(r => r.UserId == userId)
+                .ToList();
+
+            // מחיקת השיוכים של הדיווחים
+            var reportIds = reports.Select(r => r.ReportId).ToList();
+
+            var assignments = _context.ReportAssignments
+                .Where(a => reportIds.Contains(a.ReportId))
+                .ToList();
+
+            _context.ReportAssignments.RemoveRange(assignments);
+
+            _context.SaveChanges();
+
+            // מחיקת המשתמש
             _context.Users.Remove(user);
             _context.SaveChanges();
 
             return true;
         }
-
         public Users? GetOwned(int id, int userId) =>
             _context.Users.FirstOrDefault(u =>
                 u.UserId == id && u.UserId == userId);

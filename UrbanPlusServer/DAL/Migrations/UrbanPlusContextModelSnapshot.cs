@@ -262,6 +262,64 @@ namespace DAL.Migrations
                         });
                 });
 
+            modelBuilder.Entity("DAL.Entities.ProviderWorkTypes", b =>
+                {
+                    b.Property<int>("ProviderWorkTypesId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProviderWorkTypesId"));
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WorkTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProviderWorkTypesId");
+
+                    b.HasIndex("WorkTypeId");
+
+                    b.HasIndex("ProviderId", "WorkTypeId")
+                        .IsUnique();
+
+                    b.ToTable("ProviderWorkTypes");
+                });
+
+            modelBuilder.Entity("DAL.Entities.ReportAssignments", b =>
+                {
+                    b.Property<int>("AssignmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssignmentId"));
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ManagerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReportId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AssignmentId");
+
+                    b.HasIndex("ManagerId");
+
+                    b.HasIndex("ProviderId");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("ReportAssignments");
+                });
+
             modelBuilder.Entity("DAL.Entities.ReportImages", b =>
                 {
                     b.Property<int>("ReportImageId")
@@ -361,6 +419,39 @@ namespace DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("SavedEvents");
+                });
+
+            modelBuilder.Entity("DAL.Entities.ServiceProviders", b =>
+                {
+                    b.Property<int>("ProviderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProviderId"));
+
+                    b.Property<string>("Department")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("ProviderId");
+
+                    b.ToTable("ServiceProviders");
                 });
 
             modelBuilder.Entity("DAL.Entities.UserBadges", b =>
@@ -470,6 +561,33 @@ namespace DAL.Migrations
                     b.ToTable("Votes");
                 });
 
+            modelBuilder.Entity("DAL.Entities.WorkTypes", b =>
+                {
+                    b.Property<int>("WorkTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkTypeId"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("NameWorkTypes")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("WorkTypeId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("WorkTypes");
+                });
+
             modelBuilder.Entity("DAL.Entities.AIChatMessages", b =>
                 {
                     b.HasOne("DAL.Entities.AIChatSessions", "AIChatSession")
@@ -545,6 +663,52 @@ namespace DAL.Migrations
                     b.Navigation("MainEvent");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DAL.Entities.ProviderWorkTypes", b =>
+                {
+                    b.HasOne("DAL.Entities.ServiceProviders", "ServiceProvider")
+                        .WithMany("ProviderWorkTypes")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Entities.WorkTypes", "WorkType")
+                        .WithMany("ProviderWorkTypes")
+                        .HasForeignKey("WorkTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ServiceProvider");
+
+                    b.Navigation("WorkType");
+                });
+
+            modelBuilder.Entity("DAL.Entities.ReportAssignments", b =>
+                {
+                    b.HasOne("DAL.Entities.Users", "Manager")
+                        .WithMany("ManagedAssignments")
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Entities.ServiceProviders", "ServiceProvider")
+                        .WithMany("Assignments")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Entities.Reports", "Report")
+                        .WithMany("Assignments")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Manager");
+
+                    b.Navigation("Report");
+
+                    b.Navigation("ServiceProvider");
                 });
 
             modelBuilder.Entity("DAL.Entities.ReportImages", b =>
@@ -640,6 +804,17 @@ namespace DAL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DAL.Entities.WorkTypes", b =>
+                {
+                    b.HasOne("DAL.Entities.Categories", "Category")
+                        .WithMany("WorkTypes")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("DAL.Entities.AIChatSessions", b =>
                 {
                     b.Navigation("AIChatMessages");
@@ -655,6 +830,8 @@ namespace DAL.Migrations
                     b.Navigation("MainEvents");
 
                     b.Navigation("Reports");
+
+                    b.Navigation("WorkTypes");
                 });
 
             modelBuilder.Entity("DAL.Entities.MainEvents", b =>
@@ -674,12 +851,23 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("DAL.Entities.Reports", b =>
                 {
+                    b.Navigation("Assignments");
+
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("DAL.Entities.ServiceProviders", b =>
+                {
+                    b.Navigation("Assignments");
+
+                    b.Navigation("ProviderWorkTypes");
                 });
 
             modelBuilder.Entity("DAL.Entities.Users", b =>
                 {
                     b.Navigation("AIChatSessions");
+
+                    b.Navigation("ManagedAssignments");
 
                     b.Navigation("Messages");
 
@@ -692,6 +880,11 @@ namespace DAL.Migrations
                     b.Navigation("UserBadges");
 
                     b.Navigation("Votes");
+                });
+
+            modelBuilder.Entity("DAL.Entities.WorkTypes", b =>
+                {
+                    b.Navigation("ProviderWorkTypes");
                 });
 #pragma warning restore 612, 618
         }
