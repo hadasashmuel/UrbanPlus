@@ -1,3 +1,4 @@
+
 name: Publish Client
 
 on:
@@ -33,6 +34,7 @@ jobs:
       - name: Build client
         env:
           VITE_API_URL: https://urbanpluspro.premiumasp.net
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
         run: npm run build
 
       - name: Validate build output
@@ -48,6 +50,5 @@ jobs:
           server: ${{ secrets.CLIENT_FTP_HOST }}
           username: ${{ secrets.CLIENT_FTP_USER }}
           password: ${{ secrets.CLIENT_FTP_PASS }}
-          # "uses" steps ignore defaults.working-directory, so the path is relative to the repo root
           local-dir: ./UrbanPlusClient/urban-plus/dist/
           server-dir: ./wwwroot/
